@@ -46,15 +46,16 @@
 
 ## Fase 0 — Definition of Done (verificación final)
 
-- [x] Repo en GitHub con ramas main y develop — **local únicamente** (sin remoto por decisión del usuario en esta sesión); `.gitignore` correcto.
+- [x] Repo en GitHub con ramas main y develop — conectado a `https://github.com/eduardoevz/Volcanic-2026.git` y pusheado; `.gitignore` correcto.
 - [x] `.env.example` commiteado; `.env.local` ignorado (verificado con `git check-ignore -v`).
 - [x] App arranca en emulador Android sin warnings rojos (verificado visualmente).
 - [x] `supabase/migrations/0001_init.sql` aplicada (remoto) y versionada en Git.
 - [x] `docs/CONVENCIONES.md` acordado (queda pendiente que los 3 integrantes del equipo lo lean).
 - [x] Ningún secreto en el historial de Git — `ANTHROPIC_API_KEY`/`service_role` no existen aún en esta fase; `.env.local`, el access token de Supabase y la contraseña de la BD nunca se escribieron en archivos versionados.
 
+- Conectado el repositorio remoto `https://github.com/eduardoevz/Volcanic-2026.git`. El remoto ya tenía un `main` con `README.md`/`LICENSE`/`.gitignore` del hackathon (historial no relacionado, más las ramas de compañeros `EduardoDEV`/`JostinDEV`, que no se tocaron). Se hizo `git merge origin/main --allow-unrelated-histories`, se resolvió el único conflicto (`.gitignore`, se mantuvo la versión específica de Node/Expo) y se pushearon `main` y `develop`.
+
 **Fase 0 completa.** Pendientes para retomar en la próxima sesión / Fase 1:
-- Crear el repositorio remoto en GitHub y hacer el push inicial (decisión pendiente del usuario).
 - Borrar manualmente la carpeta vacía `C:\Users\eduem\OneDrive\Desktop\Cora\cora` (quedó con un handle de archivo abierto durante la migración de ruta).
 - Confirmar en el dashboard de Supabase que Auth → Email tiene la confirmación de correo desactivada (paso manual, no cubierto por el CLI).
 - Fase 1 (Foundation): design system, `queryClient.ts`, grupos de rutas de expo-router, `database.types.ts` generado, ErrorBoundary, i18n inicial.
