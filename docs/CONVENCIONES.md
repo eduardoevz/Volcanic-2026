@@ -54,7 +54,13 @@
 - **Tono:** español nicaragüense cercano, voseo ("vos podés", "contame cómo te sentís"), nunca clínico ni alarmista.
 - Toda superficie con contenido clínico incluye un aviso de "no diagnostica, no sustituye atención médica".
 
+## Testing
+
+- **`jest` + `jest-expo`**, no Vitest — es el preset soportado oficialmente por Expo para React Native y el que realmente funciona en este proyecto en Windows. Versiones fijadas a propósito: `jest@^29.7.0` + `@react-native/jest-preset@0.86.2` (son las que `jest-expo` espera internamente; `jest@30` rompe con `clearMocksOnScope is not a function`).
+- Alias `@/*` mapeado en `package.json#jest.moduleNameMapper` además de en `tsconfig.json` — hace falta en los dos lugares.
+
 ## Git
 
 - Ramas `main` (estable) y `develop` (integración). Trabajo cotidiano en ramas de feature sobre `develop`.
 - Migraciones, secretos y convenciones se revisan en cada PR — un secreto commiteado por error bloquea el merge hasta limpiarlo del historial.
+- Al cerrar cada fase del plan de implementación: commit + `git push` a `main` y `develop` en `https://github.com/eduardoevz/Volcanic-2026.git`.

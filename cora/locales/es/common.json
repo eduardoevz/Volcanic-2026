@@ -1,0 +1,12 @@
+{
+  "common": {
+    "continue": "Continuar",
+    "back": "Volver",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "loading": "Cargando...",
+    "retry": "Reintentar",
+    "somethingWentWrong": "Algo salió mal",
+    "errorBoundaryMessage": "Tuvimos un problema mostrando esta pantalla. Probá de nuevo."
+  }
+}

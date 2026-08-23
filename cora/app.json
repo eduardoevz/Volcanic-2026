@@ -26,7 +26,8 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-splash-screen"
     ]
   }
 }

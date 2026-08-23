@@ -2,6 +2,51 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-22.
 
+## Fase 1 — Foundation
+
+- [x] `src/lib/supabase.ts` completo (AsyncStorage, autoRefreshToken, listener de AppState)
+- [x] `src/shared/types/database.types.ts` generado (`supabase gen types typescript --linked`)
+- [x] `src/ui/theme/tokens.ts` (colores, espaciado, radios, tipografía, sombras)
+- [x] 12 primitivos en `src/ui/components/` (Screen, Text, Button, Input, Card, Chip, Sheet, Badge, Avatar, EmptyState, Skeleton, Banner) + barrel `index.ts`
+- [x] `src/lib/queryClient.ts` (TanStack Query + persister AsyncStorage, `networkMode: offlineFirst`)
+- [x] `src/lib/i18n.ts` + `locales/es/common.json` (+ `locales/mis|myn/common.json` vacíos, fallback a `es`)
+- [x] `src/ui/ErrorBoundary.tsx` — verificado en emulador (pantalla de fallback en vez de blanco/rojo)
+- [x] `src/shared/utils/result.ts` (`Result<T,E>`, `ok()`/`err()`) + test
+- [x] expo-router: entrypoint cambiado (`expo-router/entry`), grupos `(auth)`, `(onboarding)`, `(tabs)` con layouts y pantallas placeholder, `app/index.tsx` con navegación manual, `app/dev/kitchen-sink.tsx`
+- [x] Testing: `jest` + `jest-expo`, 1 test trivial pasando
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 1 (2026-08-23)
+
+- `src/lib/supabase.ts`: reescrito con `AsyncStorage` como storage de sesión, `autoRefreshToken`/`persistSession`, y listener de `AppState` (`startAutoRefresh`/`stopAutoRefresh`), tipado con `Database` generado.
+- Generados los tipos con `supabase gen types typescript --linked` → `src/shared/types/database.types.ts` (confirma los enums de la migración 0001: `life_stage`, `flow_level`, `mood`, `symptom_category`, `content_status`, `share_scope`).
+- Design system: `src/ui/theme/tokens.ts` (paleta pitahaya/verde tallo/crema/carbón, espaciado en escala de 4) + 12 primitivos en `src/ui/components/`, sin lógica de negocio, todos usando solo los tokens.
+- `src/lib/queryClient.ts` con `QueryClient` (`networkMode: offlineFirst`) + `createAsyncStoragePersister`.
+- `src/lib/i18n.ts`: i18next + react-i18next + expo-localization, arranca en `es`, con `locales/es/common.json` y estructuras vacías en `locales/mis/` y `locales/myn/` (fallback automático a `es` por diseño de i18next cuando la clave no existe en el idioma activo).
+- `src/ui/ErrorBoundary.tsx`: class component con `componentDidCatch` (solo loggea el mensaje técnico, nunca datos de usuaria) + fallback con los primitivos `Screen`/`Text`/`Button`.
+- `src/shared/utils/result.ts` + `result.test.ts`.
+- **Migración a expo-router:** se eliminaron `App.tsx`/`index.ts` de la Fase 0, `package.json.main` → `expo-router/entry`. Creados `app/_layout.tsx` (providers: `ErrorBoundary` → `SafeAreaProvider` → `PersistQueryClientProvider` → `Stack`), `app/index.tsx` (navegación manual a los 3 grupos, ya que el gate real de sesión es Fase 2), `app/(auth)/{_layout,login,register}.tsx`, `app/(onboarding)/{_layout,welcome}.tsx`, `app/(tabs)/{_layout,home,calendar,library,assistant,profile}.tsx` (5 tabs), `app/dev/kitchen-sink.tsx` (demuestra los 12 primitivos + botón que dispara un error de prueba).
+- **Dependencias runtime faltantes de expo-router:** el primer intento de bundling falló con `Unable to resolve "expo-linking"`. Se instalaron `expo-linking`, `expo-constants` y `expo-splash-screen` (esta última agregó automáticamente su config plugin a `app.json`; no requiere rebuild nativo para Fase 1, solo relevante si se vuelve a hacer `prebuild`).
+- **Testing:** `jest` + `jest-expo` inicialmente instalados con versiones incompatibles (`jest@30` vs `jest-expo` que depende internamente de paquetes `@jest/*@^29`, y `@react-native/jest-preset@0.87.0` vs el peer `^0.86.2` que pide `jest-expo`) → error `clearMocksOnScope is not a function`. Se fijaron las versiones correctas: `jest@^29.7.0` + `@react-native/jest-preset@0.86.2`. Se agregó `moduleNameMapper` para el alias `@/*` y `compilerOptions.types: ["jest"]` en `tsconfig.json` (los tipos de `@types/jest` no se auto-incluían).
+- `tsconfig.json`: se quitó `baseUrl` (deprecado en TypeScript 6, ya no hace falta con `moduleResolution: bundler` + `paths`).
+- **Verificación en emulador (Metro con `--dev-client`, no Expo Go):** el primer intento de `expo start --android` abrió **Expo Go** por error (`host.exp.exponent`) en vez del dev client `com.volcanic.cora`; se relanzó con `--dev-client` y sí abrió la app nativa correcta. También hubo que liberar el puerto 8081 dos veces (procesos `node.exe` de intentos previos que quedaron escuchando).
+  - `app/index.tsx` renderiza correctamente ("Cora" + 3 botones de navegación + link a Kitchen Sink).
+  - `/dev/kitchen-sink` muestra los 12 primitivos correctamente (capturas de pantalla).
+  - Botón "Lanzar error de prueba" → `componentDidCatch` se ejecuta (confirmado en el log de LogBox) → tras descartar los overlays de desarrollo (normales en modo dev), se ve la pantalla de fallback real: "Algo salió mal" / "Tuvimos un problema mostrando esta pantalla. Probá de nuevo." / botón "Reintentar" — todo vía `t('common...')`, confirmando también que `t('common.continue')` (misma fuente `common.json`) funciona.
+  - Navegación manual verificada a los 3 grupos: `(auth)/login` (formulario), `(onboarding)/welcome` (placeholder), `(tabs)/home` con las 5 tabs (Inicio, Calendario, Biblioteca, Cora, Perfil) visibles y funcionales.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, 1 warning inofensivo de `import/no-named-as-default-member` en `i18n.ts`), `npx jest` (2/2 tests OK).
+
+## Fase 1 — Definition of Done (verificación final)
+
+- [x] Los 12 primitivos existen y se renderizan en `/dev/kitchen-sink` (verificado con capturas de pantalla).
+- [x] Se navega entre `(auth)`, `(onboarding)` y `(tabs)` manualmente desde `app/index.tsx` (verificado).
+- [x] `database.types.ts` generado e importable (usado en `src/lib/supabase.ts`, compila sin errores).
+- [x] Un error lanzado a propósito muestra el `ErrorBoundary`, no una pantalla blanca (verificado).
+- [x] `t('common.continue')` devuelve texto en español (verificado indirectamente vía las mismas claves de `common.json` en la pantalla de error; la clave `continue` no se usa aún en ninguna pantalla de Fase 1, se usará desde Fase 2 en adelante).
+- [x] `npm test` corre y pasa.
+
+**Fase 1 completa.** Pendiente para Fase 2: gate real de sesión en `app/_layout.tsx` (reemplaza la navegación manual de `app/index.tsx`), auth real (login/register conectados a Supabase), RLS + tablas de perfil.
+
 ## Fase 0 — Preparación
 
 - [x] Repositorio Git local (main/develop) + .gitignore
