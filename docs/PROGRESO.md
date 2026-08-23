@@ -13,7 +13,7 @@
 - [x] Supabase CLI vinculado (`supabase link`) y migración `0001` aplicada al proyecto remoto (`supabase db push`, verificado con `migration list`)
 - [x] Migración `0001_init.sql` (enums + `set_updated_at()`) creada y versionada
 - [x] `docs/CONVENCIONES.md` creado
-- [ ] Definition of Done verificada
+- [x] Definition of Done verificada (ver sección abajo; 2 pendientes menores no bloqueantes)
 
 ## Log de tareas
 
