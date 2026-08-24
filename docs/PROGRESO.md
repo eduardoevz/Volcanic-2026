@@ -2,6 +2,41 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
 
+## Fase 4 — Core de seguimiento
+
+- [x] Migración `0006_daily_logs.sql`: `daily_logs`, `symptom_catalog`, `daily_log_symptoms`, `cycles` (derivada) + RLS (Patrón A/B + bridge vía `EXISTS`) + GRANTs explícitos + RPC `upsert_daily_log`
+- [x] Migración `0007_seed_symptoms.sql`: 24 síntomas reales con `applicable_stages` correctos
+- [x] `src/features/tracking/cycleEngine.ts`: funciones puras (mediana+MAD, sin promedio; rango de días, nunca fecha exacta; `null` con <2 ciclos; 5 reglas de derivación deterministas)
+- [x] `cycleEngine.test.ts`: 20 casos, todos pasando
+- [x] `src/features/tracking/` completa (`api.ts`, hooks: `useDailyLog`, `useDailyLogsRange`, `useSymptomCatalog`, `useCycles`, `usePrediction`, `useSaveDailyLog`, `useRecentSymptomCounts`)
+- [x] `app/log/[date].tsx`: pantalla de registro diario (flujo, ánimo, energía, síntomas filtrados por etapa, notas)
+- [x] `app/(tabs)/calendar.tsx` + `CalendarGrid.tsx`: grid mensual propio (sin librería externa), pinta sangrado/predicción/ventana fértil, lista de últimos 30 días
+- [x] Home: `DailyCheckInModule`, `CycleStatusModule`, `SymptomTrendsModule` reemplazados por versiones reales con estado vacío
+- [x] Outbox offline: `onlineManager` + `netinfo`, persistencia de mutaciones pausadas, `resumePausedMutations()` al reconectar, `useNetworkStatus.ts`
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 4 (2026-08-24)
+
+- Migración `0006`: `daily_logs` (`UNIQUE (user_id, log_date)`), `symptom_catalog` (público), `daily_log_symptoms` (bridge, RLS vía `EXISTS` contra `daily_logs` ya que no tiene `user_id` propio), `cycles` (derivada, único parcial `(user_id, start_date)`). RPC `upsert_daily_log` hace el upsert + reemplazo de síntomas + award idempotente de 10 puntos (`dedupe_key = 'daily_log:' || log_date`) en una sola transacción. GRANTs explícitos incluidos desde el inicio en esta migración, aprendiendo de los huecos de grants de Fases 2 y 3.
+- **Bloqueo recurrente confirmado, no nuevo:** la CLI de Supabase sigue bloqueada por la misma directiva de Control de Aplicaciones de Windows detectada en fases previas (`spawn UNKNOWN` / "Una directiva de Control de aplicaciones bloqueó este archivo"). No se intentó evadir la política — se aplicaron ambas migraciones vía conexión directa `pg` contra el pooler (mismo mecanismo usado desde la Fase 2 para las pruebas de RLS), con inserción manual en `supabase_migrations.schema_migrations` para mantener la contabilidad consistente. `database.types.ts` se extendió a mano (`cycles`, `daily_log_symptoms`, `daily_logs`, `symptom_catalog`, función `upsert_daily_log`) siguiendo exactamente el formato que genera la CLI, ya que `gen types` tampoco puede correr.
+- `cycleEngine.ts`: mediana + MAD (no promedio) para resistir ciclos atípicos, siempre devuelve rango de días, `predictNext` retorna `null` con menos de 2 ciclos. 20 tests cubriendo detección de ciclos (vacío, un solo período, regulares, tolerancia de huecos, cruce de fin de mes), predicción (sin datos suficientes, confianza "estimada", resistencia a un ciclo de 60 días), ventana fértil, y las 5 reglas de señales de derivación (incluyendo una aserción explícita de que el texto nunca nombra una condición médica).
+- **Bug real encontrado y corregido — mutaciones offline no se resumían:** primera prueba en modo avión (`svc wifi disable`/`svc data disable`) guardó un registro sin red; al reconectar y reiniciar la app, el registro nunca llegó a la base de datos ni se otorgaron puntos. Causa raíz: `useSaveDailyLog` tenía `networkMode: 'offlineFirst'` pero sin `retry` configurado (default `retry: 0`). TanStack Query v5 solo marca una mutación como `isPaused` (habilitando persistencia y reanudación posterior) cuando hay un reintento programado mientras está offline — con cero reintentos, una mutación offline fallida pasa directo a `error` permanente y se pierde, nunca se persiste ni se reanuda. Corregido agregando `retry: 3` con backoff exponencial. Verificado `tsc` limpio tras el cambio.
+- Repetida la prueba offline con el fix: registro del 2026-06-01 creado sin red (confirmado sin `NetworkAgentInfo` activo vía `dumpsys connectivity`), guardado optimista visible de inmediato en la UI. Al reconectar (`svc wifi enable`/`svc data enable`, confirmado con 2 agentes de red activos) y forzar un relanzamiento fresco de la app, `mascot_state.points` subió de 35 a 45 puntos — confirmación server-side de que la mutación en cola se ejecutó exitosamente contra la RPC real tras la reconexión (los puntos solo se otorgan del lado del servidor, nunca del cliente).
+- Verificado con capturas de pantalla: registrar hoy y reabrir `log/[date]` muestra los valores guardados; guardar el mismo día dos veces mantuvo los puntos en 25→25 (una sola fila en `mascot_events` por `dedupe_key`); calendario con ~3 meses de `daily_logs` sembrados por SQL directo pinta correctamente días con sangrado, rango de predicción y ventana fértil.
+- Corregido en el camino: `useMutationState` en `useNetworkStatus.ts` usaba `filter` en vez de `filters` (error de tipos TS2561); `log/[date].tsx` usaba un `useEffect` con múltiples `setState` para precargar el formulario (violaba `react-hooks/set-state-in-effect`), reemplazado por el patrón de React de ajustar estado durante el render, guardado con un flag `prefilled`; comillas sin escapar en `SymptomTrendsModule.tsx` (`react/no-unescaped-entities`), corregidas a comillas tipográficas.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre en `i18n.ts`), `npx jest` (22/22 OK, incluye los 20 nuevos de `cycleEngine`).
+
+## Fase 4 — Definition of Done (verificación final)
+
+- [x] Registrar hoy y volver a abrir muestra los datos guardados — verificado con capturas de pantalla.
+- [x] El calendario pinta días registrados, predicción y ventana estimada — verificado con ~3 meses de datos sembrados.
+- [x] Con menos de 2 ciclos NO se muestra predicción (se muestra estado vacío) — `predictNext` retorna `null` por diseño, UI muestra `EmptyState`.
+- [x] Los tests de `cycleEngine` pasan — 20/20.
+- [x] Un registro creado en modo avión aparece en Supabase al reconectar — verificado indirectamente pero de forma concluyente: `mascot_state.points` subió de 35 a 45 tras reconectar (el award de puntos solo ocurre dentro de la transacción de la RPC `upsert_daily_log` en el servidor, así que un aumento de puntos es prueba server-side de que la fila llegó).
+- [x] Registrar dos veces el mismo día NO otorga puntos dos veces — `mascot_events` mantiene 1 sola fila por `dedupe_key`, puntos 25→25 verificado.
+
+**Fase 4 completa.** Pendiente para Fase 5: Biblioteca/contenido educativo (reemplaza el módulo placeholder "Artículo recomendado" y la guía de primera menstruación).
+
 ## Fase 3 — Onboarding y personalización
 
 - [x] Migración `0005_mascot_events_and_rpcs.sql`: tabla `mascot_events` + RPCs `set_life_stage` y `complete_onboarding`

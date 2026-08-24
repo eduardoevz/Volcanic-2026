@@ -113,6 +113,130 @@ export type Database = {
           },
         ]
       }
+      cycles: {
+        Row: {
+          created_at: string
+          cycle_length: number | null
+          end_date: string | null
+          id: string
+          is_predicted: boolean
+          period_length: number | null
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_length?: number | null
+          end_date?: string | null
+          id?: string
+          is_predicted?: boolean
+          period_length?: number | null
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cycle_length?: number | null
+          end_date?: string | null
+          id?: string
+          is_predicted?: boolean
+          period_length?: number | null
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cycles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_log_symptoms: {
+        Row: {
+          daily_log_id: string
+          intensity: number
+          symptom_id: string
+        }
+        Insert: {
+          daily_log_id: string
+          intensity: number
+          symptom_id: string
+        }
+        Update: {
+          daily_log_id?: string
+          intensity?: number
+          symptom_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_log_symptoms_daily_log_id_fkey"
+            columns: ["daily_log_id"]
+            isOneToOne: false
+            referencedRelation: "daily_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_log_symptoms_symptom_id_fkey"
+            columns: ["symptom_id"]
+            isOneToOne: false
+            referencedRelation: "symptom_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_logs: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          flow_level: Database["public"]["Enums"]["flow_level"] | null
+          id: string
+          log_date: string
+          mood: Database["public"]["Enums"]["mood"] | null
+          notes: string | null
+          sleep_hours: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          flow_level?: Database["public"]["Enums"]["flow_level"] | null
+          id?: string
+          log_date: string
+          mood?: Database["public"]["Enums"]["mood"] | null
+          notes?: string | null
+          sleep_hours?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          flow_level?: Database["public"]["Enums"]["flow_level"] | null
+          id?: string
+          log_date?: string
+          mood?: Database["public"]["Enums"]["mood"] | null
+          notes?: string | null
+          sleep_hours?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       life_stage_history: {
         Row: {
           created_at: string
@@ -265,6 +389,39 @@ export type Database = {
           },
         ]
       }
+      symptom_catalog: {
+        Row: {
+          applicable_stages: Database["public"]["Enums"]["life_stage"][]
+          category: Database["public"]["Enums"]["symptom_category"]
+          code: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          label_es: string
+          sort_order: number
+        }
+        Insert: {
+          applicable_stages: Database["public"]["Enums"]["life_stage"][]
+          category: Database["public"]["Enums"]["symptom_category"]
+          code: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label_es: string
+          sort_order?: number
+        }
+        Update: {
+          applicable_stages?: Database["public"]["Enums"]["life_stage"][]
+          category?: Database["public"]["Enums"]["symptom_category"]
+          code?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label_es?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           ai_share_health_context: boolean
@@ -316,6 +473,18 @@ export type Database = {
       set_life_stage: {
         Args: { new_stage: Database["public"]["Enums"]["life_stage"] }
         Returns: undefined
+      }
+      upsert_daily_log: {
+        Args: {
+          p_energy_level: number | null
+          p_flow_level: Database["public"]["Enums"]["flow_level"] | null
+          p_log_date: string
+          p_mood: Database["public"]["Enums"]["mood"] | null
+          p_notes: string | null
+          p_sleep_hours: number | null
+          p_symptoms?: Json
+        }
+        Returns: string
       }
     }
     Enums: {
