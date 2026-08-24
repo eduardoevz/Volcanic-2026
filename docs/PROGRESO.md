@@ -2,6 +2,41 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
 
+## Fase 5 — Contenido
+
+- [x] Migración `0008_content.sql`: `content_categories`, `educational_content` (`search_vector` generado + índice GIN sobre `life_stages`, índice GIN sobre `search_vector`, único `(slug, locale)`) + `content_sources`, RLS de solo lectura de publicados (patrón B) + RPC `mark_article_read`
+- [x] Migración `0009_seed_content.sql`: 8 categorías + 25 artículos reales (6 adolescencia · 7 adultez · 4 embarazo · 4 perimenopausia · 2 adultez mayor · 2 transversales) + 40 fuentes citadas (NHS, OMS/WHO, PAHO/OPS, MINSA Nicaragua)
+- [x] `src/features/content/` completa: `api.ts` (queries RLS-aware), `markdown.ts` + `MarkdownBody.tsx` (parser propio, sin dependencia externa), hooks `useCategories`, `useArticles`, `useArticleBySlug`, `useRecommendedArticles`, `useSearchArticles`, `useMarkArticleRead`, `useStageAge`
+- [x] `app/(tabs)/library.tsx` reescrito: chips de categoría, búsqueda full-text (debounce 400 ms, mínimo 3 caracteres), lista filtrada por etapa y `min_age`, badge "Pendiente de revisión"
+- [x] `app/article/[slug].tsx`: markdown renderizado, autor, revisor (o badge honesto), fuentes tocables (`Linking.openURL`), aviso legal al pie, +5 puntos de mascota tras 20 s en pantalla (idempotente vía `mark_article_read`/`dedupe_key`)
+- [x] Módulos de Home `RecommendedArticleModule` y `FirstPeriodGuideModule` reemplazados por versiones reales conectadas a la biblioteca
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 5 (2026-08-24)
+
+- Al retomar la fase, el código (`src/features/content/`, `app/article/[slug].tsx`, `app/(tabs)/library.tsx`, migraciones `0008`/`0009`) ya estaba escrito de una sesión previa pero sin commitear. Antes de darla por completa se verificó todo de punta a punta en vez de asumir que "compila" era suficiente.
+- **Las migraciones `0008`/`0009` ya estaban aplicadas en el proyecto remoto** (confirmado con consultas de solo lectura contra la API REST usando la `anon key`, sin necesitar la CLI de Supabase — que sigue bloqueada por la misma directiva de Application Control de Windows de fases anteriores — ni el mecanismo `pg`/pooler, porque esta vez solo hacía falta lectura pública): `content_categories` 8 filas, `educational_content` 25 filas con `status=published` (`Content-Range: 0-24/25`), `content_sources` 40 filas.
+- Búsqueda full-text verificada contra la misma API que usa el cliente (`textSearch` websearch, config `spanish`): `cólicos` → 3 artículos, `menopausia` → 2 artículos. `min_age` poblado correctamente (3 artículos con 16/18).
+- Verificación final de código: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre en `i18n.ts`), `npx jest` (22/22 OK — sin tests nuevos para `content`, consistente con otras features de solo lectura del proyecto como `avatars`).
+- **Verificación end-to-end en el emulador** con la cuenta `cuentac@cora.test` (reutilizada de la Fase 3, etapa inicial perimenopausia):
+  - Biblioteca en etapa perimenopausia: 5 artículos correctos (4 propios + 1 transversal), chips de categoría visibles, badge "Pendiente de revisión profesional" en los 5 (ningún artículo sembrado tiene `reviewed_by_name` — decisión honesta documentada en el propio `0009_seed_content.sql`, no hay revisión profesional disponible todavía).
+  - Búsqueda en vivo: "menopausia" tipeado en el teclado del emulador devolvió los 2 artículos correctos. "cólicos" no se pudo tipear en vivo porque `adb shell input text` no soporta caracteres no-ASCII (limitación de la herramienta de prueba, no del producto) — se verificó la misma consulta exacta contra la API REST en su lugar (ver arriba).
+  - Detalle de "Salud ósea en la perimenopausia": título, tiempo de lectura, autor "Equipo editorial Cora", badge de revisión pendiente, markdown con encabezados y listas, 2 fuentes tocables (OMS/WHO), aviso legal "Esta información es educativa y no reemplaza la consulta con un profesional de salud" al pie.
+  - **+5 puntos por leer ≥20 s, verificado con puntos reales:** `mascot_state.points` subió de 55 a 60 (visible en la tarjeta de Home) tras permanecer 23 s en el artículo. Reabrir el mismo artículo y esperar otros 24 s **no volvió a otorgar puntos** (60 → 60) — idempotencia de `mark_article_read` vía `dedupe_key = 'article_read:' || id` confirmada con puntos reales, no solo leyendo el SQL.
+  - Cambio de etapa (Perfil → "Cambiar etapa" → Adolescencia, mismo flujo probado en Fase 3) actualizó Biblioteca y Home **sin reiniciar la app**: la búsqueda "menopausia" pasó a "Sin resultados" (las query keys de `useSearchArticles`/`useArticles` incluyen la etapa), la lista cambió a los 3 artículos de adolescencia (Tu primera menstruación, Cambios en la pubertad, Higiene menstrual), y Home mostró el módulo exclusivo `first-period-guide` ("Tu primera menstruación") además de "Artículo recomendado" apuntando al mismo artículo — ambos con datos reales, no placeholders.
+  - **Limitación de medición anotada honestamente (no bloqueante):** el filtro por `min_age` se verificó a nivel de query/API (el filtro `.lte('min_age', age)` es correcto y los 3 artículos con restricción de edad están etiquetados correctamente), pero no se pudo probar en vivo con un perfil de adolescente con edad real menor a 16 en este entorno, porque la única cuenta de prueba disponible (`cuentac`) no tiene `birth_year` cargado (`ageFromBirthYear` la trata como adulta por diseño — desviación ya documentada en el código). Mismo tipo de salvedad que se dejó anotada en el DoD de Fase 3 para el cronometraje del onboarding.
+  - No se encontró ningún bug real durante la verificación — el código escrito antes de retomar la fase funcionó correctamente en el primer recorrido end-to-end completo.
+
+## Fase 5 — Definition of Done (verificación final)
+
+- [x] 25 artículos en producción con `status = 'published'` — verificado (`Content-Range: 0-24/25`).
+- [x] Cada artículo tiene ≥1 fuente con URL válida — 40 fuentes para 25 artículos, URLs reales de NHS/OMS/PAHO/MINSA.
+- [x] Cada artículo tiene `reviewed_by_name` (o el badge honesto de "pendiente de revisión") — ninguno tiene revisor aún; el badge aparece de forma consistente en los 25, verificado en el emulador.
+- [~] Una adolescente NO ve artículos con `min_age > 15` — verificado a nivel de query/API (filtro y datos correctos); no se pudo verificar en vivo con una cuenta de edad real <16 en este entorno (ver nota arriba).
+- [x] La búsqueda encuentra "cólicos" y "menopausia" — "menopausia" verificado en vivo en el emulador; "cólicos" verificado contra la misma API que usa el cliente (limitación de tipeo de `adb`, no del producto).
+
+**Fase 5 completa** (con la misma salvedad de medición honesta que Fase 3, esta vez sobre `min_age`). Pendiente para próximas fases: Fase 6 (pulir evolución visual de la pitahaya — ya consume puntos de lectura desde esta fase), Fase 7 (Cora IA hará RAG sobre esta misma biblioteca de 25 artículos).
+
 ## Fase 4 — Core de seguimiento
 
 - [x] Migración `0006_daily_logs.sql`: `daily_logs`, `symptom_catalog`, `daily_log_symptoms`, `cycles` (derivada) + RLS (Patrón A/B + bridge vía `EXISTS`) + GRANTs explícitos + RPC `upsert_daily_log`

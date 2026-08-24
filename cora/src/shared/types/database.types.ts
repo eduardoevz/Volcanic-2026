@@ -113,6 +113,74 @@ export type Database = {
           },
         ]
       }
+      content_categories: {
+        Row: {
+          color: string | null
+          description_es: string | null
+          icon: string | null
+          id: string
+          name_es: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string | null
+          description_es?: string | null
+          icon?: string | null
+          id?: string
+          name_es: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string | null
+          description_es?: string | null
+          icon?: string | null
+          id?: string
+          name_es?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      content_sources: {
+        Row: {
+          content_id: string
+          id: string
+          label: string
+          organization: string
+          published_year: number | null
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          content_id: string
+          id?: string
+          label: string
+          organization: string
+          published_year?: number | null
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          content_id?: string
+          id?: string
+          label?: string
+          organization?: string
+          published_year?: number | null
+          sort_order?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_sources_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "educational_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cycles: {
         Row: {
           created_at: string
@@ -233,6 +301,86 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      educational_content: {
+        Row: {
+          author_name: string | null
+          body_md: string
+          category_id: string
+          cover_emoji: string
+          deleted_at: string | null
+          id: string
+          importance: number
+          life_stages: Database["public"]["Enums"]["life_stage"][]
+          locale: string
+          min_age: number
+          published_at: string | null
+          reading_minutes: number
+          reviewed_at: string | null
+          reviewed_by_credentials: string | null
+          reviewed_by_name: string | null
+          search_vector: unknown
+          slug: string
+          status: Database["public"]["Enums"]["content_status"]
+          summary: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          body_md: string
+          category_id: string
+          cover_emoji?: string
+          deleted_at?: string | null
+          id?: string
+          importance?: number
+          life_stages: Database["public"]["Enums"]["life_stage"][]
+          locale?: string
+          min_age?: number
+          published_at?: string | null
+          reading_minutes?: number
+          reviewed_at?: string | null
+          reviewed_by_credentials?: string | null
+          reviewed_by_name?: string | null
+          search_vector?: unknown
+          slug: string
+          status?: Database["public"]["Enums"]["content_status"]
+          summary: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          body_md?: string
+          category_id?: string
+          cover_emoji?: string
+          deleted_at?: string | null
+          id?: string
+          importance?: number
+          life_stages?: Database["public"]["Enums"]["life_stage"][]
+          locale?: string
+          min_age?: number
+          published_at?: string | null
+          reading_minutes?: number
+          reviewed_at?: string | null
+          reviewed_by_credentials?: string | null
+          reviewed_by_name?: string | null
+          search_vector?: unknown
+          slug?: string
+          status?: Database["public"]["Enums"]["content_status"]
+          summary?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "educational_content_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "content_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -468,6 +616,10 @@ export type Database = {
           p_consent_version: string
           p_notifications_enabled: boolean
         }
+        Returns: undefined
+      }
+      mark_article_read: {
+        Args: { p_article_id: string }
         Returns: undefined
       }
       set_life_stage: {

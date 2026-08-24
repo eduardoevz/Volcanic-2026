@@ -41,6 +41,10 @@ export default function RootLayout() {
               name="log/[date]"
               options={{ headerShown: true, presentation: 'modal', title: 'Registro diario' }}
             />
+            <Stack.Screen
+              name="article/[slug]"
+              options={{ headerShown: true, title: 'Artículo' }}
+            />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />
