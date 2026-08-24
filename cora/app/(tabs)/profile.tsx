@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Pressable, View } from 'react-native';
+import { Pressable, Switch, View } from 'react-native';
 
 import { signOut } from '@/features/auth';
 import { AVATAR_EMOJI } from '@/features/avatars';
 import { setLifeStage } from '@/features/onboarding';
-import { useProfile } from '@/features/profile';
+import { updateAiShareHealthContext, useProfile, useUserPreferences } from '@/features/profile';
 import { useSession } from '@/shared/hooks/useSession';
 import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants/lifeStages';
 import { Avatar } from '@/ui/components/Avatar';
@@ -14,14 +14,27 @@ import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
-import { spacing } from '@/ui/theme/tokens';
+import { colors, spacing } from '@/ui/theme/tokens';
 
 export default function Profile() {
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
+  const { data: preferences } = useUserPreferences();
   const queryClient = useQueryClient();
   const [changingStage, setChangingStage] = useState(false);
   const [savingStage, setSavingStage] = useState<LifeStage | null>(null);
+  const [savingShareContext, setSavingShareContext] = useState(false);
+
+  const handleToggleShareContext = async (value: boolean) => {
+    if (!session?.user.id) return;
+    setSavingShareContext(true);
+    try {
+      await updateAiShareHealthContext(session.user.id, value);
+      await queryClient.invalidateQueries({ queryKey: ['user-preferences', session.user.id] });
+    } finally {
+      setSavingShareContext(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -86,6 +99,26 @@ export default function Profile() {
           </View>
         </View>
       )}
+
+      <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
+        <Text variant="caption">Privacidad</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+          <Switch
+            value={preferences?.ai_share_health_context ?? false}
+            onValueChange={handleToggleShareContext}
+            disabled={savingShareContext || !preferences}
+            trackColor={{ true: colors.pitahaya }}
+          />
+          <View style={{ flex: 1 }}>
+            <Text variant="body">Compartir contexto con Cora IA</Text>
+            <Text variant="caption">
+              {preferences?.ai_share_health_context
+                ? 'Cora puede usar agregados de tus registros (ciclo promedio, síntoma frecuente, ánimo) para responderte mejor. Nunca ve tus notas ni filas crudas.'
+                : 'Apagado: Cora solo conoce tu etapa de vida y rango de edad, nunca tus registros.'}
+            </Text>
+          </View>
+        </View>
+      </View>
 
       <Button label="Cerrar sesión" variant="secondary" onPress={handleSignOut} />
 

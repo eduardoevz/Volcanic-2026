@@ -99,6 +99,17 @@ export async function searchArticles({
   return data;
 }
 
+export async function fetchArticlesByIds(ids: string[]) {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from('educational_content')
+    .select('id, slug, title, cover_emoji')
+    .in('id', ids);
+
+  if (error) throw error;
+  return data;
+}
+
 export async function markArticleRead(articleId: string) {
   const { error } = await supabase.rpc('mark_article_read', { p_article_id: articleId });
   if (error) throw error;

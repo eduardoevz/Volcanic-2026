@@ -7,4 +7,5 @@ export { useRecommendedArticles } from './hooks/useRecommendedArticles';
 export { useSearchArticles } from './hooks/useSearchArticles';
 export { useMarkArticleRead } from './hooks/useMarkArticleRead';
 export { useStageAge } from './hooks/useStageAge';
+export { useArticlesByIds } from './hooks/useArticlesByIds';
 export { MarkdownBody } from './components/MarkdownBody';

@@ -5,6 +5,9 @@ module.exports = [
   ...expoConfig,
   prettierConfig,
   {
-    ignores: ['dist/*', 'android/*', 'ios/*'],
+    // Deno runtime (Edge Functions): usa especificadores npm:/import maps
+    // que no resuelve el linter de Node — se revisa manualmente y en
+    // ejecución real, no con este linter.
+    ignores: ['dist/*', 'android/*', 'ios/*', 'supabase/functions/**'],
   },
 ];
