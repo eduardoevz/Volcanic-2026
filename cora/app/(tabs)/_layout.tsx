@@ -1,8 +1,21 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 
+import { useSession } from '@/shared/hooks/useSession';
 import { colors } from '@/ui/theme/tokens';
 
 export default function TabsLayout() {
+  const { status } = useSession();
+
+  // Protege cualquier ruta de (tabs) contra acceso directo sin sesión —
+  // app/index.tsx solo cubre la resolución inicial en "/".
+  if (status === 'signedOut') {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  if (status === 'loading') {
+    return null;
+  }
+
   return (
     <Tabs
       screenOptions={{

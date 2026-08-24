@@ -1,6 +1,45 @@
 # Progreso — Cora
 
-> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-22.
+> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
+
+## Fase 2 — Autenticación
+
+- [x] Migración `0002_profiles.sql`: `avatars`, `profiles`, `life_stage_history`, `user_preferences`, `consents`, `mascot_state` + RLS (Patrón A/B) + trigger `on_auth_user_created`
+- [x] Migración `0003_seed_avatars.sql`: 8 avatares de fauna nicaragüense
+- [x] Migración `0004_grants.sql`: GRANT select/insert/update/delete a `authenticated` (y select a `anon` en `avatars`) — faltaban, ver log
+- [x] `database.types.ts` regenerado con las 6 tablas nuevas
+- [x] Confirmado `mailer_autoconfirm: true` en el proyecto Supabase (registro entrega sesión inmediata)
+- [x] `src/features/auth/` (schema Zod, api con mensajes de error en español, `LoginForm`/`RegisterForm` con react-hook-form + zodResolver)
+- [x] `src/store/sessionStore.ts` + `src/shared/hooks/useSession.ts` (listener de `onAuthStateChange`)
+- [x] `src/features/profile/` (`fetchProfile`, `useProfile`)
+- [x] Gate de sesión real: `app/index.tsx` (splash/redirect), `app/(tabs)/_layout.tsx` (guard sin sesión → login), `app/(auth)/_layout.tsx` (guard con sesión → tabs)
+- [x] `app/(tabs)/profile.tsx`: email, nombre (o placeholder), botón "Cerrar sesión" + `queryClient.clear()`
+- [x] Script de pruebas de RLS (los 4 casos de §9) — todos pasan
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 2 (2026-08-24)
+
+- Escritas y aplicadas `0002_profiles.sql`, `0003_seed_avatars.sql` (sin `service_role` disponible, el seed se aplicó como migración normal — idempotente con `on conflict do nothing`) y, tras detectar el problema de grants, `0004_grants.sql`.
+- **Desviación documentada del §8:** `profiles.life_stage` es nullable (no `NOT NULL` como dice el diseño de datos original) porque el trigger de registro crea el `profile` antes del onboarding de Fase 3, que es donde se elige la etapa. El gate de navegación usa `onboarding_completed_at`, no `life_stage`.
+- Confirmada la confirmación de correo desactivada (`mailer_autoconfirm: true`) vía la Management API de Supabase (`GET /v1/projects/{ref}/config/auth` con el access token) — no hizo falta cambiarla, ya estaba así desde la creación del proyecto.
+- Instalado `@hookform/resolvers` (faltaba para conectar react-hook-form con Zod).
+- Construida la feature `auth` (`schema.ts`, `api.ts` con traducción de errores de Supabase al español, `LoginForm`/`RegisterForm`), `sessionStore.ts` + `useSession.ts`, feature `profile` (`fetchProfile`/`useProfile`).
+- **Bug real encontrado y corregido — falta de gate al salir de `(auth)`:** el primer intento de registro dejó a la usuaria varada en la pantalla de registro con el mensaje "Cuenta creada" pero sin navegar a `(tabs)`. Causa: `app/index.tsx` y `app/(tabs)/_layout.tsx` sí gateaban, pero `app/(auth)/_layout.tsx` no tenía ninguna lógica para salir del grupo cuando la sesión pasaba a activa estando parada en `login`/`register`. Se agregó el mismo patrón de guard (`<Redirect href="/(tabs)/home" />` si `status === 'signedIn'`) a `app/(auth)/_layout.tsx`.
+- **`react-native-worklets` desapareció de `node_modules`** en algún punto entre instalaciones con `--legacy-peer-deps` (quedó como dependencia extraña sin declarar en `package.json`, un `npm install` posterior lo podó). Causaba `Unable to resolve "react-native-worklets"` al bundlear (Reanimated 4 lo requiere como paquete separado). Se reinstaló explícitamente con `npx expo install react-native-worklets`; no hizo falta rebuild nativo porque el `.so` ya estaba compilado en el APK desde la Fase 0.
+- Metro había abierto la app en **Expo Go** (`host.exp.exponent`) en vez del dev client (`com.volcanic.cora`) al usar `expo start --android` sin flags; se corrigió usando `expo start --dev-client --android`.
+- **Bug real encontrado y corregido — falta de GRANT en las tablas nuevas:** el script de pruebas de RLS (ejecutado con un cliente `pg` de Node contra el pooler, simulando `auth.uid()` con `set local role authenticated; select set_config('request.jwt.claims', ...)`) reveló `permission denied for table profiles`. Postgres solo había otorgado `REFERENCES/TRIGGER/TRUNCATE` por defecto a `authenticated`/`anon` en las tablas nuevas — faltaban `SELECT/INSERT/UPDATE/DELETE`. Esto también estaba enmascarando un fallo real en la pantalla de Perfil de la app: `useProfile` fallaba silenciosamente y la UI mostraba el mismo texto de fallback ("Sin nombre todavía") tanto en éxito como en error, porque no distinguía `isError`. Se corrigieron ambas cosas: migración `0004_grants.sql` y `app/(tabs)/profile.tsx` ahora muestra un `Banner` de error real cuando `isError`.
+- Verificado en el emulador con dos cuentas de prueba reales (`cuentaa@cora.test`, `cuentab@cora.test`): registro → sesión inmediata → `(tabs)/home` → Perfil muestra el propio correo y perfil (sin datos de la otra cuenta) → cerrar sesión vuelve a `(auth)/login` → sesión persiste tras forzar el cierre y reabrir la app.
+- Pruebas de RLS ejecutadas contra el proyecto remoto (pooler, `pg` de Node ya que no hay `psql` en el entorno): los 4 casos de §9 pasan — select ajeno (0 filas), insert ajeno (falla por RLS), update propio cambiando `id` (falla por `with check`), select de `avatars` sin sesión (funciona, 8 avatares).
+
+## Fase 2 — Definition of Done (verificación final)
+
+- [x] Registro crea fila en `auth.users` **y** en `profiles` — verificado tanto en la UI (perfil carga tras registrar) como con una consulta directa a la base de datos.
+- [x] La sesión sobrevive a cerrar y reabrir la app — verificado con `am force-stop` + relanzar.
+- [x] Sin sesión, cualquier ruta de `(tabs)` redirige a `login` — guard en `app/(tabs)/_layout.tsx`.
+- [x] Los 4 casos de prueba de RLS pasan — ver log arriba.
+- [x] Cerrar sesión limpia la cache de React Query — `queryClient.clear()` en `handleSignOut`.
+
+**Fase 2 completa.** Pendientes para Fase 3 (Onboarding): pantallas reales de onboarding (slides, selección de etapa, avatar, mascota, consentimiento), que es donde `profiles.life_stage` y `onboarding_completed_at` finalmente se completan.
 
 ## Fase 1 — Foundation
 

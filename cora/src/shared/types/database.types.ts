@@ -39,7 +39,232 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      avatars: {
+        Row: {
+          code: string
+          conservation_status: string | null
+          fun_fact_es: string | null
+          habitat_es: string | null
+          id: string
+          image_path: string | null
+          is_active: boolean
+          name_es: string
+          sort_order: number
+          species_scientific: string | null
+        }
+        Insert: {
+          code: string
+          conservation_status?: string | null
+          fun_fact_es?: string | null
+          habitat_es?: string | null
+          id?: string
+          image_path?: string | null
+          is_active?: boolean
+          name_es: string
+          sort_order?: number
+          species_scientific?: string | null
+        }
+        Update: {
+          code?: string
+          conservation_status?: string | null
+          fun_fact_es?: string | null
+          habitat_es?: string | null
+          id?: string
+          image_path?: string | null
+          is_active?: boolean
+          name_es?: string
+          sort_order?: number
+          species_scientific?: string | null
+        }
+        Relationships: []
+      }
+      consents: {
+        Row: {
+          accepted_at: string
+          consent_type: string
+          id: string
+          revoked_at: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          consent_type: string
+          id?: string
+          revoked_at?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted_at?: string
+          consent_type?: string
+          id?: string
+          revoked_at?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      life_stage_history: {
+        Row: {
+          created_at: string
+          ended_on: string | null
+          id: string
+          stage: Database["public"]["Enums"]["life_stage"]
+          started_on: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_on?: string | null
+          id?: string
+          stage: Database["public"]["Enums"]["life_stage"]
+          started_on?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_on?: string | null
+          id?: string
+          stage?: Database["public"]["Enums"]["life_stage"]
+          started_on?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "life_stage_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mascot_state: {
+        Row: {
+          last_evolved_at: string | null
+          level: number
+          points: number
+          stage_variant: Database["public"]["Enums"]["life_stage"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          last_evolved_at?: string | null
+          level?: number
+          points?: number
+          stage_variant?: Database["public"]["Enums"]["life_stage"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          last_evolved_at?: string | null
+          level?: number
+          points?: number
+          stage_variant?: Database["public"]["Enums"]["life_stage"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mascot_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_id: string | null
+          birth_year: number | null
+          created_at: string
+          deleted_at: string | null
+          display_name: string | null
+          id: string
+          life_stage: Database["public"]["Enums"]["life_stage"] | null
+          locale: string
+          onboarding_completed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_id?: string | null
+          birth_year?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          display_name?: string | null
+          id: string
+          life_stage?: Database["public"]["Enums"]["life_stage"] | null
+          locale?: string
+          onboarding_completed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_id?: string | null
+          birth_year?: number | null
+          created_at?: string
+          deleted_at?: string | null
+          display_name?: string | null
+          id?: string
+          life_stage?: Database["public"]["Enums"]["life_stage"] | null
+          locale?: string
+          onboarding_completed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_preferences: {
+        Row: {
+          ai_share_health_context: boolean
+          notifications_enabled: boolean
+          reminder_time: string | null
+          updated_at: string
+          user_id: string
+          week_starts_on: number
+        }
+        Insert: {
+          ai_share_health_context?: boolean
+          notifications_enabled?: boolean
+          reminder_time?: string | null
+          updated_at?: string
+          user_id: string
+          week_starts_on?: number
+        }
+        Update: {
+          ai_share_health_context?: boolean
+          notifications_enabled?: boolean
+          reminder_time?: string | null
+          updated_at?: string
+          user_id?: string
+          week_starts_on?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

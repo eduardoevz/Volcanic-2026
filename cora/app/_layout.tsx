@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -5,9 +6,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/lib/i18n';
 
 import { asyncStoragePersister, queryClient } from '@/lib/queryClient';
+import { initSessionListener } from '@/store/sessionStore';
 import { ErrorBoundary } from '@/ui/ErrorBoundary';
 
 export default function RootLayout() {
+  useEffect(() => {
+    initSessionListener();
+  }, []);
+
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
