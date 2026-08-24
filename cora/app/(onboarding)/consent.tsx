@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Switch, View } from 'react-native';
 
+import { checkMascotEvolution } from '@/features/mascot';
 import { completeOnboarding, OnboardingProgress } from '@/features/onboarding';
 import { useSession } from '@/shared/hooks/useSession';
 import { Banner } from '@/ui/components/Banner';
@@ -25,6 +26,7 @@ export default function ConsentScreen() {
     try {
       await completeOnboarding({ notificationsEnabled, aiShareHealthContext });
       await queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
+      if (session?.user.id) await checkMascotEvolution(queryClient, session.user.id);
       router.replace('/(tabs)/home');
     } catch {
       setError('No pudimos guardar tus preferencias. Probá de nuevo.');

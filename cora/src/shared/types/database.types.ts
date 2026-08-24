@@ -610,6 +610,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_mascot_points: {
+        Args: { p_action: string; p_dedupe_key: string; p_points: number }
+        Returns: {
+          last_evolved_at: string | null
+          level: number
+          points: number
+          stage_variant: Database["public"]["Enums"]["life_stage"] | null
+          updated_at: string
+          user_id: string
+        }
+      }
       complete_onboarding: {
         Args: {
           p_ai_share_health_context: boolean
@@ -617,6 +628,10 @@ export type Database = {
           p_notifications_enabled: boolean
         }
         Returns: undefined
+      }
+      level_for_points: {
+        Args: { p_points: number }
+        Returns: number
       }
       mark_article_read: {
         Args: { p_article_id: string }

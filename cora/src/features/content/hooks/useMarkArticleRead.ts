@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { markArticleRead } from '@/features/content/api';
+import { checkMascotEvolution } from '@/features/mascot';
 import { useSession } from '@/shared/hooks/useSession';
 
 export function useMarkArticleRead() {
@@ -14,8 +15,8 @@ export function useMarkArticleRead() {
     retry: 3,
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
     mutationFn: (articleId: string) => markArticleRead(articleId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mascot-state', userId] });
+    onSuccess: async () => {
+      if (userId) await checkMascotEvolution(queryClient, userId);
     },
   });
 }

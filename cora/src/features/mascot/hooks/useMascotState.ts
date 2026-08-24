@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { fetchMascotState } from '@/features/home/api';
+import { fetchMascotState } from '@/features/mascot/api';
 import { useSession } from '@/shared/hooks/useSession';
 
 export function useMascotState() {

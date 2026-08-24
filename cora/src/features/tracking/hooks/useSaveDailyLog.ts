@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { checkMascotEvolution } from '@/features/mascot';
 import { saveDailyLog, syncCycles, type SaveDailyLogInput } from '@/features/tracking/api';
 import { useSession } from '@/shared/hooks/useSession';
 
@@ -24,11 +25,11 @@ export function useSaveDailyLog() {
       // cycles es derivada: se recalcula por completo después de cada guardado.
       await syncCycles(userId);
     },
-    onSuccess: (_data, input) => {
+    onSuccess: async (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ['daily-log', userId, input.logDate] });
       queryClient.invalidateQueries({ queryKey: ['daily-logs', userId] });
       queryClient.invalidateQueries({ queryKey: ['cycles', userId] });
-      queryClient.invalidateQueries({ queryKey: ['mascot-state', userId] });
+      await checkMascotEvolution(queryClient, userId);
     },
   });
 }

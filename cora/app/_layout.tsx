@@ -5,6 +5,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/lib/i18n';
 
+import { MascotEvolutionOverlay } from '@/features/mascot';
 import { asyncStoragePersister, configureOnlineManager, queryClient } from '@/lib/queryClient';
 import { initSessionListener } from '@/store/sessionStore';
 import { ErrorBoundary } from '@/ui/ErrorBoundary';
@@ -45,9 +46,11 @@ export default function RootLayout() {
               name="article/[slug]"
               options={{ headerShown: true, title: 'Artículo' }}
             />
+            <Stack.Screen name="mascot" options={{ headerShown: true, title: 'Tu pitahaya' }} />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />
+          <MascotEvolutionOverlay />
         </PersistQueryClientProvider>
       </SafeAreaProvider>
     </ErrorBoundary>

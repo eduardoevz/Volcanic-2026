@@ -2,6 +2,39 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
 
+## Fase 6 — Mascota
+
+- [x] Migración `0010_mascot_leveling.sql`: `level_for_points()` (los 5 umbrales de §16), RPC genérica `award_mascot_points()` (idempotencia por `dedupe_key`, tope diario de 30 puntos, nivel recalculado sin decrecer, `last_evolved_at`), backfill de nivel para cuentas ya existentes, y `complete_onboarding`/`upsert_daily_log`/`mark_article_read` reescritas para delegar en ella
+- [x] `src/features/mascot/` nueva: `level.ts` (espejo cliente puro de los umbrales + `pointsToNextLevel`), `api.ts` (movido desde `home/api.ts` + `fetchRecentMascotEvents`), `evolution.ts` (`checkMascotEvolution`), hooks `useMascotState`/`useRecentMascotEvents`, componentes `LevelProgressBar`/`MascotEvolutionOverlay`
+- [x] `level.test.ts`: 9 casos (las 5 fronteras exactas + progreso parcial + nivel máximo)
+- [x] `app/mascot.tsx`: sprite del nivel, barra de progreso al siguiente nivel, vista previa de los 5 niveles, lista de "momentos de cuidado" recientes — registrado en `app/_layout.tsx`
+- [x] `src/store/mascotEvolutionStore.ts` (Zustand) + `MascotEvolutionOverlay` montado una vez en `app/_layout.tsx`; `useSaveDailyLog`, `useMarkArticleRead` y el flujo de `completeOnboarding` en consent.tsx llaman `checkMascotEvolution()` tras cada mutación
+- [x] `MascotModule.tsx` del Home actualizado: emoji + nombre real del nivel (ya no un 🐉 fijo), pressable hacia `/mascot`
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 6 (2026-08-24)
+
+- **Bug real heredado, confirmado antes de programar:** `mascot_state.level` nunca se actualizaba en ninguna de las 3 RPCs que ya otorgaban puntos desde Fases 3/4/5 (`complete_onboarding`, `upsert_daily_log`, `mark_article_read`) — solo sumaban `points`. El nivel quedaba fijo en 1 para siempre y tampoco existía tope diario. Se corrigió centralizando toda la lógica de nivel/tope en `award_mascot_points()` (nueva RPC `security definer`) y hacinedo que las 3 RPCs existentes deleguen en ella vía `CREATE OR REPLACE` (sin tocar los archivos `0005`/`0006`/`0008`, regla de `docs/CONVENCIONES.md`). Se incluyó un backfill en la misma migración para recalcular el nivel de las cuentas creadas antes de esta fase.
+- **Bug real encontrado y corregido durante la verificación en el emulador (no en el SQL revisado a simple vista):** los literales enteros (`15`, `10`, `5`) en las llamadas `perform public.award_mascot_points('x', 15, 'y')` dentro de `complete_onboarding`/`upsert_daily_log`/`mark_article_read` no resolvían contra la sobrecarga `(text, smallint, text)` — Postgres no aplica el cast `integer → smallint` al resolver qué función llamar, solo lo aplica al insertar en una columna. El error (`function ... does not exist`) solo apareció al completar el onboarding de una cuenta nueva de verdad en el emulador (mensaje genérico "No pudimos guardar tus preferencias"); una prueba SQL directa con `perform` habría necesitado el mismo caso para revelarlo. Corregido agregando `::smallint` explícito a los 3 literales, dentro del mismo archivo `0010` (todavía no commiteado en el momento del fix, así que no cuenta como edición retroactiva) y reaplicado al proyecto remoto.
+- Migración aplicada al proyecto remoto con el mismo mecanismo de fases anteriores (conexión `pg` directa vía Node contra el pooler — la CLI de Supabase sigue bloqueada por Application Control de Windows). `database.types.ts` extendido a mano con `award_mascot_points`/`level_for_points` (mismo procedimiento que fases previas, ya que `supabase gen types` tampoco puede correr).
+- **Verificación a nivel de base de datos** (mismo mecanismo `pg`, simulando `auth.uid()` con `set local role authenticated` + `request.jwt.claims`): idempotencia confirmada (llamar `award_mascot_points` dos veces con el mismo `dedupe_key` deja los puntos exactamente iguales); tope diario confirmado (pedir 40 puntos con 8 ya otorgados hoy se recorta a 22, nunca a 40); las 5 fronteras de `level_for_points` (19/20, 59/60, 139/140, 279/280, sin techo en 1000) verificadas exactas. Backfill confirmado: la cuenta de prueba `cuentac@cora.test` (60 puntos acumulados desde Fase 5) pasó de nivel 1 (atascada) a nivel 3 (Cactus joven) sin ninguna acción nueva de la usuaria.
+- **Verificación end-to-end en el emulador con una cuenta nueva (`cuentad@cora.test`)**, evitando las cuentas ya usadas hoy porque su tope diario de 30 puntos ya estaba agotado por las pruebas de Fase 4/5:
+  - Registro → onboarding completo (etapa Adultez) → Home: `MascotModule` mostró "Tu pitahaya · Semilla · Nivel 1 · 15 puntos acumulados" tras completar el onboarding (15 puntos, sin animación — correcto, no cruza el umbral de 20).
+  - Un registro diario real (+10 puntos, 15→25, cruza el umbral de nivel 2) disparó la **animación de evolución en pantalla completa** ("¡Tu pitahaya creció! Ahora es Brote · Nivel 2") con la transición de Reanimated, y el Home quedó actualizado a "Brote · Nivel 2 · 25 puntos" tras cerrarla.
+  - Editar y volver a guardar el registro del mismo día **no otorgó puntos de nuevo ni volvió a mostrar la animación** (se mantuvo en 25 puntos) — idempotencia confirmada con una acción real de la usuaria, no solo en SQL.
+  - `/mascot`: sprite grande del nivel actual, "Le faltan 80 puntos para ser Cactus florecido" con la barra de progreso llena proporcionalmente, tira de los 5 niveles con el actual resaltado, y la lista de "momentos de cuidado recientes" mostrando los eventos reales de `mascot_events` (incluye dos entradas de las pruebas SQL de verificación con su `action_type` crudo como fallback honesto, ya que `ACTION_LABELS` no las traduce — comportamiento esperado, no un error).
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre), `npx jest` (31/31 OK, incluye los 9 nuevos de `level.test.ts`).
+
+## Fase 6 — Definition of Done (verificación final)
+
+- [x] 5 niveles con sprite propio (emoji, mismo patrón consciente que los avatares de fauna desde Fase 2/3) — Semilla 🌰, Brote 🌱, Cactus joven 🌵, Cactus florecido 🌸, Pitahaya 🐉, verificados en `/mascot` y en el Home
+- [x] La idempotencia funciona — verificado con SQL directo y con una acción real (doble guardado del mismo registro diario)
+- [x] El nivel NUNCA baja — `greatest(level, level_for_points(...))` en `award_mascot_points`, sin ninguna ruta de código que reste nivel
+- [x] El tope diario de 30 puntos se respeta — verificado con SQL directo (40 puntos pedidos, 22 otorgados tras 8 ya acumulados hoy)
+- [x] Otorgar puntos sin conexión funciona y se sincroniza después — reutiliza el mismo outbox/`networkMode: offlineFirst` de `useSaveDailyLog`/`useMarkArticleRead` ya verificado en Fases 4 y 5; `checkMascotEvolution` se ejecuta en el `onSuccess`, que solo se dispara cuando la mutación en cola finalmente se sincroniza
+
+**Fase 6 completa.** Pendiente para Fase 7 (IA): el `wellbeing-tip` module del Home sigue siendo placeholder ("Contenido personalizado llega en la Fase 5" — copy desactualizado, se corrige cuando se construya esa función); Cora IA otorgará +5 puntos por conversar (`ai:{fecha}`), reutilizando `award_mascot_points` sin cambios.
+
 ## Fase 5 — Contenido
 
 - [x] Migración `0008_content.sql`: `content_categories`, `educational_content` (`search_vector` generado + índice GIN sobre `life_stages`, índice GIN sobre `search_vector`, único `(slug, locale)`) + `content_sources`, RLS de solo lectura de publicados (patrón B) + RPC `mark_article_read`
