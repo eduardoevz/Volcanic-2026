@@ -1,11 +1,18 @@
+import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Pressable, View } from 'react-native';
 
 import { signOut } from '@/features/auth';
+import { AVATAR_EMOJI } from '@/features/avatars';
+import { setLifeStage } from '@/features/onboarding';
 import { useProfile } from '@/features/profile';
 import { useSession } from '@/shared/hooks/useSession';
+import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants/lifeStages';
+import { Avatar } from '@/ui/components/Avatar';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
+import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
@@ -13,12 +20,27 @@ export default function Profile() {
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
   const queryClient = useQueryClient();
+  const [changingStage, setChangingStage] = useState(false);
+  const [savingStage, setSavingStage] = useState<LifeStage | null>(null);
 
   const handleSignOut = async () => {
     await signOut();
     // Sin esto, la próxima usuaria en el mismo dispositivo podría ver datos
     // cacheados de la sesión anterior (perfil, registros, etc.).
     queryClient.clear();
+  };
+
+  const handleChangeStage = async (stage: LifeStage) => {
+    setSavingStage(stage);
+    try {
+      await setLifeStage(stage);
+      // El Home lee useProfile() con la misma key — invalidar acá alcanza
+      // para que se recomponga sin reiniciar la app.
+      await queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
+      setChangingStage(false);
+    } finally {
+      setSavingStage(null);
+    }
   };
 
   return (
@@ -29,6 +51,7 @@ export default function Profile() {
       <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
         {session?.user.email}
       </Text>
+
       {isLoading ? (
         <Text variant="bodyMuted">Cargando perfil...</Text>
       ) : isError ? (
@@ -37,11 +60,57 @@ export default function Profile() {
           tone="danger"
         />
       ) : (
-        <Text variant="body" style={{ marginBottom: spacing.lg }}>
-          {profile?.display_name ?? 'Sin nombre todavía (llega en la Fase 3)'}
-        </Text>
+        <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
+            <View>
+              <Text variant="body">
+                {profile?.display_name ?? 'Sin nombre todavía'}
+              </Text>
+              <Text variant="bodyMuted">
+                {profile?.avatars?.name_es ?? 'Sin avatar elegido'}
+              </Text>
+            </View>
+          </View>
+
+          <View>
+            <Text variant="caption">Etapa de vida</Text>
+            <Text variant="body">
+              {profile?.life_stage ? LIFE_STAGE_META[profile.life_stage].label : 'Sin definir'}
+            </Text>
+            <Button
+              label="Cambiar etapa"
+              variant="ghost"
+              onPress={() => setChangingStage(true)}
+            />
+          </View>
+        </View>
       )}
+
       <Button label="Cerrar sesión" variant="secondary" onPress={handleSignOut} />
+
+      <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>
+        <View style={{ gap: spacing.sm }}>
+          <Text variant="heading">¿En qué etapa estás ahora?</Text>
+          {LIFE_STAGES.map((stage) => (
+            <Pressable
+              key={stage}
+              onPress={() => handleChangeStage(stage)}
+              disabled={savingStage !== null}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: spacing.sm,
+                paddingVertical: spacing.sm,
+                opacity: savingStage && savingStage !== stage ? 0.5 : 1,
+              }}
+            >
+              <Text style={{ fontSize: 24 }}>{LIFE_STAGE_META[stage].emoji}</Text>
+              <Text variant="body">{LIFE_STAGE_META[stage].label}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </Sheet>
     </Screen>
   );
 }

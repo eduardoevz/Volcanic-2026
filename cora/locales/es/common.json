@@ -8,5 +8,15 @@
     "retry": "Reintentar",
     "somethingWentWrong": "Algo salió mal",
     "errorBoundaryMessage": "Tuvimos un problema mostrando esta pantalla. Probá de nuevo."
+  },
+  "home": {
+    "greeting": {
+      "adolescencia": "¿Cómo va tu día?",
+      "adultez": "¿Cómo te sentís hoy?",
+      "embarazo": "¿Cómo va tu embarazo hoy?",
+      "perimenopausia": "¿Cómo te sentís hoy?",
+      "mayor": "¿Cómo te sentís hoy?",
+      "default": "¡Hola de nuevo!"
+    }
   }
 }

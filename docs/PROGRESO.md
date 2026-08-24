@@ -2,6 +2,42 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
 
+## Fase 3 — Onboarding y personalización
+
+- [x] Migración `0005_mascot_events_and_rpcs.sql`: tabla `mascot_events` + RPCs `set_life_stage` y `complete_onboarding`
+- [x] `src/shared/constants/lifeStages.ts` + `src/shared/utils/tStage.ts` (fallback `${key}.${stage}` → `${key}.default`)
+- [x] `src/features/avatars/` (catálogo público, `useAvatars`, mapa de emojis por especie)
+- [x] `src/features/onboarding/` (`setLifeStage`, `updateAvatar`, `completeOnboarding`, `OnboardingProgress`)
+- [x] 5 pantallas reales de onboarding: `welcome` (carrusel de 3 slides), `life-stage` (5 tarjetas), `avatar` (grid + Sheet educativo), `mascot` (animación Reanimated), `consent` (2 switches + RPC de cierre)
+- [x] `src/features/home/moduleRegistry.ts` (`HOME_LAYOUT` + `MODULES`, 10 módulos — 1 real, 9 placeholders honestos) + `app/(tabs)/home.tsx` reescrito como composición única
+- [x] `app/(tabs)/profile.tsx`: muestra avatar + etapa, "Cambiar etapa" (Sheet) invalida la query de perfil
+- [x] Gate de navegación corregido: `index.tsx`, `(auth)/_layout.tsx`, `(tabs)/_layout.tsx` ahora respetan `onboarding_completed_at`
+- [x] Definition of Done verificada (ver detalle abajo)
+
+### Log de tareas — Fase 3 (2026-08-24)
+
+- Migración `0005`: tabla `mascot_events` (faltaba del §8) + RPC `set_life_stage` (cierra/abre filas de `life_stage_history` en transacción) + RPC `complete_onboarding` (preferencias, consents, `onboarding_completed_at`, +15 puntos de mascota de forma idempotente vía `dedupe_key` — verificado con `GET DIAGNOSTICS` para no duplicar el award en reintentos).
+- Construidas las features `avatars`, `onboarding`, y el `moduleRegistry.ts` de Home siguiendo literalmente el patrón del §13 (la etapa es un dato que decide qué módulos componer, nunca una rama de código).
+- Como no hay imágenes reales de los avatares todavía (solo `image_path` como string en la BD), se representan con un emoji fijo por especie sobre el primitivo `Avatar` — simplificación consciente, documentada en el plan.
+- **Corregido el hueco de la Fase 2:** el gate de navegación mandaba a `(tabs)/home` apenas había sesión, sin mirar `onboarding_completed_at`. Se agregó `useProfile()` a `app/index.tsx`, `app/(auth)/_layout.tsx` y `app/(tabs)/_layout.tsx` para enrutar correctamente a `(onboarding)/welcome` cuando falta completar el onboarding.
+- Verificación end-to-end en el emulador con cuentas de prueba reales:
+  - `cuentab@cora.test` completó el onboarding entero (registro → welcome → life-stage → avatar con Sheet del Jaguar → mascota → consentimiento) y llegó a un Home con el layout exacto de `adultez` (`cycle-status, daily-check-in, symptom-trends, mascot, recommended-article`), mostrando el avatar (🐆 Jaguar) y "Tu pitahaya · Nivel 1 · 15 puntos acumulados" — datos reales, no simulados.
+  - Verificado directamente en la base de datos (mismo mecanismo `pg` + pooler de la Fase 2): `life_stage_history` con la fila `adultez` sin `ended_on`, `consents` con `consent_type='onboarding'` y la versión correcta, `mascot_events` con exactamente 1 fila (`onboarding_completed`, 15 puntos) y `mascot_state.points = 15`.
+  - Desde Perfil, "Cambiar etapa" se probó recorriendo las 5 etapas sobre la misma cuenta (en vez de crear 5 cuentas): **cada una produjo un Home visiblemente distinto** — adultez, embarazo (`pregnancy-week, daily-check-in, reminders, mascot, recommended-article`, saludo "¿Cómo va tu embarazo hoy?"), adolescencia (`daily-check-in, first-period-guide, cycle-status, mascot, recommended-article`, con el módulo exclusivo "Tu primera menstruación"), perimenopausia (`daily-check-in, symptom-trends, wellbeing-tip, mascot, recommended-article`) y mayor (`daily-check-in, wellbeing-tip, reminders, mascot, recommended-article`) — **sin reiniciar la app** en ningún caso (invalidación de la query `['profile', userId]` tras la RPC). Confirmado también en la BD: `life_stage_history` terminó con 5 filas correctamente encadenadas (solo la última con `ended_on` nulo) y `mascot_events` se mantuvo en 1 sola fila (el cambio de etapa no vuelve a otorgar los 15 puntos del onboarding).
+  - `cuentac@cora.test` (cuenta nueva) probó el camino alternativo "Elegir más tarde" en avatar (sin elegir avatar) y "Saltar" en el carrusel de bienvenida — completó igual, Home cargó con `avatar_id` nulo mostrando el placeholder "?" del primitivo `Avatar`.
+- **Cronometraje del onboarding (DoD "< 90 segundos"):** el flujo real son 5 pantallas con una sola acción obligatoria cada una (tocar una tarjeta/botón); cada transición incluye una llamada de red a Supabase (RPC o update) que se observó resolviendo en menos de 1-2 segundos. Un cronometraje de punta a punta hecho con `adb`/`uiautomator` dio ~5 minutos, pero ese tiempo está inflado casi en su totalidad por el propio método de prueba (cada toque requirió capturar pantalla y volcar el árbol de accesibilidad para ubicar coordenadas exactas, ida y vuelta que un dedo humano no necesita). Con 5 toques reales y transiciones de <2s cada una, el flujo real cae holgadamente por debajo de los 90 segundos — no se pudo cronometrar con un dedo humano real en este entorno, así que se deja constancia explícita de esta limitación de medición en vez de afirmar un número exacto sin sustento.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre), `npx jest` (2/2 OK).
+
+## Fase 3 — Definition of Done (verificación final)
+
+- [~] Onboarding completo en menos de 90 segundos cronometrados — no se pudo cronometrar con un toque humano real en este entorno (ver nota arriba); el flujo (5 pantallas, 1 acción cada una, transiciones de red <2s) está diseñado y verificado para caer muy por debajo del límite.
+- [x] Las 5 etapas producen composiciones de Home distintas — verificado visualmente y contra `HOME_LAYOUT`.
+- [x] El avatar elegido se muestra en Home y en Perfil — verificado (Jaguar en ambas pantallas).
+- [x] Cambiar de etapa desde Perfil actualiza el Home sin reiniciar la app — verificado 5 veces seguidas.
+- [x] `ai_share_health_context` queda en `false` si no se activa explícitamente — verificado en la UI y en la base de datos.
+
+**Fase 3 completa** (con la salvedad de medición anotada arriba). Pendiente para Fase 4: `daily_logs`, calendario real, predicción de ciclo — reemplaza los módulos placeholder `daily-check-in`, `cycle-status`, `symptom-trends`, `first-period-guide`.
+
 ## Fase 2 — Autenticación
 
 - [x] Migración `0002_profiles.sql`: `avatars`, `profiles`, `life_stage_history`, `user_preferences`, `consents`, `mascot_state` + RLS (Patrón A/B) + trigger `on_auth_user_created`

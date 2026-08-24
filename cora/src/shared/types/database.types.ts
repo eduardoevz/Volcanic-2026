@@ -148,6 +148,41 @@ export type Database = {
           },
         ]
       }
+      mascot_events: {
+        Row: {
+          action_type: string
+          created_at: string
+          dedupe_key: string
+          id: string
+          points: number
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          dedupe_key: string
+          id?: string
+          points: number
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          points?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mascot_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mascot_state: {
         Row: {
           last_evolved_at: string | null
@@ -270,7 +305,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_onboarding: {
+        Args: {
+          p_ai_share_health_context: boolean
+          p_consent_version: string
+          p_notifications_enabled: boolean
+        }
+        Returns: undefined
+      }
+      set_life_stage: {
+        Args: { new_stage: Database["public"]["Enums"]["life_stage"] }
+        Returns: undefined
+      }
     }
     Enums: {
       content_status: "draft" | "published" | "archived"
