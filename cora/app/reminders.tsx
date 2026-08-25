@@ -36,9 +36,19 @@ function TimeStepper({
     <View style={{ alignItems: 'center', gap: spacing.xs }}>
       <Text variant="caption">{label}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Button label="−" variant="secondary" onPress={() => onChange((value - 1 + (max + 1)) % (max + 1))} />
+        <Button
+          label="−"
+          variant="secondary"
+          accessibilityLabel={`Disminuir ${label.toLowerCase()}`}
+          onPress={() => onChange((value - 1 + (max + 1)) % (max + 1))}
+        />
         <Text variant="heading">{pad(value)}</Text>
-        <Button label="+" variant="secondary" onPress={() => onChange((value + 1) % (max + 1))} />
+        <Button
+          label="+"
+          variant="secondary"
+          accessibilityLabel={`Aumentar ${label.toLowerCase()}`}
+          onPress={() => onChange((value + 1) % (max + 1))}
+        />
       </View>
     </View>
   );
@@ -82,6 +92,10 @@ export default function Reminders() {
           tone="warning"
           message="No pudimos crear el recordatorio. Verificá que le hayas dado permiso de notificaciones a Cora."
         />
+      ) : null}
+
+      {toggleReminder.isError || deleteReminder.isError ? (
+        <Banner tone="danger" message="No pudimos actualizar el recordatorio. Probá de nuevo." />
       ) : null}
 
       {isLoading ? (

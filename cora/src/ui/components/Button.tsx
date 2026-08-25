@@ -12,6 +12,7 @@ type ButtonProps = {
   loading?: boolean;
   disabled?: boolean;
   style?: ViewStyle;
+  accessibilityLabel?: string;
 };
 
 export function Button({
@@ -21,12 +22,14 @@ export function Button({
   loading = false,
   disabled = false,
   style,
+  accessibilityLabel,
 }: ButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: isDisabled }}
       onPress={onPress}
       disabled={isDisabled}

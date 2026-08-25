@@ -4,7 +4,7 @@ import { fertileWindow, predictNext, type Cycle } from '@/features/tracking/cycl
 import { useCycles } from '@/features/tracking/hooks/useCycles';
 
 export function usePrediction() {
-  const { data: cycles, isLoading } = useCycles();
+  const { data: cycles, isLoading, isError } = useCycles();
 
   const prediction = useMemo(() => {
     if (!cycles) return null;
@@ -18,6 +18,7 @@ export function usePrediction() {
 
   return {
     isLoading,
+    isError,
     cycles: cycles ?? [],
     prediction,
     fertileWindow: window,

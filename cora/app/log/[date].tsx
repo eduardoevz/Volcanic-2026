@@ -40,8 +40,8 @@ const STAGES_WITHOUT_FLOW = ['mayor', 'embarazo'];
 export default function DailyLogScreen() {
   const { date } = useLocalSearchParams<{ date: string }>();
   const { data: profile } = useProfile();
-  const { data: existingLog, isLoading: logLoading } = useDailyLog(date);
-  const { data: symptoms, isLoading: symptomsLoading } = useSymptomCatalog();
+  const { data: existingLog, isLoading: logLoading, isError: logError } = useDailyLog(date);
+  const { data: symptoms, isLoading: symptomsLoading, isError: symptomsError } = useSymptomCatalog();
   const saveDailyLog = useSaveDailyLog();
 
   const [flowLevel, setFlowLevel] = useState<FlowLevel | null>(null);
@@ -115,6 +115,13 @@ export default function DailyLogScreen() {
       <ScrollView contentContainerStyle={{ gap: spacing.lg, paddingBottom: spacing.xl }}>
         <Text variant="bodyMuted">{date}</Text>
 
+        {logError ? (
+          <Banner
+            tone="warning"
+            message="No pudimos cargar tu registro previo de este día — si ya habías guardado algo, revisalo antes de sobrescribir."
+          />
+        ) : null}
+
         {showFlow ? (
           <View style={{ gap: spacing.xs }}>
             <Text variant="heading">Flujo</Text>
@@ -161,7 +168,9 @@ export default function DailyLogScreen() {
 
         <View style={{ gap: spacing.xs }}>
           <Text variant="heading">Síntomas</Text>
-          {symptomsLoading ? (
+          {symptomsError ? (
+            <Banner tone="danger" message="No pudimos cargar el catálogo de síntomas." />
+          ) : symptomsLoading ? (
             <Text variant="bodyMuted">Cargando síntomas...</Text>
           ) : (
             <View style={{ gap: spacing.sm }}>

@@ -29,13 +29,14 @@ export default function CalendarScreen() {
 
   const monthStart = format(startOfMonth(cursor), 'yyyy-MM-dd');
   const monthEnd = format(endOfMonth(cursor), 'yyyy-MM-dd');
-  const { data: monthLogs } = useDailyLogsRange(monthStart, monthEnd);
+  const { data: monthLogs, isError: monthLogsError } = useDailyLogsRange(monthStart, monthEnd);
 
   const thirtyDaysAgo = format(subMonths(new Date(), 1), 'yyyy-MM-dd');
   const today = format(new Date(), 'yyyy-MM-dd');
-  const { data: recentLogs } = useDailyLogsRange(thirtyDaysAgo, today);
+  const { data: recentLogs, isError: recentLogsError } = useDailyLogsRange(thirtyDaysAgo, today);
 
-  const { prediction, fertileWindow, hasEnoughData, isLoading } = usePrediction();
+  const { prediction, fertileWindow, hasEnoughData, isLoading, isError: predictionError } =
+    usePrediction();
 
   const bleedingDates = useMemo(
     () =>
@@ -64,10 +65,27 @@ export default function CalendarScreen() {
         <Text variant="title">Calendario</Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Button label="‹" variant="ghost" onPress={() => setCursor((c) => subMonths(c, 1))} />
+          <Button
+            label="‹"
+            variant="ghost"
+            accessibilityLabel="Mes anterior"
+            onPress={() => setCursor((c) => subMonths(c, 1))}
+          />
           <Text variant="heading">{format(cursor, 'MMMM yyyy', { locale: es })}</Text>
-          <Button label="›" variant="ghost" onPress={() => setCursor((c) => addMonths(c, 1))} />
+          <Button
+            label="›"
+            variant="ghost"
+            accessibilityLabel="Mes siguiente"
+            onPress={() => setCursor((c) => addMonths(c, 1))}
+          />
         </View>
+
+        {monthLogsError || recentLogsError || predictionError ? (
+          <Banner
+            message="No pudimos cargar tus registros. Revisá tu conexión e intentá de nuevo."
+            tone="danger"
+          />
+        ) : null}
 
         <CalendarGrid
           year={year}
@@ -79,7 +97,7 @@ export default function CalendarScreen() {
           onDayPress={(dateISO) => router.push(`/log/${dateISO}`)}
         />
 
-        {!isLoading && !hasEnoughData ? (
+        {!isLoading && !predictionError && !hasEnoughData ? (
           <EmptyState
             title="Todavía no hay suficiente historial"
             description="Registrá al menos 2 ciclos para ver una predicción."
@@ -112,7 +130,7 @@ export default function CalendarScreen() {
           <Text variant="heading" style={{ marginBottom: spacing.xs }}>
             Últimos 30 días
           </Text>
-          {(recentLogs ?? []).length === 0 ? (
+          {recentLogsError ? null : (recentLogs ?? []).length === 0 ? (
             <EmptyState
               title="Sin registros todavía"
               description="Tocá un día del calendario para empezar a registrar."

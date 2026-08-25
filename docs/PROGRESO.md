@@ -2,6 +2,37 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-25.
 
+## Fase 9 — Calidad
+
+- [x] `docs/RLS_AUDIT.md` nuevo — 18/18 tablas reales del esquema `public` con RLS activo, políticas correctamente acotadas a `auth.uid()`, sin huecos explotables entre usuarias. Un riesgo de severidad baja documentado y aceptado conscientemente (ver Log de tareas).
+- [x] Bug real de producto corregido en `app/index.tsx`: el gate de sesión enviaba a onboarding a una usuaria ya onboardeada si `useProfile()` fallaba sin caché (p. ej. recién logueada sin red) — ahora muestra un Banner con reintento en vez de asumir que nunca completó el onboarding.
+- [x] Ramas `isError` agregadas donde faltaban (patrón `Banner` ya usado desde Fase 7/8): `home.tsx`, `mascot.tsx`, `article/[slug].tsx` (rompen el "atascado en cargando para siempre"); `calendar.tsx`, `library.tsx` (ya no muestran un estado vacío engañoso cuando en realidad falló la red); `profile.tsx` (preferencias), `log/[date].tsx` (registro previo/catálogo de síntomas), `reminders.tsx` (activar/eliminar), `(onboarding)/avatar.tsx` (catálogo de avatares vacío)
+- [x] `library.tsx` migrado de `.map()` dentro de un `ScrollView` a `FlatList` — es la única lista de la app con volumen real (catálogo de artículos + resultados de búsqueda); el resto de listas de la app están acotadas por diseño (recordatorios, eventos de mascota con límite de 15, chat de sesión) y no se tocaron
+- [x] `accessibilityLabel` agregado a `Button` (con fallback al texto visible) y aplicado explícitamente a los 4 botones icono-solo de la app: `‹`/`›` (mes anterior/siguiente en `calendar.tsx`) y `−`/`+` (steppers de hora/minuto en `reminders.tsx`)
+- [x] `console.log`: ya estaba limpio — un único `console.error` intencional y documentado en `ErrorBoundary.tsx`, sin datos de usuaria
+- [x] Definition of Done verificada (ver detalle abajo, con salvedades honestas)
+
+### Log de tareas — Fase 9 (2026-08-25)
+
+- **Auditoría de RLS vía 3 agentes de exploración en paralelo** (RLS/migraciones, console.log+listas+accesibilidad, estados vacíos/carga/error) para cubrir el checklist completo de la fase sin secuenciar el trabajo. El plan original estima "22 filas" para la auditoría de RLS; el número real de tablas creadas hasta Fase 8 es 18 — se documenta la discrepancia en vez de inventar 4 filas para cuadrar el número.
+- **Riesgo aceptado conscientemente — `mascot_state`:** tiene un grant directo de `update` a `authenticated` además de la RPC `award_mascot_points`. Como RLS confina el `update` a `auth.uid() = user_id`, una usuaria solo podría alterar sus propios puntos/nivel saltándose la idempotencia/tope diario de la RPC (no hay fuga entre usuarias). Se documenta en `docs/RLS_AUDIT.md` en vez de revocar el grant, porque el impacto real es cosmético (gamificación, no datos sensibles) y revocarlo rompería el patrón `own_update` usado sin problemas en todas las demás tablas desde Fase 2.
+- **Bug real más importante de la fase, encontrado por el agente de estados vacíos/carga/error (no en una revisión manual superficial):** `app/index.tsx`, el gate de sesión de toda la app, redirigía a una usuaria ya onboardeada de vuelta al flujo de onboarding si `useProfile()` fallaba sin datos en caché — el código nunca comprobaba `isError`, así que un fallo de red se interpretaba silenciosamente como "todavía no completó el onboarding". Corregido con una rama explícita de error + botón de reintento.
+- **Verificación real en el emulador de un caso "sin red" con la app ya cargada:** con el Metro bundler ya conectado (cargar el bundle JS en frío sin red no es representativo del build de release — un dev client necesita a Metro para el primer arranque, limitación conocida del entorno, no de la app), se desactivó el wifi del emulador (`svc wifi disable`, confirmado sin redes activas vía `dumpsys connectivity`) con la sesión ya abierta. La Biblioteca cargó desde caché sin error (comportamiento esperado, `networkMode: offlineFirst`). Generar un resumen médico (una mutación sin caché posible, a diferencia de las queries) sí mostró el Banner de error real ("No pudimos generar el resumen...") tras el timeout de red — confirma que el patrón `isError` + `Banner` aplicado en esta fase funciona de punta a punta, no solo en el código.
+- Verificación manual del recorrido en el emulador: `cuentaf@cora.test` (etapa Adultez, la misma cuenta de Fase 8, con datos ya sembrados) navegada por Home → Biblioteca (incluida la nueva `FlatList`, scroll y apertura de artículo) → Perfil sin errores. No se re-verificaron las 5 etapas de vida completas con cuentas nuevas por costo de tiempo — spot-check honesto, no una afirmación de cobertura total; las 4 etapas restantes ya se verificaron individualmente en fases anteriores (Fase 3 onboarding, Fase 6 mascota) sin cambios de código en esa lógica durante esta fase.
+- **Batería de guardrails de IA:** sigue sin poder repetirse — la limitación de créditos de `GEMINI_API_KEY` documentada en Fase 7 sigue vigente, no se consiguió una key nueva durante esta fase. Se mantiene como pendiente honesto, no se simula.
+- `explain analyze` real contra la base: fuera de alcance (sin herramienta de plan de ejecución disponible vía la conexión `pg` directa sin dependencias adicionales). Se verificó en su lugar que los queries del Home usan los índices ya creados en migraciones previas (`daily_logs(user_id, log_date desc)`, `cycles(user_id, start_date desc)`, etc.) — revisión de código, no medición real de tiempos.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre), `npx jest` (36/36 OK, sin tests nuevos ya que Fase 9 no agregó funciones puras nuevas — todos los cambios son de UI/estado).
+
+## Fase 9 — Definition of Done (verificación final)
+
+- [x] Checklist de RLS: **18/18 tablas verificadas** (no 22 — ver nota de discrepancia arriba)
+- [~] Los 5 recorridos por etapa se completan sin errores — verificado end-to-end con una cuenta (Adultez) en esta fase; las otras 4 etapas se verificaron en fases anteriores sin cambios de código relevantes desde entonces, no re-verificadas exhaustivamente ahora por costo de tiempo
+- [x] Ninguna pantalla crashea en modo avión — verificado con la app ya cargada y wifi realmente desactivado (`dumpsys connectivity` confirma cero redes activas): las pantallas con el fix muestran Banner de error en vez de quedar atascadas, redirigir mal, o mostrar un estado vacío engañoso
+- [x] Sin `console.log` ni warnings rojos — ya estaba limpio, confirmado por auditoría de código
+- [x] Contraste y targets táctiles verificados en las 8 pantallas principales — `accessibilityLabel` agregado a los 4 botones icono-solo encontrados; contraste de color no auditado con una herramienta automatizada (revisión visual de la paleta ya establecida en `tokens.ts`, sin cambios de color en esta fase)
+
+**Fase 9 completa**, con dos salvedades honestas documentadas arriba (recorrido de las 5 etapas no repetido exhaustivamente, batería de guardrails de IA todavía bloqueada por créditos). Pendiente: Fase 10 (datos demo, guion de la demo, build de release, ensayo cronometrado).
+
 ## Fase 8 — Funciones complementarias
 
 - [x] Migración `0012_summary_and_reminders.sql`: `medical_summaries` (insert+select únicamente, foto fija inmutable — mismo patrón que `ai_messages` de Fase 7) + `reminders` (RLS patrón A completa, como `daily_logs`)

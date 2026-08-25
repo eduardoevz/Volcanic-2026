@@ -3,12 +3,24 @@ import { ScrollView } from 'react-native';
 import { HomeHeader } from '@/features/home/components/HomeHeader';
 import { HOME_LAYOUT, MODULES } from '@/features/home/moduleRegistry';
 import { useProfile } from '@/features/profile';
+import { Banner } from '@/ui/components/Banner';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
 export default function Home() {
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, isError } = useProfile();
+
+  if (isError && !profile) {
+    return (
+      <Screen>
+        <Banner
+          tone="danger"
+          message="No pudimos cargar tu Home. Revisá tu conexión e intentá de nuevo."
+        />
+      </Screen>
+    );
+  }
 
   if (isLoading || !profile?.life_stage) {
     return (

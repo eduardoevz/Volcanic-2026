@@ -21,7 +21,7 @@ export default function Profile() {
   const router = useRouter();
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
-  const { data: preferences } = useUserPreferences();
+  const { data: preferences, isError: preferencesError } = useUserPreferences();
   const queryClient = useQueryClient();
   const [changingStage, setChangingStage] = useState(false);
   const [savingStage, setSavingStage] = useState<LifeStage | null>(null);
@@ -105,6 +105,12 @@ export default function Profile() {
 
       <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
         <Text variant="caption">Privacidad</Text>
+        {preferencesError ? (
+          <Banner
+            tone="danger"
+            message="No pudimos cargar tus preferencias de privacidad. Revisá tu conexión."
+          />
+        ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           <Switch
             value={preferences?.ai_share_health_context ?? false}

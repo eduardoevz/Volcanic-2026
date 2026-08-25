@@ -9,6 +9,7 @@ import {
   useRecentMascotEvents,
   type MascotLevel,
 } from '@/features/mascot';
+import { Banner } from '@/ui/components/Banner';
 import { Card } from '@/ui/components/Card';
 import { EmptyState } from '@/ui/components/EmptyState';
 import { Screen } from '@/ui/components/Screen';
@@ -30,8 +31,19 @@ function formatEventDate(iso: string) {
 }
 
 export default function MascotScreen() {
-  const { data: mascot, isLoading } = useMascotState();
+  const { data: mascot, isLoading, isError } = useMascotState();
   const { data: events, isLoading: eventsLoading } = useRecentMascotEvents(15);
+
+  if (isError && !mascot) {
+    return (
+      <Screen>
+        <Banner
+          tone="danger"
+          message="No pudimos cargar tu pitahaya. Revisá tu conexión e intentá de nuevo."
+        />
+      </Screen>
+    );
+  }
 
   if (isLoading || !mascot) {
     return (

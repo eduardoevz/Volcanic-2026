@@ -4,6 +4,7 @@ import { Linking, Pressable, ScrollView, View } from 'react-native';
 
 import { MarkdownBody, useArticleBySlug, useMarkArticleRead } from '@/features/content';
 import { Badge } from '@/ui/components/Badge';
+import { Banner } from '@/ui/components/Banner';
 import { Card } from '@/ui/components/Card';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
@@ -13,7 +14,7 @@ const READ_THRESHOLD_MS = 20_000;
 
 export default function ArticleScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const { data: article, isLoading } = useArticleBySlug(slug);
+  const { data: article, isLoading, isError } = useArticleBySlug(slug);
   const markArticleRead = useMarkArticleRead();
   const markedRef = useRef(false);
 
@@ -31,6 +32,17 @@ export default function ArticleScreen() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [article?.id]);
+
+  if (isError) {
+    return (
+      <Screen>
+        <Banner
+          tone="danger"
+          message="No pudimos cargar este artículo. Puede que ya no exista, o revisá tu conexión."
+        />
+      </Screen>
+    );
+  }
 
   if (isLoading || !article) {
     return (

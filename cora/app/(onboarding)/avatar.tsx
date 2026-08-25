@@ -6,6 +6,7 @@ import { AVATAR_EMOJI, useAvatars } from '@/features/avatars';
 import { OnboardingProgress, updateAvatar } from '@/features/onboarding';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
+import { EmptyState } from '@/ui/components/EmptyState';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Skeleton } from '@/ui/components/Skeleton';
@@ -55,6 +56,11 @@ export default function AvatarScreen() {
             <Skeleton key={i} width={92} height={92} radius={radii.lg} />
           ))}
         </View>
+      ) : avatars && avatars.length === 0 ? (
+        <EmptyState
+          title="Sin avatares disponibles"
+          description="Podés elegir uno más tarde desde tu perfil."
+        />
       ) : (
         <ScrollView contentContainerStyle={styles.grid}>
           {avatars?.map((avatar) => (
