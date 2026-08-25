@@ -1,6 +1,7 @@
 import { fetch } from 'expo/fetch';
 
 import { supabase } from '@/lib/supabase';
+import { sendMessageStreamMock } from './mockResponses';
 
 export type ChatSSEEvent =
   | { delta: string }
@@ -12,12 +13,21 @@ export type ChatSSEEvent =
  * Streaming vía `expo/fetch` (no el `fetch` global de React Native, que no
  * expone `response.body` como ReadableStream real) — lee el SSE propio de la
  * Edge Function `cora-ai` chunk a chunk. Ver docs/PLAN_DE_IMPLEMENTACION.md §17.
+ *
+ * Plan B de demo (§26/Fase 10): con `EXPO_PUBLIC_AI_MOCK=true` no se llama a
+ * la Edge Function — se simulan los mismos eventos SSE con respuestas
+ * pregrabadas, para poder demostrar la arquitectura si el proveedor de IA
+ * falla o va lento en vivo.
  */
 export async function sendMessageStream(
   input: { conversationId: string | null; message: string },
   onEvent: (event: ChatSSEEvent) => void,
   signal?: AbortSignal
 ): Promise<void> {
+  if (process.env.EXPO_PUBLIC_AI_MOCK === 'true') {
+    return sendMessageStreamMock(input, onEvent);
+  }
+
   const { data } = await supabase.auth.getSession();
   const accessToken = data.session?.access_token;
   if (!accessToken) throw new Error('Sin sesión activa.');
