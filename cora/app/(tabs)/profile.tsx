@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Pressable, Switch, View } from 'react-native';
+import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { signOut } from '@/features/auth';
 import { AVATAR_EMOJI } from '@/features/avatars';
@@ -17,6 +18,7 @@ import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 export default function Profile() {
+  const router = useRouter();
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
   const { data: preferences } = useUserPreferences();
@@ -58,6 +60,7 @@ export default function Profile() {
 
   return (
     <Screen>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
       <Text variant="title" style={{ marginBottom: spacing.sm }}>
         Perfil
       </Text>
@@ -120,7 +123,13 @@ export default function Profile() {
         </View>
       </View>
 
+      <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
+        <Button label="Resumen médico" variant="secondary" onPress={() => router.push('/summary')} />
+        <Button label="Recordatorios" variant="secondary" onPress={() => router.push('/reminders')} />
+      </View>
+
       <Button label="Cerrar sesión" variant="secondary" onPress={handleSignOut} />
+      </ScrollView>
 
       <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>
         <View style={{ gap: spacing.sm }}>

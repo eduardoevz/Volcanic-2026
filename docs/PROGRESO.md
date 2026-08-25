@@ -1,6 +1,40 @@
 # Progreso — Cora
 
-> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-24.
+> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-25.
+
+## Fase 8 — Funciones complementarias
+
+- [x] Migración `0012_summary_and_reminders.sql`: `medical_summaries` (insert+select únicamente, foto fija inmutable — mismo patrón que `ai_messages` de Fase 7) + `reminders` (RLS patrón A completa, como `daily_logs`)
+- [x] `src/features/summary/` nueva: `buildSummary.ts` (puro, testeado — `computeMoodSummary`, `buildSummaryPayload`, `buildSummaryText`; reutiliza `fetchDailyLogsRange`/`fetchRecentSymptomCounts`/`fetchCycles` de `@/features/tracking`, ninguna consulta nueva del lado del servidor), `api.ts`, `hooks/useGenerateSummary.ts`
+- [x] `app/summary/index.tsx`: presets de rango (30/90 días) en vez de un selector de fechas libre, aviso "esto NO es un diagnóstico" imposible de pasar por alto arriba del texto generado, vista tipo documento (monoespaciada), botón Compartir
+- [x] `src/features/reminders/` nueva: `notifications.ts` (`expo-notifications`, handler global, permisos, `scheduleDaily`/`cancelScheduled`), `api.ts` (CRUD directo), hooks `useReminders`/`useCreateReminder`/`useToggleReminder`/`useDeleteReminder`
+- [x] `app/reminders.tsx`: lista con `Switch` (activa/desactiva reprograma o cancela la notificación y persiste `notification_identifier`), Sheet de creación con selector de hora/minuto custom (steppers, no un date-time picker nativo), eliminar
+- [x] `app/(tabs)/profile.tsx`: envuelto en `ScrollView` (el contenido ya no entraba en pantalla tras agregar los dos botones nuevos) + enlaces a `/summary` y `/reminders`
+- [x] `app/_layout.tsx`: rutas registradas + `registerNotificationHandler()` al montar
+- [x] Definition of Done verificada end-to-end en el emulador con datos reales (ver detalle abajo)
+
+### Log de tareas — Fase 8 (2026-08-25)
+
+- **Desviación consciente #1 — numeración de migración:** el plan dice literalmente "Migración 0007" para esta fase, pero ese número ya lo ocupa `0007_seed_symptoms.sql` desde Fase 4. Se usó el siguiente número real disponible en el repo, `0012` (después de `0011_ai_assistant.sql` de Fase 7) — el texto del plan quedó desactualizado por el propio orden de ejecución, no es un error de esta fase.
+- **Desviación consciente #2 — compartir sin `expo-sharing`:** el plan sugiere `expo-sharing`, que no estaba instalado y es un módulo nativo — agregarlo hubiera exigido un `expo prebuild` + rebuild completo del dev client solo para esta función. Se usó en su lugar el `Share` de React Native (`react-native-community`/core), que ya viene en el dev build existente y abre el mismo selector nativo de Android para texto plano sin necesidad de ningún archivo temporal ni rebuild. Verificado en el emulador: abre el selector "Sharing text" de Android con el texto completo del resumen.
+- **Desviación consciente #3 — sin selector de hora nativo:** no había `@react-native-community/datetimepicker` instalado (otro módulo nativo que hubiera requerido rebuild). Se construyó un selector custom con steppers +/- de hora y minuto sobre el `Sheet` ya existente — más feo que un picker nativo, pero cero costo de rebuild y perfectamente funcional (verificado programando y disparando una notificación real).
+- **Desviación consciente #4 — sin puntos de mascota:** a diferencia de log diario/artículo leído/conversación con IA, el plan no pide otorgar puntos por generar un resumen o crear un recordatorio en esta fase — no se tocó `award_mascot_points` ni `mascot_events`, para no inventar un requisito que el plan no pide.
+- **Bug real encontrado y corregido — `profile.tsx` no scrolleaba:** al agregar los botones "Resumen médico"/"Recordatorios" el contenido de Perfil dejó de entrar en pantalla y no había forma de llegar a "Cerrar sesión" ni a los nuevos botones (el `Screen` es un `View` con `flex:1` fijo, sin scroll). Encontrado al intentar navegar en el emulador real (los botones nuevos quedaban fuera de la vista). Corregido envolviendo el cuerpo de la pantalla en un `ScrollView`.
+- **Bug de tooling durante la verificación (no de la app):** las coordenadas de `adb shell input tap` tomadas de una captura de pantalla resize-ada con `wm size` no coincidían de forma confiable con `uiautomator dump`; la causa real era que `wm size` se aplicaba de forma asíncrona entre comandos. Se resolvió consultando siempre `uiautomator dump` en bruto (coordenadas físicas reales) inmediatamente antes de cada tap, sin capturas intermedias.
+- **Hallazgo de tooling — atajo de recarga de React Native:** escribir un texto con dos letras "r" cercanas (p. ej. "Registrar mi dia") en un campo de texto del emulador, si el foco nativo del teclado aún no había terminado de asentarse, disparaba el atajo de desarrollo "doble R = recargar" y perdía todo el estado de la pantalla. Solución de verificación: confirmar `focused="true"` en el dump antes de escribir, y usar textos de prueba sin dos "r" próximas cuando eso no alcanzaba.
+- **Verificación end-to-end en el emulador con una cuenta nueva (`cuentaf@cora.test`, registrada durante esta sesión) y 8 días de `daily_logs` sembrados directamente en la base (sin `syncCycles`, por eso `cycleCount: 0` es esperado — no se llamó desde el seed):**
+  - **Resumen médico:** "Últimos 30 días" generó un resumen real con `daysLogged: 8`, síntoma más frecuente "Cólicos" (8), ánimo predominante "bien", una nota citada textual ("dolor de cabeza fuerte") — confirmado tanto en pantalla como con una consulta SQL directa a la fila insertada en `medical_summaries`. "Compartir" abrió el selector nativo de Android con el texto completo, empezando por "RESUMEN PARA CONSULTA MÉDICA — Cora" y terminando con el aviso de no-diagnóstico repetido.
+  - **Recordatorios:** se creó un recordatorio ("Toma," a las 01:34) que pidió permiso de notificaciones (`Allow`/`Don't allow` real de Android, no simulado) y programó una notificación diaria real. **La notificación sonó de verdad** con la app en segundo plano — confirmado por `adb shell dumpsys notification` (registro con el mismo `notification_identifier` guardado en la fila de `reminders`) y visualmente en la bandeja del sistema ("Cora · Toma,"). Desactivar el switch canceló la notificación programada y puso `notification_identifier` a `null` en la base (verificado por SQL); no quedó ninguna alarma pendiente para el paquete tras desactivar. Eliminar borró la fila (verificado por SQL, 0 filas restantes).
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismo warning inofensivo de siempre), `npx jest` (36/36 OK, incluye los 5 nuevos de `buildSummary.test.ts`).
+
+## Fase 8 — Definition of Done (verificación final)
+
+- [x] El resumen incluye rango, ciclos, síntomas frecuentes, ánimo predominante y notas — verificado con datos reales sembrados y consulta SQL a la fila persistida
+- [x] El aviso de "no es diagnóstico" es visualmente imposible de pasar por alto — banner de advertencia fijo arriba del texto generado, y repetido al inicio y al final del texto compartido
+- [x] Compartir abre el selector nativo de Android — verificado (`Share` de React Native, no `expo-sharing`, ver desviación consciente arriba)
+- [x] Una notificación local se dispara en el emulador — verificada de verdad (no simulada): sonó a la hora programada con la app en segundo plano, confirmado por `dumpsys notification` y visualmente
+
+**Fase 8 completa**, con las cuatro desviaciones conscientes documentadas arriba (todas para evitar un rebuild nativo innecesario o un requisito que el plan no pedía). Pendiente: Fase 9 (calidad — QA, seguridad, performance, accesibilidad) y Fase 10 (datos demo, guion, build, ensayo).
 
 ## Fase 7 — Cora IA
 

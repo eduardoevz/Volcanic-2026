@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/lib/i18n';
 
 import { MascotEvolutionOverlay } from '@/features/mascot';
+import { registerNotificationHandler } from '@/features/reminders';
 import { asyncStoragePersister, configureOnlineManager, queryClient } from '@/lib/queryClient';
 import { initSessionListener } from '@/store/sessionStore';
 import { ErrorBoundary } from '@/ui/ErrorBoundary';
@@ -14,6 +15,7 @@ export default function RootLayout() {
   useEffect(() => {
     initSessionListener();
     configureOnlineManager();
+    registerNotificationHandler();
   }, []);
 
   return (
@@ -47,6 +49,8 @@ export default function RootLayout() {
               options={{ headerShown: true, title: 'Artículo' }}
             />
             <Stack.Screen name="mascot" options={{ headerShown: true, title: 'Tu pitahaya' }} />
+            <Stack.Screen name="summary/index" options={{ headerShown: true, title: 'Resumen médico' }} />
+            <Stack.Screen name="reminders" options={{ headerShown: true, title: 'Recordatorios' }} />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />
