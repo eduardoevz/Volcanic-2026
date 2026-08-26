@@ -46,3 +46,56 @@
 | **Frontend Mobile** | Integrante 3 | Desarrollo de Interfaces y UX Responsivo |
 | **Diseño UX/UI** | Integrante 4 | Figma, Branding, Logo y Manual de Marca |
 | **Marketing & Contenido** | Integrante 5 | Buyer Persona, Traducciones y Video Demo |
+
+---
+
+## 🚀 Cómo correr la app (Android Studio / emulador)
+
+La app vive en la carpeta `cora/` (Expo + React Native). Las carpetas nativas
+`android/` e `ios/` **no están versionadas** (se generan localmente), así que
+hace falta un paso de `prebuild` antes de abrir el proyecto en Android Studio.
+
+1. **Clonar e instalar dependencias**
+   ```bash
+   git clone https://github.com/eduardoevz/Volcanic-2026.git
+   cd Volcanic-2026/cora
+   npm install
+   ```
+
+2. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Editar `.env.local` y completar `EXPO_PUBLIC_SUPABASE_URL` y
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY` con las credenciales del proyecto de
+   Supabase (pedirlas al equipo — no se suben al repo por seguridad).
+
+3. **Generar el proyecto nativo de Android**
+   ```bash
+   npx expo prebuild
+   ```
+   Esto crea la carpeta `android/` a partir de `app.json`.
+
+4. **Abrir en Android Studio**
+   - Abrir Android Studio → *Open* → seleccionar la carpeta `cora/android`.
+   - Levantar un emulador (AVD Manager) o conectar un dispositivo físico con
+     depuración USB activada.
+
+5. **Ejecutar la app**
+   - Desde Android Studio: botón ▶️ Run, o
+   - Desde terminal (más rápido, hace build + instala + abre Metro):
+     ```bash
+     npx expo run:android
+     ```
+
+6. **Otros comandos útiles** (dentro de `cora/`)
+   ```bash
+   npm run start   # solo Metro bundler (requiere dev client ya instalado)
+   npm run lint    # eslint
+   npm test        # jest
+   npx tsc --noEmit  # chequeo de tipos
+   ```
+
+> Nota: si `EXPO_PUBLIC_AI_MOCK=true` está activo en `.env.local`, Cora IA
+> responde con respuestas pregrabadas en vez de llamar a la Edge Function
+> (ver `.env.example`) — útil si el proveedor de IA falla o va lento.
