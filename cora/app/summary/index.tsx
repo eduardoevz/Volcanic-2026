@@ -3,7 +3,7 @@ import { format, subDays } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, View } from 'react-native';
 
-import { useGenerateSummary, type SummaryPayload } from '@/features/summary';
+import { exportSummaryToPdf, useGenerateSummary, type SummaryPayload } from '@/features/summary';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
@@ -19,6 +19,8 @@ export default function Summary() {
   ];
   const generateSummary = useGenerateSummary();
   const [result, setResult] = useState<{ payload: SummaryPayload; text: string } | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
 
   const handleGenerate = async (days: number) => {
     const today = new Date();
@@ -32,6 +34,19 @@ export default function Summary() {
   const handleShare = () => {
     if (!result) return;
     Share.share({ message: result.text });
+  };
+
+  const handleExportPdf = async () => {
+    if (!result) return;
+    setPdfError(false);
+    setExportingPdf(true);
+    try {
+      await exportSummaryToPdf(result.payload);
+    } catch {
+      setPdfError(true);
+    } finally {
+      setExportingPdf(false);
+    }
   };
 
   return (
@@ -64,11 +79,16 @@ export default function Summary() {
               {result.text}
             </Text>
           </Card>
-          <Button
-            label={t('share')}
-            onPress={handleShare}
-            style={{ marginTop: spacing.md, marginBottom: spacing.lg }}
-          />
+          {pdfError ? <Banner tone="danger" message={t('exportPdfError')} /> : null}
+          <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md, marginBottom: spacing.lg }}>
+            <Button label={t('share')} onPress={handleShare} />
+            <Button
+              label={t('exportPdf')}
+              variant="secondary"
+              loading={exportingPdf}
+              onPress={handleExportPdf}
+            />
+          </View>
         </ScrollView>
       ) : null}
     </Screen>

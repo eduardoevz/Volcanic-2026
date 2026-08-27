@@ -1,17 +1,36 @@
 import { useEffect, useRef } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 
-import { MarkdownBody, useArticleBySlug, useMarkArticleRead } from '@/features/content';
+import { MarkdownBody, getArticleAudioUrl, useArticleBySlug, useMarkArticleRead } from '@/features/content';
 import { Badge } from '@/ui/components/Badge';
 import { Banner } from '@/ui/components/Banner';
+import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 const READ_THRESHOLD_MS = 20_000;
+
+function ArticleAudioPlayer({ audioPath }: { audioPath: string }) {
+  const { t } = useTranslation('library');
+  const player = useAudioPlayer(getArticleAudioUrl(audioPath));
+  const status = useAudioPlayerStatus(player);
+
+  return (
+    <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+      <Button
+        label={status.playing ? t('article.audioPause') : t('article.audioPlay')}
+        variant="secondary"
+        onPress={() => (status.playing ? player.pause() : player.play())}
+      />
+      <Text variant="bodyMuted">{t('article.audioLabel')}</Text>
+    </Card>
+  );
+}
 
 export default function ArticleScreen() {
   const { t } = useTranslation('library');
@@ -76,6 +95,8 @@ export default function ArticleScreen() {
         ) : (
           <Badge label={t('article.pendingProfessionalReview')} tone="warning" />
         )}
+
+        {article.audio_path ? <ArticleAudioPlayer audioPath={article.audio_path} /> : null}
 
         <MarkdownBody markdown={article.body_md} />
 

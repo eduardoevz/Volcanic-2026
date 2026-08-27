@@ -5,5 +5,7 @@
   "preset90Days": "Últimos 90 días",
   "generating": "Generando resumen...",
   "generateError": "No pudimos generar el resumen. Revisá tu conexión e intentá de nuevo.",
-  "share": "Compartir"
+  "share": "Compartir",
+  "exportPdf": "Exportar a PDF",
+  "exportPdfError": "No pudimos generar el PDF. Probá de nuevo."
 }

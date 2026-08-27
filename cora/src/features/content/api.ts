@@ -110,6 +110,10 @@ export async function fetchArticlesByIds(ids: string[]) {
   return data;
 }
 
+export function getArticleAudioUrl(audioPath: string): string {
+  return supabase.storage.from('content-audio').getPublicUrl(audioPath).data.publicUrl;
+}
+
 export async function markArticleRead(articleId: string) {
   const { error } = await supabase.rpc('mark_article_read', { p_article_id: articleId });
   if (error) throw error;

@@ -17,6 +17,11 @@
   "healthDirectory": "Directorio de salud",
   "familyCircle": "Círculo familiar",
   "appointmentsAgenda": "Agenda de citas",
+  "languageTitle": "Idioma",
+  "languageEs": "Español",
+  "languageMis": "Miskitu",
+  "languageMyn": "Mayangna",
+  "languageChanging": "Cambiando idioma...",
   "signOut": "Cerrar sesión",
   "changeLifeStagePrompt": "¿En qué etapa estás ahora?"
 }

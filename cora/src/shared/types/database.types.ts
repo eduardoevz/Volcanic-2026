@@ -175,6 +175,8 @@ export type Database = {
           image_path: string | null
           is_active: boolean
           name_es: string
+          name_mis: string | null
+          name_myn: string | null
           sort_order: number
           species_scientific: string | null
         }
@@ -187,6 +189,8 @@ export type Database = {
           image_path?: string | null
           is_active?: boolean
           name_es: string
+          name_mis?: string | null
+          name_myn?: string | null
           sort_order?: number
           species_scientific?: string | null
         }
@@ -199,6 +203,8 @@ export type Database = {
           image_path?: string | null
           is_active?: boolean
           name_es?: string
+          name_mis?: string | null
+          name_myn?: string | null
           sort_order?: number
           species_scientific?: string | null
         }
@@ -433,6 +439,7 @@ export type Database = {
       }
       educational_content: {
         Row: {
+          audio_path: string | null
           author_name: string | null
           body_md: string
           category_id: string
@@ -456,6 +463,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          audio_path?: string | null
           author_name?: string | null
           body_md: string
           category_id: string
@@ -479,6 +487,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          audio_path?: string | null
           author_name?: string | null
           body_md?: string
           category_id?: string
@@ -967,6 +976,8 @@ export type Database = {
           id: string
           is_active: boolean
           label_es: string
+          label_mis: string | null
+          label_myn: string | null
           sort_order: number
         }
         Insert: {
@@ -977,6 +988,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           label_es: string
+          label_mis?: string | null
+          label_myn?: string | null
           sort_order?: number
         }
         Update: {
@@ -987,6 +1000,8 @@ export type Database = {
           id?: string
           is_active?: boolean
           label_es?: string
+          label_mis?: string | null
+          label_myn?: string | null
           sort_order?: number
         }
         Relationships: []

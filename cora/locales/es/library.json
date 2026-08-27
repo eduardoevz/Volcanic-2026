@@ -16,6 +16,9 @@
     "reviewedOn": "Revisado el {{date}}",
     "pendingProfessionalReview": "Pendiente de revisión profesional",
     "sourcesTitle": "Fuentes",
-    "disclaimer": "Esta información es educativa y no reemplaza la consulta con un profesional de salud."
+    "disclaimer": "Esta información es educativa y no reemplaza la consulta con un profesional de salud.",
+    "audioPlay": "Escuchar",
+    "audioPause": "Pausar",
+    "audioLabel": "Versión en audio"
   }
 }

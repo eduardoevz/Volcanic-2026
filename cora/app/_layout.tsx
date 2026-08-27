@@ -4,10 +4,10 @@ import { StatusBar } from 'expo-status-bar';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import '@/lib/i18n';
 
 import { MascotEvolutionOverlay } from '@/features/mascot';
 import { registerNotificationHandler } from '@/features/reminders';
+import { restoreSavedLanguage } from '@/lib/i18n';
 import { asyncStoragePersister, configureOnlineManager, queryClient } from '@/lib/queryClient';
 import { initSessionListener } from '@/store/sessionStore';
 import { ErrorBoundary } from '@/ui/ErrorBoundary';
@@ -19,6 +19,7 @@ export default function RootLayout() {
     initSessionListener();
     configureOnlineManager();
     registerNotificationHandler();
+    restoreSavedLanguage();
   }, []);
 
   return (

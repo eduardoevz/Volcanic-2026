@@ -29,7 +29,9 @@
       "expo-notifications",
       "expo-splash-screen",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-audio"
     ]
   }
 }

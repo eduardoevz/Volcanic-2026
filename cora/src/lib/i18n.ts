@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -110,5 +111,25 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
   returnEmptyString: false,
 });
+
+// Fase 18 — selector de idioma en Configuración. El arranque sigue siendo
+// síncrono con el idioma del dispositivo (arriba); esto solo aplica una
+// elección explícita guardada, si existe, una vez montada la app.
+const LANGUAGE_STORAGE_KEY = 'cora-language';
+
+export const SUPPORTED_LANGUAGES = ['es', 'mis', 'myn'] as const;
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
+
+export async function restoreSavedLanguage(): Promise<void> {
+  const saved = await AsyncStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (saved && (SUPPORTED_LANGUAGES as readonly string[]).includes(saved)) {
+    await i18n.changeLanguage(saved);
+  }
+}
+
+export async function setAppLanguage(language: SupportedLanguage): Promise<void> {
+  await i18n.changeLanguage(language);
+  await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+}
 
 export default i18n;

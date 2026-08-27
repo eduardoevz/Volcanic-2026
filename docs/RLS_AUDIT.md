@@ -163,6 +163,25 @@ exacto a esa tabla, revocarlo lo corta de inmediato — no se repitieron los
 probada), solo los 8 checks de la porción nueva. Cuentas de prueba
 eliminadas al terminar.
 
+## Actualización — Fase 18 (Storage, sin tablas nuevas de `public`)
+
+Esta fase no agrega tablas a `public` (solo columnas nullable a tres tablas
+existentes, sin cambios de RLS: `educational_content.audio_path`,
+`avatars.name_mis`/`name_myn`, `symptom_catalog.label_mis`/`label_myn`).
+Se crea el bucket de Storage `content-audio` (público de lectura, mismo
+criterio que `public-assets` en §7 del plan).
+
+**Nota sobre políticas temporales de `storage.objects`, ya revocadas:** para
+subir un archivo de prueba real (un tono sintetizado, no contenido
+narrado — ver `docs/PROGRESO.md` Fase 18) hizo falta crear 3 políticas
+temporales (`insert`/`update`/`select` acotadas a `bucket_id = 'content-audio'`)
+porque no hay `service_role` disponible en esta sesión y los bytes de un
+archivo no se pueden insertar solo con SQL. Las 3 políticas se revocaron
+inmediatamente después de subir el archivo — confirmado por
+`select policyname from pg_policies where schemaname='storage' and tablename='objects'`
+devolviendo 0 filas al terminar. El bucket queda, como estaba declarado,
+sin ninguna política de escritura para `authenticated`/`anon`.
+
 ## Funciones `security definer`
 
 - **`handle_new_user()`** (0002) — trigger `after insert on auth.users`, usa

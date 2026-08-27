@@ -8,18 +8,26 @@ import { signOut } from '@/features/auth';
 import { AVATAR_EMOJI } from '@/features/avatars';
 import { setLifeStage } from '@/features/onboarding';
 import { updateAiShareHealthContext, useProfile, useUserPreferences } from '@/features/profile';
+import { setAppLanguage, SUPPORTED_LANGUAGES, type SupportedLanguage } from '@/lib/i18n';
 import { useSession } from '@/shared/hooks/useSession';
 import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants/lifeStages';
 import { Avatar } from '@/ui/components/Avatar';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
+import { Chip } from '@/ui/components/Chip';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
+const LANGUAGE_LABEL_KEYS: Record<SupportedLanguage, 'languageEs' | 'languageMis' | 'languageMyn'> = {
+  es: 'languageEs',
+  mis: 'languageMis',
+  myn: 'languageMyn',
+};
+
 export default function Profile() {
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
   const router = useRouter();
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
@@ -28,6 +36,16 @@ export default function Profile() {
   const [changingStage, setChangingStage] = useState(false);
   const [savingStage, setSavingStage] = useState<LifeStage | null>(null);
   const [savingShareContext, setSavingShareContext] = useState(false);
+  const [changingLanguage, setChangingLanguage] = useState(false);
+
+  const handleChangeLanguage = async (language: SupportedLanguage) => {
+    setChangingLanguage(true);
+    try {
+      await setAppLanguage(language);
+    } finally {
+      setChangingLanguage(false);
+    }
+  };
 
   const handleToggleShareContext = async (value: boolean) => {
     if (!session?.user.id) return;
@@ -121,6 +139,21 @@ export default function Profile() {
             </Text>
           </View>
         </View>
+      </View>
+
+      <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
+        <Text variant="caption">{t('languageTitle')}</Text>
+        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+          {SUPPORTED_LANGUAGES.map((language) => (
+            <Chip
+              key={language}
+              label={t(LANGUAGE_LABEL_KEYS[language])}
+              selected={i18n.language === language}
+              onPress={() => handleChangeLanguage(language)}
+            />
+          ))}
+        </View>
+        {changingLanguage ? <Text variant="caption">{t('languageChanging')}</Text> : null}
       </View>
 
       <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
