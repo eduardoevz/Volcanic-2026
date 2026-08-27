@@ -125,6 +125,8 @@ export default function CalendarScreen() {
 
         {fertileWindow ? <Banner message={t('calendar.fertileWindowWarning')} tone="warning" /> : null}
 
+        <Button label={t('calendar.viewStats')} variant="secondary" onPress={() => router.push('/stats')} />
+
         <View>
           <Text variant="heading" style={{ marginBottom: spacing.xs }}>
             {t('calendar.last30DaysTitle')}

@@ -19,7 +19,8 @@
     "article": "Artículo",
     "mascot": "Tu pitahaya",
     "summary": "Resumen médico",
-    "reminders": "Recordatorios"
+    "reminders": "Recordatorios",
+    "stats": "Estadísticas"
   },
   "index": {
     "sessionCheckError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."

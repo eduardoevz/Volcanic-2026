@@ -2,6 +2,32 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-27.
 
+## Fase 13 — Analítica de seguimiento (P1)
+
+`CORA-102`: estadísticas descriptivas del ciclo + detección de patrones que ameritan hablar con un profesional, sin nombrar nunca una condición médica (§14 del plan).
+
+- [x] **Hallazgo real, no un olvido:** la detección de las 5 reglas de §14 (`detectReferralSignals`) ya estaba implementada y testeada en `cycleEngine.ts` desde una fase anterior, sin exponerse todavía en UI. El trabajo de esta fase fue lo que sí faltaba: estadísticas descriptivas, los hooks que alimentan ambas cosas, y la pantalla que las muestra.
+- [x] `cycleLengthStats(cycles)` nueva en `cycleEngine.ts` — promedio/mínimo/máximo de los últimos 5 ciclos plausibles, con `null` si hay menos de 2 (mismo criterio que `predictNext`/`fertileWindow`). A diferencia de la predicción (mediana, para no desplazarse con un ciclo atípico), acá se usa promedio real: es una descripción del pasado, no una proyección — un ciclo atípico correctamente **sí** amplía el rango min/max mostrado.
+- [x] Tests nuevos en `cycleEngine.test.ts` (4 casos: sin datos suficientes, ciclos regulares, ciclo atípico reflejado en el rango, solo se consideran los últimos 5).
+- [x] Hooks nuevos `useCycleStats.ts` (envuelve `useCycles` + `cycleLengthStats`) y `useHealthSignals.ts` (envuelve `useCycles` + `useDailyLogsRange` con ventana de 180 días + `detectReferralSignals`) — sin tabla ni query nueva, solo cálculo sobre datos ya existentes.
+- [x] `app/stats.tsx` nueva (ruta plana, mismo patrón que `app/reminders.tsx`), accedida con un botón "Ver estadísticas" agregado al final de `app/(tabs)/calendar.tsx` — la tab bar ya tenía sus 5 slots ocupados, así que no podía ser un tab nuevo.
+- [x] Namespace `tracking.json` (Fase 12) extendido con `stats.*` y `referral.*` — el mensaje de derivación es fijo e idéntico sin importar cuál de las 5 reglas se disparó, cumpliendo la instrucción explícita de §14.
+
+### Log de tareas — Fase 13 (2026-08-27)
+
+- **Salvedad honesta, documentada a propósito:** la tarjeta de derivación no tiene todavía un botón/link al directorio de salud porque `src/features/directory/` (Fase 14) no existe — se muestra como texto neutro sin acción, y el enlace se agrega cuando se construya esa fase. No es un olvido: se verificó explícitamente que la carpeta/ruta no existen antes de decidir esto.
+- **Verificado en el emulador con `demo-adulta@cora.test` (datos reales sembrados, no mock):** Calendario → botón "Ver estadísticas" → la pantalla muestra "Tu ciclo promedio es de 28 días en los últimos 3 ciclos." y "Tus ciclos han variado entre 28 y 28 días." (coherente con los 4 ciclos sembrados de esta cuenta) y "Registraste Cólicos en 2 de los últimos 30 días." (mismo dato que ya se ve en el módulo de Tendencia de síntomas del Home — misma fuente, `useRecentSymptomCounts`, sin duplicar lógica). Sin tarjeta de derivación, correcto: esta cuenta tiene datos regulares sin patrones preocupantes — confirma que el camino "sin señales" no genera falsos positivos.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismas 2 advertencias esperadas de Fase 12 + el warning inofensivo de `i18n.ts`), `npx jest` (40/40 OK, 4 tests nuevos de `cycleLengthStats`).
+
+## Fase 13 — Definition of Done (verificación final)
+
+- [x] `cycleLengthStats` implementado y testeado (4 casos nuevos)
+- [x] Hooks `useCycleStats`/`useHealthSignals` reusando datos ya existentes, sin tabla nueva
+- [x] Pantalla de estadísticas accesible desde Calendario, verificada en el emulador con datos reales
+- [x] Tarjeta de derivación con mensaje neutro fijo — nunca nombra una condición médica, mismo criterio que el test existente de `detectReferralSignals`
+
+**Fase 13 completa.** Salvedad honesta: el enlace de la tarjeta de derivación al directorio de salud queda pendiente de Fase 14 (la carpeta/ruta del directorio no existen todavía) — no bloquea el resto del roadmap, que puede seguir en paralelo.
+
 ## Fase 12 — Migración a i18n
 
 Fase agregada al backlog en §29 del plan porque la adopción real de i18next era mínima (un solo namespace, un solo archivo usando `t()`) pese a que el plan original asumía "cero strings literales desde el día 1". Prerrequisito real para que el selector de idioma en Configuración traduzca la app completa y para que miskito/mayangna (Fase 18) tengan sentido.

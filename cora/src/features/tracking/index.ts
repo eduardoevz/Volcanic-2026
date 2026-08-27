@@ -7,3 +7,5 @@ export { useCycles } from './hooks/useCycles';
 export { usePrediction } from './hooks/usePrediction';
 export { useSaveDailyLog } from './hooks/useSaveDailyLog';
 export { useRecentSymptomCounts } from './hooks/useRecentSymptomCounts';
+export { useCycleStats } from './hooks/useCycleStats';
+export { useHealthSignals } from './hooks/useHealthSignals';

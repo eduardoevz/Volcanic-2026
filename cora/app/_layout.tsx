@@ -54,6 +54,7 @@ export default function RootLayout() {
             <Stack.Screen name="mascot" options={{ headerShown: true, title: t('nav.mascot') }} />
             <Stack.Screen name="summary/index" options={{ headerShown: true, title: t('nav.summary') }} />
             <Stack.Screen name="reminders" options={{ headerShown: true, title: t('nav.reminders') }} />
+            <Stack.Screen name="stats" options={{ headerShown: true, title: t('nav.stats') }} />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />

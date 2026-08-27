@@ -32,6 +32,13 @@ export type FertileWindow = {
   end: string;
 };
 
+export type CycleLengthStats = {
+  averageDays: number;
+  minDays: number;
+  maxDays: number;
+  cycleCount: number;
+};
+
 export type ReferralSignal =
   | 'cycle_gap'
   | 'prolonged_bleeding'
@@ -153,6 +160,28 @@ export function fertileWindow(cycles: Cycle[]): FertileWindow | null {
   return {
     start: addDaysISO(lastStart, 10),
     end: addDaysISO(lastStart, 17),
+  };
+}
+
+/**
+ * Estadísticas descriptivas sobre los ciclos ya registrados (§14: "Tu ciclo
+ * promedio es de 29 días en los últimos 5 ciclos" / "Tus ciclos han variado
+ * entre 26 y 34 días") — a diferencia de `predictNext`, acá sí se usa el
+ * promedio real (no la mediana): es una descripción del pasado, no una
+ * predicción que deba resistir un ciclo atípico. Con menos de 2 ciclos
+ * plausibles no se describe nada: devuelve null.
+ */
+export function cycleLengthStats(cycles: Cycle[]): CycleLengthStats | null {
+  const recent = cycles.slice(-5).filter(isPlausible);
+  if (recent.length < 2) return null;
+
+  const lengths = recent.map((c) => c.cycle_length as number);
+
+  return {
+    averageDays: Math.round(lengths.reduce((sum, n) => sum + n, 0) / lengths.length),
+    minDays: Math.min(...lengths),
+    maxDays: Math.max(...lengths),
+    cycleCount: lengths.length,
   };
 }
 

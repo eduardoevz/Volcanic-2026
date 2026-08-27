@@ -1,4 +1,5 @@
 import {
+  cycleLengthStats,
   detectCycles,
   detectReferralSignals,
   fertileWindow,
@@ -133,6 +134,63 @@ describe('fertileWindow', () => {
       { start_date: '2026-01-29', end_date: '2026-02-01', period_length: 4, cycle_length: null, is_predicted: false },
     ];
     expect(fertileWindow(cycles)).toEqual({ start: '2026-02-08', end: '2026-02-15' });
+  });
+});
+
+describe('cycleLengthStats', () => {
+  it('con menos de 2 ciclos plausibles devuelve null', () => {
+    const oneCycle: Cycle[] = [
+      { start_date: '2026-01-01', end_date: '2026-01-04', period_length: 4, cycle_length: 28, is_predicted: false },
+    ];
+    expect(cycleLengthStats([])).toBeNull();
+    expect(cycleLengthStats(oneCycle)).toBeNull();
+  });
+
+  it('ciclos regulares producen promedio, min y max correctos', () => {
+    const cycles: Cycle[] = [
+      { start_date: '2026-01-01', end_date: '2026-01-04', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2026-01-29', end_date: '2026-02-01', period_length: 4, cycle_length: 30, is_predicted: false },
+      { start_date: '2026-02-28', end_date: '2026-03-03', period_length: 4, cycle_length: 26, is_predicted: false },
+      { start_date: '2026-03-26', end_date: '2026-03-29', period_length: 4, cycle_length: null, is_predicted: false },
+    ];
+    expect(cycleLengthStats(cycles)).toEqual({
+      averageDays: 28, // (28+30+26)/3 = 28
+      minDays: 26,
+      maxDays: 30,
+      cycleCount: 3,
+    });
+  });
+
+  it('un ciclo atípico sí se refleja en el rango min/max (a diferencia de la mediana de predictNext)', () => {
+    const cycles: Cycle[] = [
+      { start_date: '2026-01-01', end_date: '2026-01-04', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2026-01-29', end_date: '2026-02-01', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2026-02-26', end_date: '2026-03-01', period_length: 4, cycle_length: 60, is_predicted: false },
+      { start_date: '2026-04-27', end_date: '2026-04-30', period_length: 4, cycle_length: null, is_predicted: false },
+    ];
+    const stats = cycleLengthStats(cycles);
+    expect(stats?.maxDays).toBe(60);
+    expect(stats?.minDays).toBe(28);
+  });
+
+  it('solo considera los últimos 5 ciclos', () => {
+    const cycles: Cycle[] = [
+      { start_date: '2025-08-01', end_date: '2025-08-04', period_length: 4, cycle_length: 100, is_predicted: false },
+      { start_date: '2025-09-09', end_date: '2025-09-12', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2025-10-07', end_date: '2025-10-10', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2025-11-04', end_date: '2025-11-07', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2025-12-02', end_date: '2025-12-05', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2025-12-30', end_date: '2026-01-02', period_length: 4, cycle_length: 28, is_predicted: false },
+      { start_date: '2026-01-27', end_date: '2026-01-30', period_length: 4, cycle_length: null, is_predicted: false },
+    ];
+    // el ciclo atípico de 100 días queda fuera de los últimos 5 (los últimos 5
+    // son 4 de 28 días + el ciclo en curso sin cycle_length todavía)
+    expect(cycleLengthStats(cycles)).toEqual({
+      averageDays: 28,
+      minDays: 28,
+      maxDays: 28,
+      cycleCount: 4,
+    });
   });
 });
 
