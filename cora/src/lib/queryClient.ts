@@ -1,7 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { onlineManager, QueryClient } from '@tanstack/react-query';
+
+import { LargeSecureStore } from '@/lib/secureStorage';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -17,7 +18,7 @@ export const queryClient = new QueryClient({
 });
 
 export const asyncStoragePersister = createAsyncStoragePersister({
-  storage: AsyncStorage,
+  storage: new LargeSecureStore('rq-cache'),
   key: 'cora-query-cache',
 });
 

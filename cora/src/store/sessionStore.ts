@@ -9,12 +9,16 @@ type SessionState = {
   session: Session | null;
   status: SessionStatus;
   setSession: (session: Session | null) => void;
+  isPasswordRecovery: boolean;
+  setPasswordRecovery: (isPasswordRecovery: boolean) => void;
 };
 
 export const useSessionStore = create<SessionState>((set) => ({
   session: null,
   status: 'loading',
   setSession: (session) => set({ session, status: session ? 'signedIn' : 'signedOut' }),
+  isPasswordRecovery: false,
+  setPasswordRecovery: (isPasswordRecovery) => set({ isPasswordRecovery }),
 }));
 
 let listenerStarted = false;

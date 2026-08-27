@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { StyleSheet, View } from 'react-native';
 
@@ -87,6 +88,10 @@ export function LoginForm() {
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}
       />
+
+      <Link href="/(auth)/forgot-password" asChild>
+        <Button label="¿Olvidaste tu contraseña?" variant="ghost" onPress={() => {}} />
+      </Link>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
