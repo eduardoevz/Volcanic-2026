@@ -461,6 +461,89 @@ export type Database = {
           },
         ]
       }
+      family_circle_members: {
+        Row: {
+          accepted_at: string | null
+          id: string
+          invite_email: string
+          invited_at: string
+          member_user_id: string | null
+          owner_display_name: string
+          owner_id: string
+          relationship: string | null
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          id?: string
+          invite_email: string
+          invited_at?: string
+          member_user_id?: string | null
+          owner_display_name: string
+          owner_id: string
+          relationship?: string | null
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          id?: string
+          invite_email?: string
+          invited_at?: string
+          member_user_id?: string | null
+          owner_display_name?: string
+          owner_id?: string
+          relationship?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_circle_members_member_user_id_fkey"
+            columns: ["member_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_circle_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_share_grants: {
+        Row: {
+          granted_at: string
+          id: string
+          membership_id: string
+          revoked_at: string | null
+          scope: Database["public"]["Enums"]["share_scope"]
+        }
+        Insert: {
+          granted_at?: string
+          id?: string
+          membership_id: string
+          revoked_at?: string | null
+          scope: Database["public"]["Enums"]["share_scope"]
+        }
+        Update: {
+          granted_at?: string
+          id?: string
+          membership_id?: string
+          revoked_at?: string | null
+          scope?: Database["public"]["Enums"]["share_scope"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_share_grants_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "family_circle_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       health_centers: {
         Row: {
           address: string | null
@@ -854,6 +937,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_family_invite: {
+        Args: { p_membership_id: string }
+        Returns: {
+          accepted_at: string | null
+          id: string
+          invite_email: string
+          invited_at: string
+          member_user_id: string | null
+          owner_display_name: string
+          owner_id: string
+          relationship: string | null
+          status: string
+        }
+      }
       award_mascot_points: {
         Args: { p_action: string; p_dedupe_key: string; p_points: number }
         Returns: {
@@ -871,6 +968,25 @@ export type Database = {
           p_consent_version: string
           p_notifications_enabled: boolean
         }
+        Returns: undefined
+      }
+      get_family_mood_summary: {
+        Args: { p_days?: number; p_owner_id: string }
+        Returns: {
+          day_count: number
+          mood: Database["public"]["Enums"]["mood"]
+        }[]
+      }
+      has_active_grant: {
+        Args: {
+          p_owner_id: string
+          p_scope: Database["public"]["Enums"]["share_scope"]
+          p_viewer_id: string
+        }
+        Returns: boolean
+      }
+      leave_family_circle: {
+        Args: { p_membership_id: string }
         Returns: undefined
       }
       level_for_points: {

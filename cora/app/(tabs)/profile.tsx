@@ -131,6 +131,11 @@ export default function Profile() {
           variant="secondary"
           onPress={() => router.push('/directory')}
         />
+        <Button
+          label={t('familyCircle')}
+          variant="secondary"
+          onPress={() => router.push('/family')}
+        />
       </View>
 
       <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />

@@ -33,7 +33,7 @@ de tablas creadas en el esquema `public` a través de las migraciones
 | 17 | `medical_summaries` | 0012 | ✅ | `own_select`/`own_insert` en `user_id` (sin update/delete — foto fija inmutable) | `select,insert` → `authenticated` | OK |
 | 18 | `reminders` | 0012 | ✅ | 4 políticas `own_*` en `user_id` | CRUD → `authenticated` | OK |
 
-**20/20 tablas tienen RLS activo** (actualizado en Fase 14, ver sección
+**22/22 tablas tienen RLS activo** (actualizado en Fase 15, ver sección
 abajo). Ninguna tabla del esquema `public` quedó sin
 `alter table ... enable row level security`. Ninguna política `update`
 tiene un `with check` faltante — todas repiten `using (auth.uid() = ...)`
@@ -70,9 +70,74 @@ fase (`0014_seed_health_directory.sql`) solo inserta especialistas
 **ficticios** precisamente porque no había consentimientos reales
 verificables disponibles durante la implementación.
 
-## Funciones `security definer`
+## Actualización — Fase 15 (2 tablas nuevas + 2 políticas aditivas + patrón nuevo de RLS)
 
-Solo dos funciones corren con privilegios elevados en todo el proyecto:
+| # | Tabla | Migración | RLS | Políticas | Grants | Veredicto |
+|---|---|---|:---:|---|---|---|
+| 21 | `family_circle_members` | 0015 | ✅ | `owner_select`/`member_select` (SELECT), `owner_insert`, `owner_update` (`with check` prohíbe `status='accepted'` — solo el RPC `accept_family_invite` puede aceptar) | `select,insert,update` → `authenticated`, **sin `delete`** | OK — ver nota de diseño abajo (sin política de `update` para el familiar) |
+| 22 | `family_share_grants` | 0015 | ✅ | `owner_select`/`member_select` vía `EXISTS` contra `family_circle_members`, `owner_insert` (exige membresía `accepted`), `owner_update` | `select,insert,update` → `authenticated` | OK |
+
+Más 2 políticas **aditivas** (no reemplazan las `own_*` existentes — Postgres
+combina políticas permisivas del mismo comando con OR):
+
+| Tabla | Política nueva | Condición |
+|---|---|---|
+| `cycles` | `family_shared_select` | `has_active_grant(user_id, auth.uid(), 'cycle_dates')` |
+| `reminders` | `family_shared_select` | `has_active_grant(user_id, auth.uid(), 'reminders')` |
+
+`daily_logs` **no** recibe ninguna política nueva a propósito: el scope
+`cycle_dates` cubre solo `cycles` (fechas), nunca las notas/síntomas crudos
+de un registro diario. El scope `mood_summary` tampoco abre una política de
+`select` sobre `daily_logs` — se resuelve con el RPC `get_family_mood_summary`
+(agregación server-side, nunca devuelve una fila cruda).
+
+**Tercer patrón de RLS del proyecto** (los otros dos ya están documentados en
+`docs/CONVENCIONES.md`: Patrón A privado por `user_id`, Patrón B catálogo
+público de solo lectura): **acceso condicionado a un grant de otra tabla**,
+vía la función reusable `has_active_grant(owner_id, viewer_id, scope)`
+(`security definer`, `stable`, `set search_path = public`). Es la primera
+vez que una usuaria puede leer filas cuyo `user_id` no es el suyo.
+
+**Nota de diseño — por qué `family_circle_members` no tiene política de
+`update` para el familiar:** el diseño original evaluado permitía que un
+familiar "saliera del círculo" con una política de `update`
+(`using (member_user_id = auth.uid()) with check (member_user_id = auth.uid() and status = 'revoked')`).
+Se descartó antes de aplicar la migración: ese `with check` solo fija
+`member_user_id`/`status` en la fila nueva, pero no restringe qué **otras**
+columnas cambian en la misma sentencia — un familiar podría, en el mismo
+`update` que pone `status='revoked'`, reescribir `owner_id`,
+`owner_display_name` o `invite_email` sin que la política lo bloquee (misma
+trampa que esta misma página ya señala en `docs/CONVENCIONES.md` sobre
+`with check` faltante en `update`). Se reemplazó por el RPC
+`leave_family_circle()` — el familiar no tiene ningún grant de `update`
+sobre esta tabla, solo `select`.
+
+**Verificación funcional con dos cuentas reales, no solo estática** — el
+2026-08-27, además de `list_tables`/`pg_policies`/`get_advisors` (mismo
+procedimiento que Fase 14), se registraron dos cuentas reales
+(`hackathonvolcanic+family-owner@gmail.com`/`+family-member@gmail.com`) y se
+ejerció el flujo completo con **REST directo usando el `access_token` de
+cada sesión** (`execute_sql` corre con privilegios elevados y no aplica
+RLS, así que no sirve para este tipo de prueba). Los 20 checks
+automatizados confirmaron: cero acceso sin grant; acceso exacto al otorgar
+`reminders` (sin filtrar a `cycles`); el RPC de `mood_summary` agrega datos
+sin exponer `daily_logs` crudo (confirmado con un `select` directo del
+familiar contra `daily_logs` del owner → 0 filas); revocar un scope o la
+membresía completa corta el acceso al instante; y los dos intentos de
+bypass de los RPCs (`update` directo para auto-aceptar una invitación ajena,
+o para que el owner ponga `status='accepted'` sin pasar por el RPC) fallan
+por RLS. Las dos cuentas de prueba se eliminaron al terminar (cascada
+limpia, sin datos de prueba remanentes en el proyecto real).
+
+`get_advisors(security)` tras aplicar la migración: sin hallazgos nuevos
+atribuibles a estas tablas más allá de que las 4 funciones nuevas son
+ejecutables por `anon`/`authenticated` sin restricción explícita — mismo
+nivel de riesgo ya aceptado para `award_mascot_points`/`handle_new_user`
+(ver sección siguiente), porque las 4 se autoprotegen internamente con
+`auth.uid()`/`auth.jwt()` y no aceptan ningún parámetro de identidad del
+llamante.
+
+## Funciones `security definer`
 
 - **`handle_new_user()`** (0002) — trigger `after insert on auth.users`, usa
   `new.id` de la fila que se está insertando, nunca un parámetro del
@@ -81,6 +146,23 @@ Solo dos funciones corren con privilegios elevados en todo el proyecto:
   sus lecturas/escrituras usan `auth.uid()` internamente; no acepta
   `user_id` como parámetro. Confirmado en el código: no hay ninguna ruta
   para que una usuaria otorgue puntos a otra cuenta.
+- **`accept_family_invite(p_membership_id)`** (0015) — usa `auth.uid()` y
+  `auth.jwt()->>'email'` internamente; el `update` que ejecuta exige
+  `status='pending'` y que el email del JWT coincida con `invite_email` de
+  la fila. No acepta ningún identificador de usuaria como parámetro.
+- **`leave_family_circle(p_membership_id)`** (0015) — usa `auth.uid()`
+  internamente; el `update` exige `member_user_id = auth.uid()`. No acepta
+  ningún identificador de usuaria como parámetro.
+- **`has_active_grant(p_owner_id, p_viewer_id, p_scope)`** (0015) — a
+  diferencia de las anteriores, **sí** recibe `p_viewer_id` como parámetro,
+  pero siempre se invoca desde una política RLS con
+  `auth.uid()` como ese argumento (`cycles`/`reminders`), nunca con un valor
+  arbitrario del cliente — confirmado revisando las dos políticas que la
+  usan, las únicas dos llamadas a esta función en todo el esquema.
+- **`get_family_mood_summary(p_owner_id, p_days)`** (0015) — el `where`
+  incluye `has_active_grant(p_owner_id, auth.uid(), 'mood_summary')`; sin
+  grant activo, el conjunto siempre es vacío, sin excepción (no revela si
+  `daily_logs` tiene filas).
 
 El resto de RPCs que tocan gamificación (`complete_onboarding`,
 `upsert_daily_log`, `mark_article_read`, `set_life_stage`) **no** son

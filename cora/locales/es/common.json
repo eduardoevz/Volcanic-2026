@@ -22,7 +22,10 @@
     "reminders": "Recordatorios",
     "stats": "Estadísticas",
     "directory": "Directorio de salud",
-    "specialists": "Especialistas"
+    "specialists": "Especialistas",
+    "family": "Círculo familiar",
+    "familyInvite": "Invitar a mi círculo",
+    "familyAccept": "Unirse a un círculo"
   },
   "index": {
     "sessionCheckError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."

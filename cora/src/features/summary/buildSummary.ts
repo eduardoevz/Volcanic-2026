@@ -15,7 +15,7 @@ export type SummaryLogInput = {
 
 export type SymptomCount = { label: string; count: number };
 
-const MOOD_LABELS: Record<Mood, string> = {
+export const MOOD_LABELS: Record<Mood, string> = {
   great: 'genial',
   good: 'bien',
   neutral: 'neutral',

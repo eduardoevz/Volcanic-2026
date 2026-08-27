@@ -34,7 +34,7 @@
 ## Base de datos / Supabase
 
 - Todas las migraciones son archivos SQL numerados en `supabase/migrations/`, versionados en Git. **Nunca se editan retroactivamente** ni se hacen cambios desde el panel web — se pierden y no son reproducibles en otra máquina.
-- RLS activado en **todas** las tablas sin excepción, aplicando mecánicamente el Patrón A (privado, `auth.uid() = user_id` en select/insert/update/delete, con `with check` también en `update`) o el Patrón B (catálogo público de solo lectura, solo `service_role` escribe).
+- RLS activado en **todas** las tablas sin excepción, aplicando mecánicamente el Patrón A (privado, `auth.uid() = user_id` en select/insert/update/delete, con `with check` también en `update`), el Patrón B (catálogo público de solo lectura, solo `service_role` escribe), o el Patrón C (acceso condicionado a un grant de otra tabla, vía una función reusable `security definer` tipo `has_active_grant(owner_id, viewer_id, scope)` — usado desde Fase 15 para el círculo familiar; nunca dupliques esa lógica dentro de cada política, agregala como política aditiva de `select` sin tocar las `own_*` existentes).
 - `created_at`/`updated_at` en toda tabla, con el trigger `set_updated_at()` (definido en `0001_init.sql`).
 
 ## Seguridad
