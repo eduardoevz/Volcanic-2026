@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
@@ -11,6 +12,7 @@ import { spacing } from '@/ui/theme/tokens';
 
 export default function Stats() {
   const { t } = useTranslation('tracking');
+  const router = useRouter();
   const { stats: cycleStats, isLoading: cycleStatsLoading } = useCycleStats();
   const { data: symptomCounts, isLoading: symptomCountsLoading } = useRecentSymptomCounts();
   const { signals } = useHealthSignals();
@@ -20,7 +22,18 @@ export default function Stats() {
       <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: spacing.xl }}>
         <Text variant="title">{t('stats.title')}</Text>
 
-        {signals.length > 0 ? <Banner message={t('referral.message')} tone="warning" /> : null}
+        {signals.length > 0 ? (
+          <View style={{ gap: 2 }}>
+            <Banner
+              message={t('referral.message')}
+              tone="warning"
+              onPress={() => router.push('/directory')}
+            />
+            <Text variant="caption" style={{ paddingHorizontal: spacing.xs }}>
+              {t('referral.action')}
+            </Text>
+          </View>
+        ) : null}
 
         {!cycleStatsLoading && !cycleStats ? (
           <EmptyState

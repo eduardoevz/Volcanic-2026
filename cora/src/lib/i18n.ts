@@ -5,6 +5,7 @@ import { initReactI18next } from 'react-i18next';
 import esAssistant from '../../locales/es/assistant.json';
 import esAuth from '../../locales/es/auth.json';
 import esCommon from '../../locales/es/common.json';
+import esDirectory from '../../locales/es/directory.json';
 import esHome from '../../locales/es/home.json';
 import esLibrary from '../../locales/es/library.json';
 import esMascot from '../../locales/es/mascot.json';
@@ -16,6 +17,7 @@ import esTracking from '../../locales/es/tracking.json';
 import misAssistant from '../../locales/mis/assistant.json';
 import misAuth from '../../locales/mis/auth.json';
 import misCommon from '../../locales/mis/common.json';
+import misDirectory from '../../locales/mis/directory.json';
 import misHome from '../../locales/mis/home.json';
 import misLibrary from '../../locales/mis/library.json';
 import misMascot from '../../locales/mis/mascot.json';
@@ -27,6 +29,7 @@ import misTracking from '../../locales/mis/tracking.json';
 import mynAssistant from '../../locales/myn/assistant.json';
 import mynAuth from '../../locales/myn/auth.json';
 import mynCommon from '../../locales/myn/common.json';
+import mynDirectory from '../../locales/myn/directory.json';
 import mynHome from '../../locales/myn/home.json';
 import mynLibrary from '../../locales/myn/library.json';
 import mynMascot from '../../locales/myn/mascot.json';
@@ -49,6 +52,7 @@ const resources = {
     summary: esSummary,
     settings: esSettings,
     reminders: esReminders,
+    directory: esDirectory,
   },
   mis: {
     common: misCommon,
@@ -62,6 +66,7 @@ const resources = {
     summary: misSummary,
     settings: misSettings,
     reminders: misReminders,
+    directory: misDirectory,
   },
   myn: {
     common: mynCommon,
@@ -75,6 +80,7 @@ const resources = {
     summary: mynSummary,
     settings: mynSettings,
     reminders: mynReminders,
+    directory: mynDirectory,
   },
 };
 

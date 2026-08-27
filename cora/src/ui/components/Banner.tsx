@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
 import { colors, radii, spacing } from '@/ui/theme/tokens';
@@ -8,6 +8,7 @@ type Tone = 'info' | 'warning' | 'danger';
 type BannerProps = {
   message: string;
   tone?: Tone;
+  onPress?: () => void;
 };
 
 const toneColors: Record<Tone, { bg: string; fg: string }> = {
@@ -16,15 +17,27 @@ const toneColors: Record<Tone, { bg: string; fg: string }> = {
   danger: { bg: colors.dangerLight, fg: colors.danger },
 };
 
-export function Banner({ message, tone = 'info' }: BannerProps) {
+export function Banner({ message, tone = 'info', onPress }: BannerProps) {
   const { bg, fg } = toneColors[tone];
-  return (
-    <View style={[styles.banner, { backgroundColor: bg }]}>
-      <Text variant="caption" style={{ color: fg }}>
-        {message}
-      </Text>
-    </View>
+  const content = (
+    <Text variant="caption" style={{ color: fg }}>
+      {message}
+    </Text>
   );
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={[styles.banner, { backgroundColor: bg }]}
+      >
+        {content}
+      </Pressable>
+    );
+  }
+
+  return <View style={[styles.banner, { backgroundColor: bg }]}>{content}</View>;
 }
 
 const styles = StyleSheet.create({

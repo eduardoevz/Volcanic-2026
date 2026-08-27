@@ -461,6 +461,51 @@ export type Database = {
           },
         ]
       }
+      health_centers: {
+        Row: {
+          address: string | null
+          department: string
+          id: string
+          is_verified: boolean
+          latitude: number | null
+          longitude: number | null
+          municipality: string
+          name: string
+          phone: string | null
+          services: string[]
+          type: Database["public"]["Enums"]["health_center_type"]
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          department: string
+          id?: string
+          is_verified?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          municipality: string
+          name: string
+          phone?: string | null
+          services?: string[]
+          type: Database["public"]["Enums"]["health_center_type"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          department?: string
+          id?: string
+          is_verified?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          municipality?: string
+          name?: string
+          phone?: string | null
+          services?: string[]
+          type?: Database["public"]["Enums"]["health_center_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       life_stage_history: {
         Row: {
           created_at: string
@@ -692,6 +737,50 @@ export type Database = {
           },
         ]
       }
+      specialists: {
+        Row: {
+          consent_to_publish: boolean
+          email: string | null
+          full_name: string
+          health_center_id: string | null
+          id: string
+          is_verified: boolean
+          phone: string | null
+          specialty: string
+          updated_at: string
+        }
+        Insert: {
+          consent_to_publish?: boolean
+          email?: string | null
+          full_name: string
+          health_center_id?: string | null
+          id?: string
+          is_verified?: boolean
+          phone?: string | null
+          specialty: string
+          updated_at?: string
+        }
+        Update: {
+          consent_to_publish?: boolean
+          email?: string | null
+          full_name?: string
+          health_center_id?: string | null
+          id?: string
+          is_verified?: boolean
+          phone?: string | null
+          specialty?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "specialists_health_center_id_fkey"
+            columns: ["health_center_id"]
+            isOneToOne: false
+            referencedRelation: "health_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       symptom_catalog: {
         Row: {
           applicable_stages: Database["public"]["Enums"]["life_stage"][]
@@ -812,6 +901,7 @@ export type Database = {
     Enums: {
       content_status: "draft" | "published" | "archived"
       flow_level: "none" | "spotting" | "light" | "medium" | "heavy"
+      health_center_type: "hospital" | "centro_salud" | "clinica" | "casa_materna"
       life_stage:
         | "adolescencia"
         | "adultez"
@@ -959,6 +1049,7 @@ export const Constants = {
     Enums: {
       content_status: ["draft", "published", "archived"],
       flow_level: ["none", "spotting", "light", "medium", "heavy"],
+      health_center_type: ["hospital", "centro_salud", "clinica", "casa_materna"],
       life_stage: [
         "adolescencia",
         "adultez",

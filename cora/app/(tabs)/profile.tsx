@@ -126,6 +126,11 @@ export default function Profile() {
       <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
         <Button label={t('medicalSummary')} variant="secondary" onPress={() => router.push('/summary')} />
         <Button label={t('reminders')} variant="secondary" onPress={() => router.push('/reminders')} />
+        <Button
+          label={t('healthDirectory')}
+          variant="secondary"
+          onPress={() => router.push('/directory')}
+        />
       </View>
 
       <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />

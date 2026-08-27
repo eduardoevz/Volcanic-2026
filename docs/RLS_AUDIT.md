@@ -33,12 +33,35 @@ de tablas creadas en el esquema `public` a través de las migraciones
 | 17 | `medical_summaries` | 0012 | ✅ | `own_select`/`own_insert` en `user_id` (sin update/delete — foto fija inmutable) | `select,insert` → `authenticated` | OK |
 | 18 | `reminders` | 0012 | ✅ | 4 políticas `own_*` en `user_id` | CRUD → `authenticated` | OK |
 
-**18/18 tablas tienen RLS activo.** Ninguna tabla del esquema `public` quedó
-sin `alter table ... enable row level security`. Ninguna política `update`
+**20/20 tablas tienen RLS activo** (actualizado en Fase 14, ver sección
+abajo). Ninguna tabla del esquema `public` quedó sin
+`alter table ... enable row level security`. Ninguna política `update`
 tiene un `with check` faltante — todas repiten `using (auth.uid() = ...)`
-igual en ambas cláusulas. La única política con `using (true)`
-(`content_categories`) es de solo lectura sin ningún grant de escritura
-asociado — no es una fuga, es una taxonomía pública intencional.
+igual en ambas cláusulas. Las políticas con `using (true)`
+(`content_categories`, `health_centers`) son de solo lectura sin ningún grant
+de escritura asociado — no son una fuga, son catálogos públicos
+intencionales.
+
+## Actualización — Fase 14 (2 tablas nuevas)
+
+| # | Tabla | Migración | RLS | Políticas | Grants | Veredicto |
+|---|---|---|:---:|---|---|---|
+| 19 | `health_centers` | 0013 | ✅ | `public_read`: SELECT `using (true)` | `select` → `anon, authenticated` | OK — catálogo público de solo lectura, mismo patrón que `content_categories` |
+| 20 | `specialists` | 0013 | ✅ | `public_read_consented`: SELECT `using (consent_to_publish = true)` | `select` → `anon, authenticated` | **Ver nota abajo — no es `using (true)`** |
+
+**Nota sobre `specialists`:** a diferencia de todos los demás catálogos
+"públicos" del proyecto (`content_categories`, `educational_content` vía
+`status`, `health_centers`), la política de `specialists` no es
+incondicional ni depende solo de un estado de publicación — depende de un
+consentimiento explícito por fila (`consent_to_publish`). Esto es
+intencional y coincide con la restricción no negociable de §8 del plan:
+publicar datos de contacto de una persona real sin su consentimiento es un
+problema legal, no un detalle. RLS activo por sí solo no bastaría para
+proteger esto si la política fuera `using (true)` — es la condición
+`consent_to_publish = true` la que hace el trabajo real. La semilla de esta
+fase (`0014_seed_health_directory.sql`) solo inserta especialistas
+**ficticios** precisamente porque no había consentimientos reales
+verificables disponibles durante la implementación.
 
 ## Funciones `security definer`
 

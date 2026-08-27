@@ -14,6 +14,7 @@
   "aiShareOffDescription": "Apagado: Cora solo conoce tu etapa de vida y rango de edad, nunca tus registros.",
   "medicalSummary": "Resumen médico",
   "reminders": "Recordatorios",
+  "healthDirectory": "Directorio de salud",
   "signOut": "Cerrar sesión",
   "changeLifeStagePrompt": "¿En qué etapa estás ahora?"
 }

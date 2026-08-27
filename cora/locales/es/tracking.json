@@ -56,6 +56,7 @@
     "symptomFrequency": "Registraste {{label}} en {{count}} de los últimos 30 días."
   },
   "referral": {
-    "message": "Notamos algo que vale la pena conversar con un profesional de salud."
+    "message": "Notamos algo que vale la pena conversar con un profesional de salud.",
+    "action": "Toca para ver el directorio de salud"
   }
 }

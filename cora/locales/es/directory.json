@@ -1,0 +1,25 @@
+{
+  "title": "Directorio de salud",
+  "viewCenters": "Centros",
+  "viewSpecialists": "Especialistas",
+  "allDepartments": "Todos los departamentos",
+  "allTypes": "Todos los tipos",
+  "allSpecialties": "Todas las especialidades",
+  "loading": "Cargando...",
+  "loadError": "No pudimos cargar el directorio. Revisá tu conexión e intentá de nuevo.",
+  "emptyCentersTitle": "Sin centros para este filtro",
+  "emptyCentersDescription": "Probá con otro departamento o tipo de centro.",
+  "emptySpecialistsTitle": "Sin especialistas para este filtro",
+  "emptySpecialistsDescription": "Probá con otra especialidad.",
+  "unverified": "Sin verificar",
+  "call": "Llamar",
+  "viewOnMap": "Ver en mapa",
+  "viewSpecialistsHere": "Ver especialistas",
+  "noHealthCenter": "Sin centro asociado",
+  "type": {
+    "hospital": "Hospital",
+    "centro_salud": "Centro de salud",
+    "clinica": "Clínica",
+    "casa_materna": "Casa materna"
+  }
+}
