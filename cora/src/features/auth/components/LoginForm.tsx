@@ -1,17 +1,21 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { signIn } from '@/features/auth/api';
+import { signIn, signInWithGoogle } from '@/features/auth/api';
+import { GoogleSignInButton } from '@/features/auth/components/GoogleSignInButton';
 import { loginSchema, type LoginInput } from '@/features/auth/schema';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Input } from '@/ui/components/Input';
-import { spacing } from '@/ui/theme/tokens';
+import { PasswordInput } from '@/ui/components/PasswordInput';
+import { Text } from '@/ui/components/Text';
+import { colors, spacing } from '@/ui/theme/tokens';
 
 export function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -29,6 +33,16 @@ export function LoginForm() {
     }
     // Si fue exitoso, el listener de sesión (src/store/sessionStore.ts) actualiza
     // el estado global y el gate en app/index.tsx redirige sola a (tabs)/home.
+  };
+
+  const handleGoogleSignIn = async () => {
+    setFormError(null);
+    setGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setGoogleLoading(false);
+    if (!result.ok) {
+      setFormError(result.error);
+    }
   };
 
   return (
@@ -56,10 +70,9 @@ export function LoginForm() {
         control={control}
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
-          <Input
+          <PasswordInput
             label="Contraseña"
             placeholder="••••••••"
-            secureTextEntry
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -74,6 +87,28 @@ export function LoginForm() {
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}
       />
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text variant="caption">o continuá con</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <GoogleSignInButton onPress={handleGoogleSignIn} loading={googleLoading} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+});

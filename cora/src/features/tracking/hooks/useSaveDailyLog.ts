@@ -22,8 +22,14 @@ export function useSaveDailyLog() {
     retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
     mutationFn: async (input: SaveDailyLogInput) => {
       await saveDailyLog(input);
-      // cycles es derivada: se recalcula por completo después de cada guardado.
-      await syncCycles(userId);
+      // cycles es derivada, no fuente de verdad (§14) — si su resync falla no
+      // debe tumbar el guardado real ni bloquear la invalidación de caché que
+      // hace que el Calendario refleje el daily_log recién guardado.
+      try {
+        await syncCycles(userId);
+      } catch (err) {
+        console.warn('syncCycles falló tras guardar daily_log (no crítico):', err);
+      }
     },
     onSuccess: async (_data, input) => {
       queryClient.invalidateQueries({ queryKey: ['daily-log', userId, input.logDate] });

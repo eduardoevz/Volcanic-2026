@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, View } from 'react-native';
 
@@ -91,24 +91,37 @@ export default function DailyLogScreen() {
   };
 
   const handleSave = () => {
-    // No se espera la respuesta de red: con networkMode 'offlineFirst' la
-    // mutación se pausa sola sin conexión y se retoma al reconectar (ver
-    // configureOnlineManager en queryClient.ts). La usuaria ve el cambio al
-    // instante; la red va detrás.
-    saveDailyLog.mutate({
-      logDate: date,
-      flowLevel,
-      mood,
-      energyLevel,
-      sleepHours: null,
-      notes: notes.trim() ? notes.trim() : null,
-      symptoms: Array.from(selectedSymptoms.entries()).map(([symptomId, intensity]) => ({
-        symptomId,
-        intensity,
-      })),
-    });
-    router.back();
+    // Con networkMode 'offlineFirst' la mutación se pausa sola sin conexión y
+    // se retoma al reconectar (ver configureOnlineManager en queryClient.ts).
+    // Navegamos de inmediato en el camino online exitoso y también apenas la
+    // mutación queda pausada por falta de red (para no romper la sensación de
+    // guardado instantáneo del modo offline). Si falla de verdad con red (tras
+    // agotar los reintentos), nos quedamos en la pantalla para que se vea el
+    // banner de error de abajo, en vez de perderlo por haber navegado antes.
+    saveDailyLog.mutate(
+      {
+        logDate: date,
+        flowLevel,
+        mood,
+        energyLevel,
+        sleepHours: null,
+        notes: notes.trim() ? notes.trim() : null,
+        symptoms: Array.from(selectedSymptoms.entries()).map(([symptomId, intensity]) => ({
+          symptomId,
+          intensity,
+        })),
+      },
+      { onSuccess: () => router.back() }
+    );
   };
+
+  // La actualización de isPaused llega en un render posterior al de mutate()
+  // de arriba, así que se cubre con un efecto separado en vez de leerlo ahí.
+  useEffect(() => {
+    if (saveDailyLog.isPaused) {
+      router.back();
+    }
+  }, [saveDailyLog.isPaused]);
 
   return (
     <Screen>

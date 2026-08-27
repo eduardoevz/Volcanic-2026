@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { signUp } from '@/features/auth/api';
+import { signInWithGoogle, signUp } from '@/features/auth/api';
+import { GoogleSignInButton } from '@/features/auth/components/GoogleSignInButton';
 import { registerSchema, type RegisterInput } from '@/features/auth/schema';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Input } from '@/ui/components/Input';
-import { spacing } from '@/ui/theme/tokens';
+import { PasswordInput } from '@/ui/components/PasswordInput';
+import { Text } from '@/ui/components/Text';
+import { colors, spacing } from '@/ui/theme/tokens';
 
 export function RegisterForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -33,6 +37,16 @@ export function RegisterForm() {
     // El trigger on_auth_user_created ya creó profiles/user_preferences/mascot_state.
     // Si la confirmación de correo está desactivada, signUp() devuelve sesión directo
     // y el listener global redirige sola a (tabs)/home.
+  };
+
+  const handleGoogleSignIn = async () => {
+    setFormError(null);
+    setGoogleLoading(true);
+    const result = await signInWithGoogle();
+    setGoogleLoading(false);
+    if (!result.ok) {
+      setFormError(result.error);
+    }
   };
 
   return (
@@ -63,10 +77,9 @@ export function RegisterForm() {
         control={control}
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
-          <Input
+          <PasswordInput
             label="Contraseña"
             placeholder="mínimo 8 caracteres"
-            secureTextEntry
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -81,6 +94,28 @@ export function RegisterForm() {
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}
       />
+
+      <View style={styles.divider}>
+        <View style={styles.dividerLine} />
+        <Text variant="caption">o continuá con</Text>
+        <View style={styles.dividerLine} />
+      </View>
+
+      <GoogleSignInButton onPress={handleGoogleSignIn} loading={googleLoading} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+});
