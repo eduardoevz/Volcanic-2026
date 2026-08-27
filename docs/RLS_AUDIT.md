@@ -49,6 +49,13 @@ intencionales.
 | 19 | `health_centers` | 0013 | ✅ | `public_read`: SELECT `using (true)` | `select` → `anon, authenticated` | OK — catálogo público de solo lectura, mismo patrón que `content_categories` |
 | 20 | `specialists` | 0013 | ✅ | `public_read_consented`: SELECT `using (consent_to_publish = true)` | `select` → `anon, authenticated` | **Ver nota abajo — no es `using (true)`** |
 
+Verificado contra el proyecto remoto real (no solo revisión de SQL) el
+2026-08-27 vía el servidor MCP oficial de Supabase: `list_tables` confirma
+`rls_enabled: true` en ambas; consulta directa a `pg_policies` confirma el
+`qual` exacto de cada política (`true` en `health_centers`,
+`(consent_to_publish = true)` en `specialists`). `get_advisors` (seguridad)
+no reportó ningún hallazgo nuevo atribuible a estas dos tablas.
+
 **Nota sobre `specialists`:** a diferencia de todos los demás catálogos
 "públicos" del proyecto (`content_categories`, `educational_content` vía
 `status`, `health_centers`), la política de `specialists` no es
