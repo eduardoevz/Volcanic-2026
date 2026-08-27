@@ -2,6 +2,30 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-27.
 
+## Fase 17 — Contenido: derechos de salud (P1, no es trabajo de ingeniería)
+
+`docs/PLAN_DE_IMPLEMENTACION.md` §29 es explícito: esta fase es contenido, no código — entra en la categoría ya existente `derechos-y-comunidad` (`content_categories`/`educational_content`/`content_sources`, funcionando desde Fase 5). Sin tablas, RLS, pantallas ni features nuevas.
+
+- [x] Migración `0017_seed_health_rights_content.sql` (solo datos, sin cambios de esquema, mismo patrón que `0007`/`0009`/`0014`): 3 artículos nuevos, complementarios al artículo general `derechos-en-salud-en-nicaragua` ya sembrado en Fase 5 (que cubre el derecho genérico a salud pública gratuita, sin entrar en detalle legal específico):
+  - `ley-779-vida-libre-de-violencia` — qué protege la Ley 779 y a dónde denunciar (Policía Nacional/comisarías de la mujer, Ministerio Público, obligación de denuncia en 48h para instituciones que atienden a niñas/adolescentes). Aplica a las 5 etapas.
+  - `derechos-laborales-embarazo-y-maternidad` — descanso pre/post natal del Código del Trabajo (4 semanas antes, 8 después) + la reforma real de abril 2025 a la Ley de Seguridad Social que amplió el descanso postnatal a 9 semanas (13 semanas totales, subsidio INSS del 60% del salario promedio).
+  - `parto-humanizado-derecho-al-acompanamiento` — Normativa 042 del MINSA (privacidad, libertad de posición, derecho a elegir acompañante) + control prenatal integral y gratuito.
+- [x] Las 3 leyes/normativas y la reforma de 2025 se verificaron por búsqueda web el 2026-08-27 antes de escribir el contenido — ninguna cifra ni afirmación legal se asumió de memoria (mismo estándar editorial que la nota de `0009_seed_content.sql`: "URLs verificadas... antes de escribir este archivo"). 6 fuentes citadas (2 por artículo): texto oficial de la Ley 779 (UNICEF Nicaragua) + rutas de denuncia (MINIM); cobertura de la reforma de 2025 (La Mesa Redonda) + comunicado oficial (Asamblea Nacional); Normativa 042 y Normativa 011 del MINSA.
+- [x] Sin `reviewed_by_name` en ninguno de los 3 (igual que el resto del contenido sembrado — sin profesional de salud disponible en el equipo; la UI ya muestra el badge "Pendiente de revisión profesional" para esto).
+
+### Log de tareas — Fase 17 (2026-08-27)
+
+- Migración aplicada al proyecto remoto real vía MCP de Supabase (mismo mecanismo de Fases 14-16). Verificado por consulta directa: `educational_content` pasó de 25 a 28 filas, `content_sources` de 40 a 46; los 3 slugs nuevos existen; una consulta con `life_stages @> array['embarazo']` trae 9 artículos (incluye los 2 nuevos relevantes a esa etapa, junto con el contenido de embarazo ya existente).
+- Sin cambios a código: no aplica `tsc`/`eslint`/`jest` ni recorrido en emulador esta vez — no se tocó ningún archivo `.ts`/`.tsx`, y `database.types.ts` no cambia porque no hay tablas ni columnas nuevas. Esto no es una salvedad, es el alcance real de la fase.
+
+## Fase 17 — Definition of Done (verificación final)
+
+- [x] 3 artículos publicados, complementarios (no duplicados) al contenido de derechos ya existente
+- [x] Toda afirmación legal respaldada por una fuente real verificada, citada en `content_sources`
+- [x] Verificado contra el proyecto remoto real (conteo de filas + filtro por etapa), no solo asumido por el SQL
+
+**Fase 17 completa**, sin salvedades. Lista para continuar con Fase 18 (P2: exportables y alcance de contenido — PDF, miskito/mayangna, audio) según `docs/PLAN_DE_IMPLEMENTACION.md` §29.
+
 ## Fase 16 — Etapas y agenda ampliadas (P1)
 
 `CORA-106`/`CORA-107`: seguimiento de embarazo (`pregnancies`) y agenda de citas médicas (`appointments`). Cierra dos cosas pendientes de fases anteriores: reemplaza el `PlaceholderModule` honesto que `PregnancyWeekModule.tsx` mostraba desde que existe `moduleRegistry.ts`, y reactiva el scope `appointments` de `family_share_grants`, dejado inerte a propósito en Fase 15 por no existir esta tabla todavía.
