@@ -1,16 +1,18 @@
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 import { usePrediction } from '@/features/tracking';
 import { Card } from '@/ui/components/Card';
 import { Text } from '@/ui/components/Text';
 
 export function CycleStatusModule() {
+  const { t } = useTranslation('home');
   const { prediction, hasEnoughData, isLoading } = usePrediction();
 
   if (isLoading) {
     return (
       <Card>
-        <Text variant="bodyMuted">Cargando tu ciclo...</Text>
+        <Text variant="bodyMuted">{t('cycleStatus.loading')}</Text>
       </Card>
     );
   }
@@ -18,10 +20,8 @@ export function CycleStatusModule() {
   if (!hasEnoughData || !prediction) {
     return (
       <Card>
-        <Text variant="heading">Estado del ciclo</Text>
-        <Text variant="bodyMuted">
-          Registrá al menos 2 ciclos para ver una predicción estimada acá.
-        </Text>
+        <Text variant="heading">{t('cycleStatus.title')}</Text>
+        <Text variant="bodyMuted">{t('cycleStatus.needMoreData')}</Text>
       </Card>
     );
   }
@@ -30,14 +30,17 @@ export function CycleStatusModule() {
 
   return (
     <Card>
-      <Text variant="heading">Estado del ciclo</Text>
+      <Text variant="heading">{t('cycleStatus.title')}</Text>
       <Text variant="body">
-        Tu próximo período podría llegar entre el {format(new Date(prediction.nextStart), 'd')} y el{' '}
-        {format(endDate, 'd MMM')}.
+        {t('cycleStatus.prediction', {
+          start: format(new Date(prediction.nextStart), 'd'),
+          end: format(endDate, 'd MMM'),
+        })}
       </Text>
       <Text variant="caption">
-        {prediction.confidence === 'buena' ? 'Confianza buena' : 'Estimación inicial'} · no es un
-        diagnóstico
+        {prediction.confidence === 'buena'
+          ? t('cycleStatus.confidenceGood')
+          : t('cycleStatus.confidenceInitial')}
       </Text>
     </Card>
   );

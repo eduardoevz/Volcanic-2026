@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderModule } from './PlaceholderModule';
 
 export function WellbeingTipModule() {
+  const { t } = useTranslation('home');
+
   return (
     <PlaceholderModule
       emoji="💡"
-      title="Tip de bienestar"
-      description="Contenido personalizado llega en la Fase 5."
+      title={t('wellbeingTip.title')}
+      description={t('wellbeingTip.description')}
     />
   );
 }

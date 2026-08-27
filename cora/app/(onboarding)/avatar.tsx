@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AVATAR_EMOJI, useAvatars } from '@/features/avatars';
@@ -17,6 +18,7 @@ import type { Database } from '@/shared/types/database.types';
 type Avatar = Database['public']['Tables']['avatars']['Row'];
 
 export default function AvatarScreen() {
+  const { t } = useTranslation('onboarding');
   const { data: avatars, isLoading, isError } = useAvatars();
   const [selected, setSelected] = useState<Avatar | null>(null);
   const [saving, setSaving] = useState(false);
@@ -32,7 +34,7 @@ export default function AvatarScreen() {
       await updateAvatar(selected.id);
       goNext();
     } catch {
-      setError('No pudimos guardar tu avatar. Probá de nuevo.');
+      setError(t('avatar.saveError'));
     } finally {
       setSaving(false);
     }
@@ -42,14 +44,14 @@ export default function AvatarScreen() {
     <Screen>
       <OnboardingProgress step={3} />
       <Text variant="title" style={{ marginBottom: spacing.xs }}>
-        Elegí tu avatar
+        {t('avatar.title')}
       </Text>
       <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
-        Fauna nicaragüense — tocá una para conocerla mejor.
+        {t('avatar.subtitle')}
       </Text>
 
       {isError ? (
-        <Banner message="No pudimos cargar los avatares." tone="danger" />
+        <Banner message={t('avatar.loadError')} tone="danger" />
       ) : isLoading ? (
         <View style={styles.grid}>
           {Array.from({ length: 8 }).map((_, i) => (
@@ -58,8 +60,8 @@ export default function AvatarScreen() {
         </View>
       ) : avatars && avatars.length === 0 ? (
         <EmptyState
-          title="Sin avatares disponibles"
-          description="Podés elegir uno más tarde desde tu perfil."
+          title={t('avatar.emptyTitle')}
+          description={t('avatar.emptyDescription')}
         />
       ) : (
         <ScrollView contentContainerStyle={styles.grid}>
@@ -84,13 +86,13 @@ export default function AvatarScreen() {
       {error ? <Banner message={error} tone="danger" /> : null}
 
       <Button
-        label="Elegir este avatar"
+        label={t('avatar.chooseThisOne')}
         onPress={handleChoose}
         disabled={!selected}
         loading={saving}
         style={{ marginTop: spacing.md }}
       />
-      <Button label="Elegir más tarde" variant="ghost" onPress={goNext} />
+      <Button label={t('avatar.chooseLater')} variant="ghost" onPress={goNext} />
 
       <Sheet visible={!!selected && !saving} onClose={() => setSelected(null)}>
         {selected ? (
@@ -105,11 +107,11 @@ export default function AvatarScreen() {
               {selected.species_scientific}
             </Text>
             <Text variant="body">{selected.fun_fact_es}</Text>
-            <Text variant="bodyMuted">Hábitat: {selected.habitat_es}</Text>
+            <Text variant="bodyMuted">{t('avatar.habitat', { habitat: selected.habitat_es })}</Text>
             <Text variant="bodyMuted">
-              Estado de conservación: {selected.conservation_status}
+              {t('avatar.conservationStatus', { status: selected.conservation_status })}
             </Text>
-            <Button label="Elegir este avatar" onPress={handleChoose} loading={saving} />
+            <Button label={t('avatar.chooseThisOne')} onPress={handleChoose} loading={saving} />
           </View>
         ) : null}
       </Sheet>

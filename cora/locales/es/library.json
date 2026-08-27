@@ -1,0 +1,21 @@
+{
+  "title": "Biblioteca",
+  "searchPlaceholder": "Buscar (ej. cólicos, menopausia)",
+  "allCategories": "Todas",
+  "loadError": "No pudimos cargar la biblioteca. Revisá tu conexión e intentá de nuevo.",
+  "loading": "Cargando...",
+  "noResultsTitle": "Sin resultados",
+  "noResultsDescription": "Probá con otra palabra, como \"cólicos\" o \"menopausia\".",
+  "emptyTitle": "Sin artículos todavía",
+  "emptyDescription": "Todavía no hay artículos para esta categoría.",
+  "readingMinutes": "{{minutes}} min de lectura",
+  "pendingReview": "Pendiente de revisión",
+  "article": {
+    "loadError": "No pudimos cargar este artículo. Puede que ya no exista, o revisá tu conexión.",
+    "reviewedBy": "Revisado por {{name}}",
+    "reviewedOn": "Revisado el {{date}}",
+    "pendingProfessionalReview": "Pendiente de revisión profesional",
+    "sourcesTitle": "Fuentes",
+    "disclaimer": "Esta información es educativa y no reemplaza la consulta con un profesional de salud."
+  }
+}

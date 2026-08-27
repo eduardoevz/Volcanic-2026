@@ -1,0 +1,23 @@
+{
+  "loadError": "No pudimos cargar tu pitahaya. Revisá tu conexión e intentá de nuevo.",
+  "pointsAccumulated": "{{points}} puntos acumulados",
+  "levelName": "{{name}} · Nivel {{level}}",
+  "remainingToNextLevel": "Le faltan {{remaining}} puntos para ser {{nextLevelName}}",
+  "maxLevelReached": "Tu pitahaya llegó a su forma más plena. Sigue creciendo con vos.",
+  "growthNote": "Crece con cada momento de cuidado que registrás — sin castigos ni rachas. Nunca baja de nivel.",
+  "levelsTitle": "Los 5 niveles",
+  "recentMomentsTitle": "Momentos de cuidado recientes",
+  "emptyMomentsTitle": "Todavía no hay momentos registrados",
+  "emptyMomentsDescription": "Cada registro, lectura o conversación con Cora suma acá.",
+  "actions": {
+    "onboarding_completed": "Completaste tu onboarding",
+    "daily_log": "Registraste tu día",
+    "article_read": "Leíste un artículo"
+  },
+  "pointsEarned": "+{{points}} · {{date}}",
+  "evolution": {
+    "title": "¡Tu pitahaya creció!",
+    "subtitle": "Ahora es {{name}} · Nivel {{level}}",
+    "accept": "Genial"
+  }
+}

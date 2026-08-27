@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { format, subDays } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, View } from 'react-native';
 
 import { useGenerateSummary, type SummaryPayload } from '@/features/summary';
@@ -10,12 +11,12 @@ import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
-const PRESETS = [
-  { label: 'Últimos 30 días', days: 30 },
-  { label: 'Últimos 90 días', days: 90 },
-];
-
 export default function Summary() {
+  const { t } = useTranslation('summary');
+  const presets = [
+    { labelKey: 'preset30Days' as const, days: 30 },
+    { labelKey: 'preset90Days' as const, days: 90 },
+  ];
   const generateSummary = useGenerateSummary();
   const [result, setResult] = useState<{ payload: SummaryPayload; text: string } | null>(null);
 
@@ -36,18 +37,15 @@ export default function Summary() {
   return (
     <Screen>
       <Text variant="title" style={{ marginBottom: spacing.sm }}>
-        Resumen médico
+        {t('title')}
       </Text>
-      <Banner
-        tone="warning"
-        message="Esto NO es un diagnóstico. Es una transcripción de tus propios registros para llevar a tu consulta médica."
-      />
+      <Banner tone="warning" message={t('disclaimer')} />
 
       <View style={{ flexDirection: 'row', gap: spacing.sm, marginVertical: spacing.md }}>
-        {PRESETS.map((preset) => (
+        {presets.map((preset) => (
           <Button
             key={preset.days}
-            label={preset.label}
+            label={t(preset.labelKey)}
             variant="secondary"
             onPress={() => handleGenerate(preset.days)}
             disabled={generateSummary.isPending}
@@ -55,14 +53,9 @@ export default function Summary() {
         ))}
       </View>
 
-      {generateSummary.isPending ? <Text variant="bodyMuted">Generando resumen...</Text> : null}
+      {generateSummary.isPending ? <Text variant="bodyMuted">{t('generating')}</Text> : null}
 
-      {generateSummary.isError ? (
-        <Banner
-          tone="danger"
-          message="No pudimos generar el resumen. Revisá tu conexión e intentá de nuevo."
-        />
-      ) : null}
+      {generateSummary.isError ? <Banner tone="danger" message={t('generateError')} /> : null}
 
       {result ? (
         <ScrollView style={{ marginTop: spacing.md }}>
@@ -72,7 +65,7 @@ export default function Summary() {
             </Text>
           </Card>
           <Button
-            label="Compartir"
+            label={t('share')}
             onPress={handleShare}
             style={{ marginTop: spacing.md, marginBottom: spacing.lg }}
           />

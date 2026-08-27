@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { ResetPasswordForm } from '@/features/auth';
 import { supabase } from '@/lib/supabase';
@@ -13,6 +14,7 @@ import { spacing } from '@/ui/theme/tokens';
 type ExchangeStatus = 'pending' | 'success' | 'error';
 
 export default function ResetPassword() {
+  const { t } = useTranslation('auth');
   const { setPasswordRecovery } = useSession();
   const { code } = useLocalSearchParams<{ code?: string }>();
   const [status, setStatus] = useState<ExchangeStatus>(code ? 'pending' : 'error');
@@ -43,20 +45,17 @@ export default function ResetPassword() {
   return (
     <Screen>
       <Text variant="title" style={{ marginBottom: spacing.lg }}>
-        Restablecer contraseña
+        {t('resetPassword.title')}
       </Text>
 
-      {status === 'pending' ? <Banner message="Verificando el enlace..." tone="info" /> : null}
+      {status === 'pending' ? <Banner message={t('resetPassword.verifying')} tone="info" /> : null}
 
       {status === 'error' ? (
         <>
-          <Banner
-            message="Este enlace ya no es válido o expiró. Pedí uno nuevo."
-            tone="danger"
-          />
+          <Banner message={t('resetPassword.invalidLink')} tone="danger" />
           <Link href="/(auth)/forgot-password" asChild>
             <Button
-              label="Pedir un nuevo enlace"
+              label={t('resetPassword.requestNewLink')}
               variant="ghost"
               onPress={() => {}}
               style={{ marginTop: spacing.sm }}

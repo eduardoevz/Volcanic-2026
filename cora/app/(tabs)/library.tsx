@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
 
 import { useArticles, useCategories, useSearchArticles } from '@/features/content';
@@ -14,6 +15,7 @@ import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
 export default function Library() {
+  const { t } = useTranslation('library');
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
@@ -49,10 +51,10 @@ export default function Library() {
         contentContainerStyle={{ gap: spacing.sm, paddingBottom: spacing.xl }}
         ListHeaderComponent={
           <View style={{ gap: spacing.md, marginBottom: spacing.sm }}>
-            <Text variant="title">Biblioteca</Text>
+            <Text variant="title">{t('title')}</Text>
 
             <Input
-              placeholder="Buscar (ej. cólicos, menopausia)"
+              placeholder={t('searchPlaceholder')}
               value={searchInput}
               onChangeText={setSearchInput}
             />
@@ -60,7 +62,11 @@ export default function Library() {
             {!isSearching ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                  <Chip label="Todas" selected={!categoryId} onPress={() => setCategoryId(undefined)} />
+                  <Chip
+                    label={t('allCategories')}
+                    selected={!categoryId}
+                    onPress={() => setCategoryId(undefined)}
+                  />
                   {(categories ?? []).map((cat) => (
                     <Chip
                       key={cat.id}
@@ -73,25 +79,16 @@ export default function Library() {
               </ScrollView>
             ) : null}
 
-            {isError ? (
-              <Banner
-                tone="danger"
-                message="No pudimos cargar la biblioteca. Revisá tu conexión e intentá de nuevo."
-              />
-            ) : null}
+            {isError ? <Banner tone="danger" message={t('loadError')} /> : null}
           </View>
         }
         ListEmptyComponent={
           isError ? null : isLoading ? (
-            <Text variant="bodyMuted">Cargando...</Text>
+            <Text variant="bodyMuted">{t('loading')}</Text>
           ) : (
             <EmptyState
-              title={isSearching ? 'Sin resultados' : 'Sin artículos todavía'}
-              description={
-                isSearching
-                  ? 'Probá con otra palabra, como "cólicos" o "menopausia".'
-                  : 'Todavía no hay artículos para esta categoría.'
-              }
+              title={isSearching ? t('noResultsTitle') : t('emptyTitle')}
+              description={isSearching ? t('noResultsDescription') : t('emptyDescription')}
             />
           )
         }
@@ -107,9 +104,9 @@ export default function Library() {
                   {article.summary}
                 </Text>
                 <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 2, alignItems: 'center' }}>
-                  <Text variant="caption">{`${article.reading_minutes} min de lectura`}</Text>
+                  <Text variant="caption">{t('readingMinutes', { minutes: article.reading_minutes })}</Text>
                   {!article.reviewed_by_name ? (
-                    <Badge label="Pendiente de revisión" tone="warning" />
+                    <Badge label={t('pendingReview')} tone="warning" />
                   ) : null}
                 </View>
               </View>

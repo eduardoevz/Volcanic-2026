@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { MessageBubble, ReferralCard, SourceChips, SUGGESTED_QUESTIONS, useChat } from '@/features/assistant';
@@ -11,11 +12,8 @@ import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
-const FIRST_MESSAGE =
-  'Hola, soy Cora. Puedo ayudarte a entender tu ciclo y tu cuerpo con información educativa, ' +
-  'pero no soy médica: no diagnostico ni reemplazo una consulta profesional. ¿En qué te ayudo hoy?';
-
 export default function Assistant() {
+  const { t } = useTranslation('assistant');
   const { data: profile } = useProfile();
   const { messages, send, isSending, errorMessage, isOnline } = useChat();
   const [input, setInput] = useState('');
@@ -32,9 +30,9 @@ export default function Assistant() {
   return (
     <Screen>
       <Text variant="title" style={{ marginBottom: spacing.sm }}>
-        Cora IA
+        {t('title')}
       </Text>
-      <Banner message="Cora es educativa. No sustituye a un profesional de salud." tone="info" />
+      <Banner message={t('disclaimer')} tone="info" />
 
       <KeyboardAvoidingView
         style={{ flex: 1, marginTop: spacing.sm }}
@@ -46,7 +44,7 @@ export default function Assistant() {
           contentContainerStyle={{ gap: spacing.sm, paddingBottom: spacing.md }}
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
         >
-          <MessageBubble message={{ id: 'first', role: 'assistant', content: FIRST_MESSAGE }} />
+          <MessageBubble message={{ id: 'first', role: 'assistant', content: t('firstMessage') }} />
 
           {messages.map((message) => (
             <View key={message.id} style={{ gap: spacing.xs }}>
@@ -63,9 +61,7 @@ export default function Assistant() {
 
           {errorMessage ? <Banner message={errorMessage} tone="danger" /> : null}
 
-          {!isOnline ? (
-            <Banner message="Cora necesita internet para conversar." tone="warning" />
-          ) : null}
+          {!isOnline ? <Banner message={t('offline')} tone="warning" /> : null}
         </ScrollView>
 
         {messages.length === 0 && suggestions.length > 0 ? (
@@ -85,7 +81,7 @@ export default function Assistant() {
         <View style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-end' }}>
           <View style={{ flex: 1 }}>
             <Input
-              placeholder="Escribí tu pregunta..."
+              placeholder={t('inputPlaceholder')}
               value={input}
               onChangeText={setInput}
               editable={isOnline && !isSending}
@@ -93,7 +89,7 @@ export default function Assistant() {
             />
           </View>
           <Button
-            label="Enviar"
+            label={t('send')}
             onPress={() => handleSend(input)}
             disabled={!isOnline || isSending || input.trim().length === 0}
             loading={isSending}

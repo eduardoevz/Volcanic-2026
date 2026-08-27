@@ -1,0 +1,19 @@
+{
+  "title": "Perfil",
+  "loading": "Cargando perfil...",
+  "loadError": "No pudimos cargar tu perfil. Revisá tu conexión e intentá de nuevo.",
+  "noNameYet": "Sin nombre todavía",
+  "noAvatarChosen": "Sin avatar elegido",
+  "lifeStageLabel": "Etapa de vida",
+  "lifeStageUndefined": "Sin definir",
+  "changeLifeStage": "Cambiar etapa",
+  "privacyTitle": "Privacidad",
+  "privacyLoadError": "No pudimos cargar tus preferencias de privacidad. Revisá tu conexión.",
+  "aiShareLabel": "Compartir contexto con Cora IA",
+  "aiShareOnDescription": "Cora puede usar agregados de tus registros (ciclo promedio, síntoma frecuente, ánimo) para responderte mejor. Nunca ve tus notas ni filas crudas.",
+  "aiShareOffDescription": "Apagado: Cora solo conoce tu etapa de vida y rango de edad, nunca tus registros.",
+  "medicalSummary": "Resumen médico",
+  "reminders": "Recordatorios",
+  "signOut": "Cerrar sesión",
+  "changeLifeStagePrompt": "¿En qué etapa estás ahora?"
+}

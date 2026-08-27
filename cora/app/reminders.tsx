@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import {
@@ -32,6 +33,8 @@ function TimeStepper({
   max: number;
   onChange: (next: number) => void;
 }) {
+  const { t } = useTranslation('reminders');
+
   return (
     <View style={{ alignItems: 'center', gap: spacing.xs }}>
       <Text variant="caption">{label}</Text>
@@ -39,14 +42,14 @@ function TimeStepper({
         <Button
           label="−"
           variant="secondary"
-          accessibilityLabel={`Disminuir ${label.toLowerCase()}`}
+          accessibilityLabel={t('decrease', { label: label.toLowerCase() })}
           onPress={() => onChange((value - 1 + (max + 1)) % (max + 1))}
         />
         <Text variant="heading">{pad(value)}</Text>
         <Button
           label="+"
           variant="secondary"
-          accessibilityLabel={`Aumentar ${label.toLowerCase()}`}
+          accessibilityLabel={t('increase', { label: label.toLowerCase() })}
           onPress={() => onChange((value + 1) % (max + 1))}
         />
       </View>
@@ -55,6 +58,7 @@ function TimeStepper({
 }
 
 export default function Reminders() {
+  const { t } = useTranslation('reminders');
   const { data: reminders, isLoading, isError } = useReminders();
   const createReminder = useCreateReminder();
   const toggleReminder = useToggleReminder();
@@ -77,29 +81,22 @@ export default function Reminders() {
   return (
     <Screen>
       <Text variant="title" style={{ marginBottom: spacing.sm }}>
-        Recordatorios
+        {t('title')}
       </Text>
       <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
-        Notificaciones locales en este dispositivo — no requieren conexión para sonar.
+        {t('subtitle')}
       </Text>
 
-      {isError ? (
-        <Banner tone="danger" message="No pudimos cargar tus recordatorios." />
-      ) : null}
+      {isError ? <Banner tone="danger" message={t('loadError')} /> : null}
 
-      {createReminder.isError ? (
-        <Banner
-          tone="warning"
-          message="No pudimos crear el recordatorio. Verificá que le hayas dado permiso de notificaciones a Cora."
-        />
-      ) : null}
+      {createReminder.isError ? <Banner tone="warning" message={t('createError')} /> : null}
 
       {toggleReminder.isError || deleteReminder.isError ? (
-        <Banner tone="danger" message="No pudimos actualizar el recordatorio. Probá de nuevo." />
+        <Banner tone="danger" message={t('updateError')} />
       ) : null}
 
       {isLoading ? (
-        <Text variant="bodyMuted">Cargando...</Text>
+        <Text variant="bodyMuted">{t('loading')}</Text>
       ) : reminders && reminders.length > 0 ? (
         <ScrollView contentContainerStyle={{ gap: spacing.sm }}>
           {reminders.map((reminder) => (
@@ -108,7 +105,7 @@ export default function Reminders() {
                 <View style={{ flex: 1 }}>
                   <Text variant="body">{reminder.title}</Text>
                   <Text variant="caption">
-                    {pad(reminder.hour)}:{pad(reminder.minute)} — todos los días
+                    {t('dailyAt', { hour: pad(reminder.hour), minute: pad(reminder.minute) })}
                   </Text>
                 </View>
                 <Switch
@@ -118,40 +115,37 @@ export default function Reminders() {
                   trackColor={{ true: colors.pitahaya }}
                 />
                 <Pressable onPress={() => deleteReminder.mutate(reminder)} hitSlop={8}>
-                  <Text style={{ color: colors.danger }}>Eliminar</Text>
+                  <Text style={{ color: colors.danger }}>{t('delete')}</Text>
                 </Pressable>
               </View>
             </Card>
           ))}
         </ScrollView>
       ) : (
-        <EmptyState
-          title="Sin recordatorios todavía"
-          description="Creá uno para que Cora te avise a la hora que elijas."
-        />
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       )}
 
       <Button
-        label="+ Nuevo recordatorio"
+        label={t('newReminder')}
         onPress={() => setCreating(true)}
         style={{ marginTop: spacing.md }}
       />
 
       <Sheet visible={creating} onClose={() => setCreating(false)}>
         <View style={{ gap: spacing.md }}>
-          <Text variant="heading">Nuevo recordatorio</Text>
+          <Text variant="heading">{t('newReminderTitle')}</Text>
           <Input
-            label="Título"
-            placeholder="Ej. Registrar mi día"
+            label={t('titleLabel')}
+            placeholder={t('titlePlaceholder')}
             value={title}
             onChangeText={setTitle}
           />
           <View style={{ flexDirection: 'row', justifyContent: 'center', gap: spacing.lg }}>
-            <TimeStepper label="Hora" value={hour} max={23} onChange={setHour} />
-            <TimeStepper label="Minuto" value={minute} max={59} onChange={setMinute} />
+            <TimeStepper label={t('hourLabel')} value={hour} max={23} onChange={setHour} />
+            <TimeStepper label={t('minuteLabel')} value={minute} max={59} onChange={setMinute} />
           </View>
           <Button
-            label="Guardar"
+            label={t('save')}
             onPress={handleCreate}
             loading={createReminder.isPending}
             disabled={!title.trim()}

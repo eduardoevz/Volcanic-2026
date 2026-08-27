@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { useDailyLog } from '@/features/tracking';
@@ -9,6 +10,7 @@ import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
 export function DailyCheckInModule() {
+  const { t } = useTranslation('home');
   const today = format(new Date(), 'yyyy-MM-dd');
   const { data: todayLog, isLoading } = useDailyLog(today);
   const alreadyLogged = !isLoading && !!todayLog;
@@ -18,14 +20,14 @@ export function DailyCheckInModule() {
       <Text style={{ fontSize: 32 }}>{alreadyLogged ? '✅' : '📝'}</Text>
       <View style={{ flex: 1 }}>
         <Text variant="heading">
-          {alreadyLogged ? 'Ya registraste hoy' : '¿Cómo te sentís hoy?'}
+          {alreadyLogged ? t('dailyCheckIn.loggedTitle') : t('dailyCheckIn.notLoggedTitle')}
         </Text>
         <Text variant="bodyMuted">
-          {alreadyLogged ? 'Podés editar tu registro cuando quieras.' : 'Toma menos de un minuto.'}
+          {alreadyLogged ? t('dailyCheckIn.loggedSubtitle') : t('dailyCheckIn.notLoggedSubtitle')}
         </Text>
       </View>
       <Button
-        label={alreadyLogged ? 'Editar' : 'Registrar'}
+        label={alreadyLogged ? t('dailyCheckIn.editButton') : t('dailyCheckIn.registerButton')}
         variant="secondary"
         onPress={() => router.push(`/log/${today}`)}
       />

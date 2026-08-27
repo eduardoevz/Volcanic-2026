@@ -1,0 +1,56 @@
+{
+  "loadError": "No pudimos cargar tu Home. Revisá tu conexión e intentá de nuevo.",
+  "loading": "Cargando tu Home...",
+  "cycleStatus": {
+    "title": "Estado del ciclo",
+    "loading": "Cargando tu ciclo...",
+    "needMoreData": "Registrá al menos 2 ciclos para ver una predicción estimada acá.",
+    "prediction": "Tu próximo período podría llegar entre el {{start}} y el {{end}}.",
+    "confidenceGood": "Confianza buena · no es un diagnóstico",
+    "confidenceInitial": "Estimación inicial · no es un diagnóstico"
+  },
+  "dailyCheckIn": {
+    "loggedTitle": "Ya registraste hoy",
+    "loggedSubtitle": "Podés editar tu registro cuando quieras.",
+    "notLoggedTitle": "¿Cómo te sentís hoy?",
+    "notLoggedSubtitle": "Toma menos de un minuto.",
+    "editButton": "Editar",
+    "registerButton": "Registrar"
+  },
+  "firstPeriodGuide": {
+    "title": "Tu primera menstruación",
+    "loading": "Cargando..."
+  },
+  "hydration": {
+    "title": "Hidratación",
+    "description": "Seguimiento de bienestar general — llega en una fase posterior."
+  },
+  "mascot": {
+    "summary": "Tu pitahaya · {{name}} · Nivel {{level}}",
+    "points": "{{points}} puntos acumulados"
+  },
+  "pregnancyWeek": {
+    "title": "Semana de embarazo",
+    "description": "El seguimiento de embarazo es P1, llega después del MVP."
+  },
+  "recommendedArticle": {
+    "title": "Artículo recomendado",
+    "loading": "Cargando...",
+    "empty": "Todavía no hay artículos para tu etapa."
+  },
+  "reminders": {
+    "title": "Recordatorios",
+    "description": "Los recordatorios locales son P1, llegan en la Fase 8."
+  },
+  "symptomTrends": {
+    "title": "Tendencia de síntomas",
+    "loading": "Cargando...",
+    "count_one": "Registraste “{{label}}” {{count}} vez en los últimos 30 días.",
+    "count_other": "Registraste “{{label}}” {{count}} veces en los últimos 30 días.",
+    "empty": "Todavía no hay suficientes registros de síntomas para mostrar una tendencia."
+  },
+  "wellbeingTip": {
+    "title": "Tip de bienestar",
+    "description": "Contenido personalizado llega en la Fase 5."
+  }
+}

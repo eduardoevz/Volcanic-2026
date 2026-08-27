@@ -1,0 +1,21 @@
+{
+  "title": "Recordatorios",
+  "subtitle": "Notificaciones locales en este dispositivo — no requieren conexión para sonar.",
+  "loadError": "No pudimos cargar tus recordatorios.",
+  "createError": "No pudimos crear el recordatorio. Verificá que le hayas dado permiso de notificaciones a Cora.",
+  "updateError": "No pudimos actualizar el recordatorio. Probá de nuevo.",
+  "loading": "Cargando...",
+  "dailyAt": "{{hour}}:{{minute}} — todos los días",
+  "delete": "Eliminar",
+  "emptyTitle": "Sin recordatorios todavía",
+  "emptyDescription": "Creá uno para que Cora te avise a la hora que elijas.",
+  "newReminder": "+ Nuevo recordatorio",
+  "newReminderTitle": "Nuevo recordatorio",
+  "titleLabel": "Título",
+  "titlePlaceholder": "Ej. Registrar mi día",
+  "hourLabel": "Hora",
+  "minuteLabel": "Minuto",
+  "decrease": "Disminuir {{label}}",
+  "increase": "Aumentar {{label}}",
+  "save": "Guardar"
+}

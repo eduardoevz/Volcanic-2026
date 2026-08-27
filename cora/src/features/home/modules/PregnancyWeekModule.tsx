@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderModule } from './PlaceholderModule';
 
 export function PregnancyWeekModule() {
+  const { t } = useTranslation('home');
+
   return (
     <PlaceholderModule
       emoji="🤰"
-      title="Semana de embarazo"
-      description="El seguimiento de embarazo es P1, llega después del MVP."
+      title={t('pregnancyWeek.title')}
+      description={t('pregnancyWeek.description')}
     />
   );
 }

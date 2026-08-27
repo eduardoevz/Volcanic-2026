@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 
 import { MarkdownBody, useArticleBySlug, useMarkArticleRead } from '@/features/content';
@@ -13,6 +14,7 @@ import { colors, spacing } from '@/ui/theme/tokens';
 const READ_THRESHOLD_MS = 20_000;
 
 export default function ArticleScreen() {
+  const { t } = useTranslation('library');
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: article, isLoading, isError } = useArticleBySlug(slug);
   const markArticleRead = useMarkArticleRead();
@@ -36,10 +38,7 @@ export default function ArticleScreen() {
   if (isError) {
     return (
       <Screen>
-        <Banner
-          tone="danger"
-          message="No pudimos cargar este artículo. Puede que ya no exista, o revisá tu conexión."
-        />
+        <Banner tone="danger" message={t('article.loadError')} />
       </Screen>
     );
   }
@@ -47,7 +46,7 @@ export default function ArticleScreen() {
   if (isLoading || !article) {
     return (
       <Screen>
-        <Text variant="bodyMuted">Cargando...</Text>
+        <Text variant="bodyMuted">{t('loading')}</Text>
       </Screen>
     );
   }
@@ -58,29 +57,31 @@ export default function ArticleScreen() {
         <Text variant="heading">{`${article.cover_emoji}  ${article.title}`}</Text>
 
         <View style={{ flexDirection: 'row', gap: spacing.xs, alignItems: 'center' }}>
-          <Text variant="caption">{`${article.reading_minutes} min de lectura`}</Text>
+          <Text variant="caption">{t('readingMinutes', { minutes: article.reading_minutes })}</Text>
           {article.author_name ? <Text variant="caption">{`· ${article.author_name}`}</Text> : null}
         </View>
 
         {article.reviewed_by_name ? (
           <Card>
             <Text variant="caption" style={{ fontWeight: '700' }}>
-              Revisado por {article.reviewed_by_name}
+              {t('article.reviewedBy', { name: article.reviewed_by_name })}
             </Text>
             {article.reviewed_by_credentials ? (
               <Text variant="caption">{article.reviewed_by_credentials}</Text>
             ) : null}
-            {article.reviewed_at ? <Text variant="caption">{`Revisado el ${article.reviewed_at}`}</Text> : null}
+            {article.reviewed_at ? (
+              <Text variant="caption">{t('article.reviewedOn', { date: article.reviewed_at })}</Text>
+            ) : null}
           </Card>
         ) : (
-          <Badge label="Pendiente de revisión profesional" tone="warning" />
+          <Badge label={t('article.pendingProfessionalReview')} tone="warning" />
         )}
 
         <MarkdownBody markdown={article.body_md} />
 
         {article.content_sources.length > 0 ? (
           <View style={{ gap: spacing.xs }}>
-            <Text variant="heading">Fuentes</Text>
+            <Text variant="heading">{t('article.sourcesTitle')}</Text>
             {[...article.content_sources]
               .sort((a, b) => a.sort_order - b.sort_order)
               .map((source) => (
@@ -94,7 +95,7 @@ export default function ArticleScreen() {
         ) : null}
 
         <Text variant="caption" style={{ marginTop: spacing.md }}>
-          Esta información es educativa y no reemplaza la consulta con un profesional de salud.
+          {t('article.disclaimer')}
         </Text>
       </ScrollView>
     </Screen>

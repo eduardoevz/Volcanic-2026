@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
@@ -11,12 +12,13 @@ type GoogleSignInButtonProps = {
 };
 
 export function GoogleSignInButton({ onPress, loading = false, disabled = false }: GoogleSignInButtonProps) {
+  const { t } = useTranslation('auth');
   const isDisabled = disabled || loading;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Continuar con Google"
+      accessibilityLabel={t('shared.googleContinue')}
       accessibilityState={{ disabled: isDisabled }}
       onPress={onPress}
       disabled={isDisabled}
@@ -32,7 +34,7 @@ export function GoogleSignInButton({ onPress, loading = false, disabled = false 
         <>
           <GoogleIcon />
           <Text variant="button" style={styles.label}>
-            Continuar con Google
+            {t('shared.googleContinue')}
           </Text>
         </>
       )}

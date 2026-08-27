@@ -1,6 +1,7 @@
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
+import i18n from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 import { err, ok, type Result } from '@/shared/utils/result';
 
@@ -13,13 +14,13 @@ WebBrowser.maybeCompleteAuthSession();
 
 function toFriendlyMessage(rawMessage: string): string {
   const known: Record<string, string> = {
-    'Invalid login credentials': 'Correo o contraseña incorrectos.',
-    'User already registered': 'Ese correo ya está registrado.',
-    'Email not confirmed': 'Todavía no confirmaste tu correo.',
-    'Password should be at least 6 characters': 'La contraseña es muy corta.',
+    'Invalid login credentials': i18n.t('auth:errors.invalidCredentials'),
+    'User already registered': i18n.t('auth:errors.userAlreadyRegistered'),
+    'Email not confirmed': i18n.t('auth:errors.emailNotConfirmed'),
+    'Password should be at least 6 characters': i18n.t('auth:errors.passwordTooShort'),
   };
 
-  return known[rawMessage] ?? 'Ocurrió un error. Intentá de nuevo.';
+  return known[rawMessage] ?? i18n.t('auth:errors.generic');
 }
 
 export async function signIn({ email, password }: LoginInput): Promise<Result<null, string>> {
@@ -60,7 +61,7 @@ export async function signInWithGoogle(): Promise<Result<null, string>> {
   if (error || !data.url) return err(toFriendlyMessage(error?.message ?? ''));
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, GOOGLE_OAUTH_REDIRECT_URL);
-  if (result.type !== 'success') return err('Inicio de sesión cancelado.');
+  if (result.type !== 'success') return err(i18n.t('auth:errors.googleSignInCancelled'));
 
   // supabase-js usa flujo PKCE por defecto (sin flowType explícito en
   // createClient): el redirect trae un ?code=... que hay que canjear, no
@@ -68,7 +69,7 @@ export async function signInWithGoogle(): Promise<Result<null, string>> {
   // el código crudo, no la URL completa (@supabase/auth-js@2.112.3).
   const { queryParams } = Linking.parse(result.url);
   const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
-  if (!code) return err('No se pudo completar el inicio de sesión con Google.');
+  if (!code) return err(i18n.t('auth:errors.googleSignInFailed'));
 
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
   if (exchangeError) return err(toFriendlyMessage(exchangeError.message));

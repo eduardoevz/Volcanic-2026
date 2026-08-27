@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { OnboardingProgress, setLifeStage } from '@/features/onboarding';
@@ -10,6 +11,7 @@ import { Text } from '@/ui/components/Text';
 import { colors, radii, shadows, spacing } from '@/ui/theme/tokens';
 
 export default function LifeStageScreen() {
+  const { t } = useTranslation('onboarding');
   const [saving, setSaving] = useState<LifeStage | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +22,7 @@ export default function LifeStageScreen() {
       await setLifeStage(stage);
       router.push('/(onboarding)/avatar');
     } catch {
-      setError('No pudimos guardar tu etapa. Probá de nuevo.');
+      setError(t('lifeStage.saveError'));
       setSaving(null);
     }
   };
@@ -29,11 +31,10 @@ export default function LifeStageScreen() {
     <Screen>
       <OnboardingProgress step={2} />
       <Text variant="title" style={{ marginBottom: spacing.xs }}>
-        ¿En qué etapa estás?
+        {t('lifeStage.title')}
       </Text>
       <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
-        Esto define cómo se adapta Cora para vos. Podés cambiarlo cuando quieras desde tu
-        perfil.
+        {t('lifeStage.subtitle')}
       </Text>
 
       {error ? <Banner message={error} tone="danger" /> : null}

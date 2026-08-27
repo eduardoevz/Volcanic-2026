@@ -1,0 +1,47 @@
+{
+  "progress": {
+    "stepOf": "Paso {{step}} de {{total}}"
+  },
+  "welcome": {
+    "slides": {
+      "grow": { "title": "Cora crece con vos", "body": "Tu Home, tus registros y tu contenido se adaptan a la etapa de vida que estés viviendo." },
+      "privacy": { "title": "Tu información es tuya", "body": "Nada se comparte con terceros. Vos decidís qué compartir con la IA de Cora, y por defecto está apagado." },
+      "mascot": { "title": "Conocé a tu pitahaya", "body": "Una mascota que crece con tu acompañamiento, sin castigos ni rachas — solo sube de nivel." }
+    },
+    "next": "Siguiente",
+    "start": "Comenzar",
+    "skip": "Saltar"
+  },
+  "lifeStage": {
+    "title": "¿En qué etapa estás?",
+    "subtitle": "Esto define cómo se adapta Cora para vos. Podés cambiarlo cuando quieras desde tu perfil.",
+    "saveError": "No pudimos guardar tu etapa. Probá de nuevo."
+  },
+  "avatar": {
+    "title": "Elegí tu avatar",
+    "subtitle": "Fauna nicaragüense — tocá una para conocerla mejor.",
+    "loadError": "No pudimos cargar los avatares.",
+    "emptyTitle": "Sin avatares disponibles",
+    "emptyDescription": "Podés elegir uno más tarde desde tu perfil.",
+    "chooseThisOne": "Elegir este avatar",
+    "chooseLater": "Elegir más tarde",
+    "saveError": "No pudimos guardar tu avatar. Probá de nuevo.",
+    "habitat": "Hábitat: {{habitat}}",
+    "conservationStatus": "Estado de conservación: {{status}}"
+  },
+  "mascotIntro": {
+    "title": "Conocé a tu pitahaya",
+    "body": "Crece con cada momento de cuidado que registrés — sin castigos ni rachas. Nunca baja de nivel.",
+    "continue": "Continuar"
+  },
+  "consent": {
+    "title": "Privacidad y Cora IA",
+    "notificationsLabel": "Notificaciones",
+    "notificationsDescription": "Recordatorios suaves de autocuidado.",
+    "aiShareLabel": "Compartir contexto con Cora IA",
+    "aiShareDescription": "Apagado por defecto. Si lo activás, la IA puede usar tus registros para responderte mejor — nunca sin este permiso.",
+    "disclaimer": "Cora no diagnostica ni sustituye atención médica.",
+    "accept": "Aceptar y continuar",
+    "saveError": "No pudimos guardar tus preferencias. Probá de nuevo."
+  }
+}

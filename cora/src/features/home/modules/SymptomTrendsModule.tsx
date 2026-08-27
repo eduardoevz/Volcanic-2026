@@ -1,25 +1,25 @@
+import { useTranslation } from 'react-i18next';
+
 import { useRecentSymptomCounts } from '@/features/tracking';
 import { Card } from '@/ui/components/Card';
 import { Text } from '@/ui/components/Text';
 
 export function SymptomTrendsModule() {
+  const { t } = useTranslation('home');
   const { data: counts, isLoading } = useRecentSymptomCounts();
   const top = counts?.[0];
 
   return (
     <Card>
-      <Text variant="heading">Tendencia de síntomas</Text>
+      <Text variant="heading">{t('symptomTrends.title')}</Text>
       {isLoading ? (
-        <Text variant="bodyMuted">Cargando...</Text>
+        <Text variant="bodyMuted">{t('symptomTrends.loading')}</Text>
       ) : top ? (
         <Text variant="body">
-          Registraste “{top.label}” {top.count} {top.count === 1 ? 'vez' : 'veces'} en los últimos 30
-          días.
+          {t('symptomTrends.count', { label: top.label, count: top.count })}
         </Text>
       ) : (
-        <Text variant="bodyMuted">
-          Todavía no hay suficientes registros de síntomas para mostrar una tendencia.
-        </Text>
+        <Text variant="bodyMuted">{t('symptomTrends.empty')}</Text>
       )}
     </Card>
   );

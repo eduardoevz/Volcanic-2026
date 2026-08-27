@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/ui/components/Button';
@@ -9,32 +10,25 @@ import { colors, radii, spacing } from '@/ui/theme/tokens';
 
 const { width } = Dimensions.get('window');
 
-const SLIDES = [
-  {
-    emoji: '🌱',
-    title: 'Cora crece con vos',
-    body: 'Tu Home, tus registros y tu contenido se adaptan a la etapa de vida que estés viviendo.',
-  },
-  {
-    emoji: '🔒',
-    title: 'Tu información es tuya',
-    body: 'Nada se comparte con terceros. Vos decidís qué compartir con la IA de Cora, y por defecto está apagado.',
-  },
-  {
-    emoji: '🐉',
-    title: 'Conocé a tu pitahaya',
-    body: 'Una mascota que crece con tu acompañamiento, sin castigos ni rachas — solo sube de nivel.',
-  },
-];
+const SLIDE_EMOJI = ['🌱', '🔒', '🐉'];
+const SLIDE_KEYS = ['grow', 'privacy', 'mascot'] as const;
 
 export default function Welcome() {
+  const { t } = useTranslation('onboarding');
   const scrollRef = useRef<ScrollView>(null);
   const [slideIndex, setSlideIndex] = useState(0);
+
+  const slides = SLIDE_KEYS.map((key, i) => ({
+    key,
+    emoji: SLIDE_EMOJI[i],
+    title: t(`welcome.slides.${key}.title`),
+    body: t(`welcome.slides.${key}.body`),
+  }));
 
   const goToLifeStage = () => router.push('/(onboarding)/life-stage');
 
   const handleNext = () => {
-    if (slideIndex < SLIDES.length - 1) {
+    if (slideIndex < slides.length - 1) {
       scrollRef.current?.scrollTo({ x: (slideIndex + 1) * width, animated: true });
     } else {
       goToLifeStage();
@@ -52,8 +46,8 @@ export default function Welcome() {
           setSlideIndex(Math.round(e.nativeEvent.contentOffset.x / width));
         }}
       >
-        {SLIDES.map((slide) => (
-          <View key={slide.title} style={[styles.slide, { width }]}>
+        {slides.map((slide) => (
+          <View key={slide.key} style={[styles.slide, { width }]}>
             <Text style={styles.emoji}>{slide.emoji}</Text>
             <Text variant="title" style={styles.title}>
               {slide.title}
@@ -67,19 +61,19 @@ export default function Welcome() {
 
       <View style={styles.footer}>
         <View style={styles.dots}>
-          {SLIDES.map((slide, index) => (
+          {slides.map((slide, index) => (
             <View
-              key={slide.title}
+              key={slide.key}
               style={[styles.dot, index === slideIndex && styles.dotActive]}
             />
           ))}
         </View>
         <Button
-          label={slideIndex === SLIDES.length - 1 ? 'Comenzar' : 'Siguiente'}
+          label={slideIndex === slides.length - 1 ? t('welcome.start') : t('welcome.next')}
           onPress={handleNext}
           style={{ marginBottom: spacing.sm }}
         />
-        <Button label="Saltar" variant="ghost" onPress={goToLifeStage} />
+        <Button label={t('welcome.skip')} variant="ghost" onPress={goToLifeStage} />
       </View>
     </Screen>
   );

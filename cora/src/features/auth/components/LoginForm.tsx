@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { signIn, signInWithGoogle } from '@/features/auth/api';
@@ -15,6 +16,7 @@ import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 export function LoginForm() {
+  const { t } = useTranslation('auth');
   const [formError, setFormError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
   const {
@@ -55,8 +57,8 @@ export function LoginForm() {
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label="Correo"
-            placeholder="vos@correo.com"
+            label={t('shared.emailLabel')}
+            placeholder={t('shared.emailPlaceholder')}
             autoCapitalize="none"
             keyboardType="email-address"
             value={value}
@@ -72,8 +74,8 @@ export function LoginForm() {
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Contraseña"
-            placeholder="••••••••"
+            label={t('shared.passwordLabel')}
+            placeholder={t('shared.passwordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -83,19 +85,19 @@ export function LoginForm() {
       />
 
       <Button
-        label="Entrar"
+        label={t('login.submit')}
         loading={isSubmitting}
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}
       />
 
       <Link href="/(auth)/forgot-password" asChild>
-        <Button label="¿Olvidaste tu contraseña?" variant="ghost" onPress={() => {}} />
+        <Button label={t('login.forgotPassword')} variant="ghost" onPress={() => {}} />
       </Link>
 
       <View style={styles.divider}>
         <View style={styles.dividerLine} />
-        <Text variant="caption">o continuá con</Text>
+        <Text variant="caption">{t('shared.orContinueWith')}</Text>
         <View style={styles.dividerLine} />
       </View>
 

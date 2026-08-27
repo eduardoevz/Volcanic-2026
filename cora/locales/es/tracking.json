@@ -1,0 +1,45 @@
+{
+  "calendar": {
+    "title": "Calendario",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "loadError": "No pudimos cargar tus registros. Revisá tu conexión e intentá de nuevo.",
+    "noHistoryTitle": "Todavía no hay suficiente historial",
+    "noHistoryDescription": "Registrá al menos 2 ciclos para ver una predicción.",
+    "nextPeriodTitle": "Próximo período estimado",
+    "nextPeriodRange": "Entre el {{start}} y el {{end}} ({{confidence}})",
+    "confidenceGood": "confianza buena",
+    "confidenceInitial": "estimación",
+    "fertileWindowWarning": "Ventana fértil estimada. Esta estimación no es un método anticonceptivo.",
+    "last30DaysTitle": "Últimos 30 días",
+    "emptyTitle": "Sin registros todavía",
+    "emptyDescription": "Tocá un día del calendario para empezar a registrar."
+  },
+  "mood": {
+    "great": "Genial",
+    "good": "Bien",
+    "neutral": "Neutral",
+    "low": "Bajo",
+    "difficult": "Difícil"
+  },
+  "flow": {
+    "none": "Nada",
+    "spotting": "Manchado",
+    "light": "Leve",
+    "medium": "Moderado",
+    "heavy": "Abundante"
+  },
+  "log": {
+    "loadError": "No pudimos cargar tu registro previo de este día — si ya habías guardado algo, revisalo antes de sobrescribir.",
+    "flowTitle": "Flujo",
+    "moodTitle": "Ánimo",
+    "energyTitle": "Energía",
+    "symptomsTitle": "Síntomas",
+    "symptomsLoadError": "No pudimos cargar el catálogo de síntomas.",
+    "symptomsLoading": "Cargando síntomas...",
+    "noteTitle": "Nota",
+    "notePlaceholder": "Algo más que quieras anotar (opcional)",
+    "saveError": "No pudimos guardar. Probá de nuevo.",
+    "save": "Guardar"
+  }
+}

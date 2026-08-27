@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { requestPasswordReset } from '@/features/auth/api';
@@ -11,6 +12,7 @@ import { Input } from '@/ui/components/Input';
 import { spacing } from '@/ui/theme/tokens';
 
 export function ForgotPasswordForm() {
+  const { t } = useTranslation('auth');
   const [formError, setFormError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const {
@@ -35,20 +37,15 @@ export function ForgotPasswordForm() {
   return (
     <View style={{ gap: spacing.sm }}>
       {formError ? <Banner message={formError} tone="danger" /> : null}
-      {sent ? (
-        <Banner
-          message="Si el correo existe, te enviamos un enlace para restablecer tu contraseña. Revisá tu bandeja de entrada."
-          tone="info"
-        />
-      ) : null}
+      {sent ? <Banner message={t('forgotPassword.success')} tone="info" /> : null}
 
       <Controller
         control={control}
         name="email"
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            label="Correo"
-            placeholder="vos@correo.com"
+            label={t('shared.emailLabel')}
+            placeholder={t('shared.emailPlaceholder')}
             autoCapitalize="none"
             keyboardType="email-address"
             value={value}
@@ -60,7 +57,7 @@ export function ForgotPasswordForm() {
       />
 
       <Button
-        label="Enviar enlace"
+        label={t('forgotPassword.submit')}
         loading={isSubmitting}
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}

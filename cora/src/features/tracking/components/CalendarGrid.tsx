@@ -10,12 +10,17 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
 import { colors, radii, spacing } from '@/ui/theme/tokens';
 
-const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+// Días de la semana vía date-fns + locale (nunca hardcodeados) — §19 del plan.
+const WEEKDAY_ANCHORS = eachDayOfInterval({
+  start: startOfWeek(new Date(), { weekStartsOn: 1 }),
+  end: endOfWeek(new Date(), { weekStartsOn: 1 }),
+});
 
 type CalendarGridProps = {
   year: number;
@@ -49,9 +54,9 @@ export function CalendarGrid({
   return (
     <View>
       <View style={styles.weekRow}>
-        {WEEKDAY_LABELS.map((label, i) => (
-          <Text key={i} variant="caption" style={styles.weekdayLabel}>
-            {label}
+        {WEEKDAY_ANCHORS.map((day) => (
+          <Text key={day.getDay()} variant="caption" style={styles.weekdayLabel}>
+            {format(day, 'EEEEEE', { locale: es })}
           </Text>
         ))}
       </View>

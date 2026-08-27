@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { addMonths, endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { CalendarGrid } from '@/features/tracking/components/CalendarGrid';
@@ -14,15 +15,16 @@ import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
-const MOOD_LABELS: Record<string, string> = {
-  great: '😄 Genial',
-  good: '🙂 Bien',
-  neutral: '😐 Neutral',
-  low: '😔 Bajo',
-  difficult: '😣 Difícil',
+const MOOD_EMOJI: Record<string, string> = {
+  great: '😄',
+  good: '🙂',
+  neutral: '😐',
+  low: '😔',
+  difficult: '😣',
 };
 
 export default function CalendarScreen() {
+  const { t } = useTranslation('tracking');
   const [cursor, setCursor] = useState(() => new Date());
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
@@ -62,29 +64,26 @@ export default function CalendarScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: spacing.xl }}>
-        <Text variant="title">Calendario</Text>
+        <Text variant="title">{t('calendar.title')}</Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Button
             label="‹"
             variant="ghost"
-            accessibilityLabel="Mes anterior"
+            accessibilityLabel={t('calendar.prevMonth')}
             onPress={() => setCursor((c) => subMonths(c, 1))}
           />
           <Text variant="heading">{format(cursor, 'MMMM yyyy', { locale: es })}</Text>
           <Button
             label="›"
             variant="ghost"
-            accessibilityLabel="Mes siguiente"
+            accessibilityLabel={t('calendar.nextMonth')}
             onPress={() => setCursor((c) => addMonths(c, 1))}
           />
         </View>
 
         {monthLogsError || recentLogsError || predictionError ? (
-          <Banner
-            message="No pudimos cargar tus registros. Revisá tu conexión e intentá de nuevo."
-            tone="danger"
-          />
+          <Banner message={t('calendar.loadError')} tone="danger" />
         ) : null}
 
         <CalendarGrid
@@ -99,41 +98,41 @@ export default function CalendarScreen() {
 
         {!isLoading && !predictionError && !hasEnoughData ? (
           <EmptyState
-            title="Todavía no hay suficiente historial"
-            description="Registrá al menos 2 ciclos para ver una predicción."
+            title={t('calendar.noHistoryTitle')}
+            description={t('calendar.noHistoryDescription')}
           />
         ) : null}
 
         {prediction ? (
           <Card>
-            <Text variant="heading">Próximo período estimado</Text>
+            <Text variant="heading">{t('calendar.nextPeriodTitle')}</Text>
             <Text variant="body">
-              Entre el {format(new Date(prediction.nextStart), 'd')} y el{' '}
-              {format(
-                new Date(new Date(prediction.nextStart).getTime() + prediction.windowDays * 86400000),
-                'd MMM',
-                { locale: es }
-              )}{' '}
-              ({prediction.confidence === 'buena' ? 'confianza buena' : 'estimación'})
+              {t('calendar.nextPeriodRange', {
+                start: format(new Date(prediction.nextStart), 'd'),
+                end: format(
+                  new Date(new Date(prediction.nextStart).getTime() + prediction.windowDays * 86400000),
+                  'd MMM',
+                  { locale: es }
+                ),
+                confidence:
+                  prediction.confidence === 'buena'
+                    ? t('calendar.confidenceGood')
+                    : t('calendar.confidenceInitial'),
+              })}
             </Text>
           </Card>
         ) : null}
 
-        {fertileWindow ? (
-          <Banner
-            message="Ventana fértil estimada. Esta estimación no es un método anticonceptivo."
-            tone="warning"
-          />
-        ) : null}
+        {fertileWindow ? <Banner message={t('calendar.fertileWindowWarning')} tone="warning" /> : null}
 
         <View>
           <Text variant="heading" style={{ marginBottom: spacing.xs }}>
-            Últimos 30 días
+            {t('calendar.last30DaysTitle')}
           </Text>
           {recentLogsError ? null : (recentLogs ?? []).length === 0 ? (
             <EmptyState
-              title="Sin registros todavía"
-              description="Tocá un día del calendario para empezar a registrar."
+              title={t('calendar.emptyTitle')}
+              description={t('calendar.emptyDescription')}
             />
           ) : (
             <View style={{ gap: spacing.xs }}>
@@ -144,7 +143,7 @@ export default function CalendarScreen() {
                     <Text variant="body">{format(new Date(log.log_date), 'd MMM', { locale: es })}</Text>
                     <Text variant="bodyMuted">
                       {log.flow_level && log.flow_level !== 'none' ? '🩸 ' : ''}
-                      {log.mood ? MOOD_LABELS[log.mood] : ''}
+                      {log.mood ? `${MOOD_EMOJI[log.mood]} ${t(`mood.${log.mood}`)}` : ''}
                     </Text>
                   </Card>
                 ))}

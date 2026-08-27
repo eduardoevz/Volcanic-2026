@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/lib/i18n';
 
@@ -12,6 +13,8 @@ import { initSessionListener } from '@/store/sessionStore';
 import { ErrorBoundary } from '@/ui/ErrorBoundary';
 
 export default function RootLayout() {
+  const { t } = useTranslation('common');
+
   useEffect(() => {
     initSessionListener();
     configureOnlineManager();
@@ -42,15 +45,15 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen
               name="log/[date]"
-              options={{ headerShown: true, presentation: 'modal', title: 'Registro diario' }}
+              options={{ headerShown: true, presentation: 'modal', title: t('nav.dailyLog') }}
             />
             <Stack.Screen
               name="article/[slug]"
-              options={{ headerShown: true, title: 'Artículo' }}
+              options={{ headerShown: true, title: t('nav.article') }}
             />
-            <Stack.Screen name="mascot" options={{ headerShown: true, title: 'Tu pitahaya' }} />
-            <Stack.Screen name="summary/index" options={{ headerShown: true, title: 'Resumen médico' }} />
-            <Stack.Screen name="reminders" options={{ headerShown: true, title: 'Recordatorios' }} />
+            <Stack.Screen name="mascot" options={{ headerShown: true, title: t('nav.mascot') }} />
+            <Stack.Screen name="summary/index" options={{ headerShown: true, title: t('nav.summary') }} />
+            <Stack.Screen name="reminders" options={{ headerShown: true, title: t('nav.reminders') }} />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />

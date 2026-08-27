@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { updatePassword } from '@/features/auth/api';
@@ -12,6 +13,7 @@ import { PasswordInput } from '@/ui/components/PasswordInput';
 import { spacing } from '@/ui/theme/tokens';
 
 export function ResetPasswordForm() {
+  const { t } = useTranslation('auth');
   const { setPasswordRecovery } = useSession();
   const [formError, setFormError] = useState<string | null>(null);
   const {
@@ -44,8 +46,8 @@ export function ResetPasswordForm() {
         name="password"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Nueva contraseña"
-            placeholder="mínimo 8 caracteres"
+            label={t('resetPassword.newPasswordLabel')}
+            placeholder={t('resetPassword.newPasswordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -59,8 +61,8 @@ export function ResetPasswordForm() {
         name="confirmPassword"
         render={({ field: { onChange, onBlur, value } }) => (
           <PasswordInput
-            label="Confirmar contraseña"
-            placeholder="repetí la contraseña"
+            label={t('resetPassword.confirmPasswordLabel')}
+            placeholder={t('resetPassword.confirmPasswordPlaceholder')}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
@@ -70,7 +72,7 @@ export function ResetPasswordForm() {
       />
 
       <Button
-        label="Guardar contraseña"
+        label={t('resetPassword.submit')}
         loading={isSubmitting}
         onPress={handleSubmit(onSubmit)}
         style={{ marginTop: spacing.xs }}

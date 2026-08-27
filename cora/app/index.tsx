@@ -1,4 +1,5 @@
 import { Redirect } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 
 import { useProfile } from '@/features/profile';
@@ -9,6 +10,7 @@ import { Screen } from '@/ui/components/Screen';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 export default function Index() {
+  const { t } = useTranslation('common');
   const { status } = useSession();
   const { data: profile, isLoading: profileLoading, isError: profileError, refetch } = useProfile();
 
@@ -30,11 +32,8 @@ export default function Index() {
   if (profileError && !profile) {
     return (
       <Screen style={{ alignItems: 'center', justifyContent: 'center', gap: spacing.md }}>
-        <Banner
-          tone="danger"
-          message="No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."
-        />
-        <Button label="Reintentar" onPress={() => refetch()} />
+        <Banner tone="danger" message={t('index.sessionCheckError')} />
+        <Button label={t('common.retry')} onPress={() => refetch()} />
       </Screen>
     );
   }

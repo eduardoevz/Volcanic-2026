@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderModule } from './PlaceholderModule';
 
 export function HydrationModule() {
+  const { t } = useTranslation('home');
+
   return (
     <PlaceholderModule
       emoji="💧"
-      title="Hidratación"
-      description="Seguimiento de bienestar general — llega en una fase posterior."
+      title={t('hydration.title')}
+      description={t('hydration.description')}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 
 import { useProfile } from '@/features/profile';
@@ -18,31 +19,31 @@ import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
-const FLOW_OPTIONS: { value: FlowLevel; label: string }[] = [
-  { value: 'none', label: 'Nada' },
-  { value: 'spotting', label: 'Manchado' },
-  { value: 'light', label: 'Leve' },
-  { value: 'medium', label: 'Moderado' },
-  { value: 'heavy', label: 'Abundante' },
-];
-
-const MOOD_OPTIONS: { value: Mood; label: string }[] = [
-  { value: 'great', label: '😄 Genial' },
-  { value: 'good', label: '🙂 Bien' },
-  { value: 'neutral', label: '😐 Neutral' },
-  { value: 'low', label: '😔 Bajo' },
-  { value: 'difficult', label: '😣 Difícil' },
+const FLOW_VALUES: FlowLevel[] = ['none', 'spotting', 'light', 'medium', 'heavy'];
+const MOOD_VALUES: { value: Mood; emoji: string }[] = [
+  { value: 'great', emoji: '😄' },
+  { value: 'good', emoji: '🙂' },
+  { value: 'neutral', emoji: '😐' },
+  { value: 'low', emoji: '😔' },
+  { value: 'difficult', emoji: '😣' },
 ];
 
 // El flujo no aplica en estas etapas (no hay ciclo menstrual en curso).
 const STAGES_WITHOUT_FLOW = ['mayor', 'embarazo'];
 
 export default function DailyLogScreen() {
+  const { t } = useTranslation('tracking');
   const { date } = useLocalSearchParams<{ date: string }>();
   const { data: profile } = useProfile();
   const { data: existingLog, isLoading: logLoading, isError: logError } = useDailyLog(date);
   const { data: symptoms, isLoading: symptomsLoading, isError: symptomsError } = useSymptomCatalog();
   const saveDailyLog = useSaveDailyLog();
+
+  const flowOptions = FLOW_VALUES.map((value) => ({ value, label: t(`flow.${value}`) }));
+  const moodOptions = MOOD_VALUES.map(({ value, emoji }) => ({
+    value,
+    label: `${emoji} ${t(`mood.${value}`)}`,
+  }));
 
   const [flowLevel, setFlowLevel] = useState<FlowLevel | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
@@ -128,18 +129,13 @@ export default function DailyLogScreen() {
       <ScrollView contentContainerStyle={{ gap: spacing.lg, paddingBottom: spacing.xl }}>
         <Text variant="bodyMuted">{date}</Text>
 
-        {logError ? (
-          <Banner
-            tone="warning"
-            message="No pudimos cargar tu registro previo de este día — si ya habías guardado algo, revisalo antes de sobrescribir."
-          />
-        ) : null}
+        {logError ? <Banner tone="warning" message={t('log.loadError')} /> : null}
 
         {showFlow ? (
           <View style={{ gap: spacing.xs }}>
-            <Text variant="heading">Flujo</Text>
+            <Text variant="heading">{t('log.flowTitle')}</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-              {FLOW_OPTIONS.map((opt) => (
+              {flowOptions.map((opt) => (
                 <Chip
                   key={opt.value}
                   label={opt.label}
@@ -152,9 +148,9 @@ export default function DailyLogScreen() {
         ) : null}
 
         <View style={{ gap: spacing.xs }}>
-          <Text variant="heading">Ánimo</Text>
+          <Text variant="heading">{t('log.moodTitle')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
-            {MOOD_OPTIONS.map((opt) => (
+            {moodOptions.map((opt) => (
               <Chip
                 key={opt.value}
                 label={opt.label}
@@ -166,7 +162,7 @@ export default function DailyLogScreen() {
         </View>
 
         <View style={{ gap: spacing.xs }}>
-          <Text variant="heading">Energía</Text>
+          <Text variant="heading">{t('log.energyTitle')}</Text>
           <View style={{ flexDirection: 'row', gap: spacing.xs }}>
             {[1, 2, 3, 4, 5].map((level) => (
               <Chip
@@ -180,11 +176,11 @@ export default function DailyLogScreen() {
         </View>
 
         <View style={{ gap: spacing.xs }}>
-          <Text variant="heading">Síntomas</Text>
+          <Text variant="heading">{t('log.symptomsTitle')}</Text>
           {symptomsError ? (
-            <Banner tone="danger" message="No pudimos cargar el catálogo de síntomas." />
+            <Banner tone="danger" message={t('log.symptomsLoadError')} />
           ) : symptomsLoading ? (
-            <Text variant="bodyMuted">Cargando síntomas...</Text>
+            <Text variant="bodyMuted">{t('log.symptomsLoading')}</Text>
           ) : (
             <View style={{ gap: spacing.sm }}>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
@@ -221,9 +217,9 @@ export default function DailyLogScreen() {
         </View>
 
         <View style={{ gap: spacing.xs }}>
-          <Text variant="heading">Nota</Text>
+          <Text variant="heading">{t('log.noteTitle')}</Text>
           <Input
-            placeholder="Algo más que quieras anotar (opcional)"
+            placeholder={t('log.notePlaceholder')}
             value={notes}
             onChangeText={setNotes}
             multiline
@@ -231,11 +227,9 @@ export default function DailyLogScreen() {
           />
         </View>
 
-        {saveDailyLog.isError ? (
-          <Banner message="No pudimos guardar. Probá de nuevo." tone="danger" />
-        ) : null}
+        {saveDailyLog.isError ? <Banner message={t('log.saveError')} tone="danger" /> : null}
 
-        <Button label="Guardar" onPress={handleSave} loading={saveDailyLog.isPending} />
+        <Button label={t('log.save')} onPress={handleSave} loading={saveDailyLog.isPending} />
       </ScrollView>
     </Screen>
   );

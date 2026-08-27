@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -17,6 +18,7 @@ import { colors, spacing } from '@/ui/theme/tokens';
 // desde cualquier pantalla de la app cuando checkMascotEvolution detecta que
 // el nivel subió — no requiere que la usuaria esté en /mascot.
 export function MascotEvolutionOverlay() {
+  const { t } = useTranslation('mascot');
   const level = useMascotEvolutionStore((state) => state.justEvolvedToLevel);
   const clear = useMascotEvolutionStore((state) => state.clear);
   const scale = useSharedValue(0);
@@ -58,15 +60,15 @@ export function MascotEvolutionOverlay() {
             variant="title"
             style={{ color: colors.white, textAlign: 'center', marginTop: spacing.md }}
           >
-            ¡Tu pitahaya creció!
+            {t('evolution.title')}
           </Text>
           <Text
             variant="body"
             style={{ color: colors.white, textAlign: 'center', marginTop: spacing.xs }}
           >
-            {`Ahora es ${meta.name} · Nivel ${level}`}
+            {t('evolution.subtitle', { name: meta.name, level })}
           </Text>
-          <Button label="Genial" onPress={clear} style={{ marginTop: spacing.lg }} />
+          <Button label={t('evolution.accept')} onPress={clear} style={{ marginTop: spacing.lg }} />
         </Animated.View>
       </View>
     </Modal>

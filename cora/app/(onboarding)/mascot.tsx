@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -13,6 +14,7 @@ import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
 export default function MascotScreen() {
+  const { t } = useTranslation('onboarding');
   const scale = useSharedValue(0);
 
   useEffect(() => {
@@ -30,13 +32,12 @@ export default function MascotScreen() {
         🐉
       </Animated.Text>
       <Text variant="title" style={{ textAlign: 'center', marginBottom: spacing.sm }}>
-        Conocé a tu pitahaya
+        {t('mascotIntro.title')}
       </Text>
       <Text variant="bodyMuted" style={{ textAlign: 'center', marginBottom: spacing.lg }}>
-        Crece con cada momento de cuidado que registrés — sin castigos ni rachas. Nunca baja
-        de nivel.
+        {t('mascotIntro.body')}
       </Text>
-      <Button label="Continuar" onPress={() => router.push('/(onboarding)/consent')} />
+      <Button label={t('mascotIntro.continue')} onPress={() => router.push('/(onboarding)/consent')} />
     </Screen>
   );
 }

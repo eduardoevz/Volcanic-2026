@@ -1,11 +1,15 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderModule } from './PlaceholderModule';
 
 export function RemindersModule() {
+  const { t } = useTranslation('home');
+
   return (
     <PlaceholderModule
       emoji="⏰"
-      title="Recordatorios"
-      description="Los recordatorios locales son P1, llegan en la Fase 8."
+      title={t('reminders.title')}
+      description={t('reminders.description')}
     />
   );
 }

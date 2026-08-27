@@ -1,0 +1,8 @@
+{
+  "title": "Cora IA",
+  "disclaimer": "Cora es educativa. No sustituye a un profesional de salud.",
+  "firstMessage": "Hola, soy Cora. Puedo ayudarte a entender tu ciclo y tu cuerpo con información educativa, pero no soy médica: no diagnostico ni reemplazo una consulta profesional. ¿En qué te ayudo hoy?",
+  "offline": "Cora necesita internet para conversar.",
+  "inputPlaceholder": "Escribí tu pregunta...",
+  "send": "Enviar"
+}

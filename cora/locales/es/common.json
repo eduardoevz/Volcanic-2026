@@ -9,6 +9,21 @@
     "somethingWentWrong": "Algo salió mal",
     "errorBoundaryMessage": "Tuvimos un problema mostrando esta pantalla. Probá de nuevo."
   },
+  "nav": {
+    "home": "Inicio",
+    "calendar": "Calendario",
+    "library": "Biblioteca",
+    "assistant": "Cora",
+    "profile": "Perfil",
+    "dailyLog": "Registro diario",
+    "article": "Artículo",
+    "mascot": "Tu pitahaya",
+    "summary": "Resumen médico",
+    "reminders": "Recordatorios"
+  },
+  "index": {
+    "sessionCheckError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."
+  },
   "home": {
     "greeting": {
       "adolescencia": "¿Cómo va tu día?",

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Switch, View } from 'react-native';
 
 import { checkMascotEvolution } from '@/features/mascot';
@@ -13,6 +14,7 @@ import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 export default function ConsentScreen() {
+  const { t } = useTranslation('onboarding');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [aiShareHealthContext, setAiShareHealthContext] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -29,7 +31,7 @@ export default function ConsentScreen() {
       if (session?.user.id) await checkMascotEvolution(queryClient, session.user.id);
       router.replace('/(tabs)/home');
     } catch {
-      setError('No pudimos guardar tus preferencias. Probá de nuevo.');
+      setError(t('consent.saveError'));
       setSaving(false);
     }
   };
@@ -38,7 +40,7 @@ export default function ConsentScreen() {
     <Screen>
       <OnboardingProgress step={5} />
       <Text variant="title" style={{ marginBottom: spacing.md }}>
-        Privacidad y Cora IA
+        {t('consent.title')}
       </Text>
 
       {error ? <Banner message={error} tone="danger" /> : null}
@@ -51,8 +53,8 @@ export default function ConsentScreen() {
             trackColor={{ true: colors.pitahaya }}
           />
           <View style={{ flex: 1 }}>
-            <Text variant="body">Notificaciones</Text>
-            <Text variant="caption">Recordatorios suaves de autocuidado.</Text>
+            <Text variant="body">{t('consent.notificationsLabel')}</Text>
+            <Text variant="caption">{t('consent.notificationsDescription')}</Text>
           </View>
         </View>
 
@@ -63,22 +65,16 @@ export default function ConsentScreen() {
             trackColor={{ true: colors.pitahaya }}
           />
           <View style={{ flex: 1 }}>
-            <Text variant="body">Compartir contexto con Cora IA</Text>
-            <Text variant="caption">
-              Apagado por defecto. Si lo activás, la IA puede usar tus registros para
-              responderte mejor — nunca sin este permiso.
-            </Text>
+            <Text variant="body">{t('consent.aiShareLabel')}</Text>
+            <Text variant="caption">{t('consent.aiShareDescription')}</Text>
           </View>
         </View>
       </View>
 
-      <Banner
-        message="Cora no diagnostica ni sustituye atención médica."
-        tone="info"
-      />
+      <Banner message={t('consent.disclaimer')} tone="info" />
 
       <Button
-        label="Aceptar y continuar"
+        label={t('consent.accept')}
         onPress={handleAccept}
         loading={saving}
         style={{ marginTop: spacing.lg }}

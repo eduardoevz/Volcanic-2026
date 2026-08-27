@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ScrollView } from 'react-native';
 
 import { HomeHeader } from '@/features/home/components/HomeHeader';
@@ -9,15 +10,13 @@ import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
 
 export default function Home() {
+  const { t } = useTranslation('home');
   const { data: profile, isLoading, isError } = useProfile();
 
   if (isError && !profile) {
     return (
       <Screen>
-        <Banner
-          tone="danger"
-          message="No pudimos cargar tu Home. Revisá tu conexión e intentá de nuevo."
-        />
+        <Banner tone="danger" message={t('loadError')} />
       </Screen>
     );
   }
@@ -25,7 +24,7 @@ export default function Home() {
   if (isLoading || !profile?.life_stage) {
     return (
       <Screen>
-        <Text variant="bodyMuted">Cargando tu Home...</Text>
+        <Text variant="bodyMuted">{t('loading')}</Text>
       </Screen>
     );
   }

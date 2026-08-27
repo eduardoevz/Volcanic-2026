@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
@@ -10,10 +11,12 @@ type OnboardingProgressProps = {
 };
 
 export function OnboardingProgress({ step }: OnboardingProgressProps) {
+  const { t } = useTranslation('onboarding');
+
   return (
     <View style={{ marginBottom: spacing.md }}>
       <Text variant="caption" style={{ marginBottom: spacing.xs }}>
-        Paso {step} de {TOTAL_STEPS}
+        {t('progress.stepOf', { step, total: TOTAL_STEPS })}
       </Text>
       <View style={styles.track}>
         {Array.from({ length: TOTAL_STEPS }).map((_, index) => (

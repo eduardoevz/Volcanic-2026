@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Switch, View } from 'react-native';
 
 import { signOut } from '@/features/auth';
@@ -18,6 +19,7 @@ import { Text } from '@/ui/components/Text';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 export default function Profile() {
+  const { t } = useTranslation('settings');
   const router = useRouter();
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
@@ -62,40 +64,37 @@ export default function Profile() {
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
       <Text variant="title" style={{ marginBottom: spacing.sm }}>
-        Perfil
+        {t('title')}
       </Text>
       <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
         {session?.user.email}
       </Text>
 
       {isLoading ? (
-        <Text variant="bodyMuted">Cargando perfil...</Text>
+        <Text variant="bodyMuted">{t('loading')}</Text>
       ) : isError ? (
-        <Banner
-          message="No pudimos cargar tu perfil. Revisá tu conexión e intentá de nuevo."
-          tone="danger"
-        />
+        <Banner message={t('loadError')} tone="danger" />
       ) : (
         <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
             <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
             <View>
               <Text variant="body">
-                {profile?.display_name ?? 'Sin nombre todavía'}
+                {profile?.display_name ?? t('noNameYet')}
               </Text>
               <Text variant="bodyMuted">
-                {profile?.avatars?.name_es ?? 'Sin avatar elegido'}
+                {profile?.avatars?.name_es ?? t('noAvatarChosen')}
               </Text>
             </View>
           </View>
 
           <View>
-            <Text variant="caption">Etapa de vida</Text>
+            <Text variant="caption">{t('lifeStageLabel')}</Text>
             <Text variant="body">
-              {profile?.life_stage ? LIFE_STAGE_META[profile.life_stage].label : 'Sin definir'}
+              {profile?.life_stage ? LIFE_STAGE_META[profile.life_stage].label : t('lifeStageUndefined')}
             </Text>
             <Button
-              label="Cambiar etapa"
+              label={t('changeLifeStage')}
               variant="ghost"
               onPress={() => setChangingStage(true)}
             />
@@ -104,13 +103,8 @@ export default function Profile() {
       )}
 
       <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
-        <Text variant="caption">Privacidad</Text>
-        {preferencesError ? (
-          <Banner
-            tone="danger"
-            message="No pudimos cargar tus preferencias de privacidad. Revisá tu conexión."
-          />
-        ) : null}
+        <Text variant="caption">{t('privacyTitle')}</Text>
+        {preferencesError ? <Banner tone="danger" message={t('privacyLoadError')} /> : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
           <Switch
             value={preferences?.ai_share_health_context ?? false}
@@ -119,27 +113,27 @@ export default function Profile() {
             trackColor={{ true: colors.pitahaya }}
           />
           <View style={{ flex: 1 }}>
-            <Text variant="body">Compartir contexto con Cora IA</Text>
+            <Text variant="body">{t('aiShareLabel')}</Text>
             <Text variant="caption">
               {preferences?.ai_share_health_context
-                ? 'Cora puede usar agregados de tus registros (ciclo promedio, síntoma frecuente, ánimo) para responderte mejor. Nunca ve tus notas ni filas crudas.'
-                : 'Apagado: Cora solo conoce tu etapa de vida y rango de edad, nunca tus registros.'}
+                ? t('aiShareOnDescription')
+                : t('aiShareOffDescription')}
             </Text>
           </View>
         </View>
       </View>
 
       <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-        <Button label="Resumen médico" variant="secondary" onPress={() => router.push('/summary')} />
-        <Button label="Recordatorios" variant="secondary" onPress={() => router.push('/reminders')} />
+        <Button label={t('medicalSummary')} variant="secondary" onPress={() => router.push('/summary')} />
+        <Button label={t('reminders')} variant="secondary" onPress={() => router.push('/reminders')} />
       </View>
 
-      <Button label="Cerrar sesión" variant="secondary" onPress={handleSignOut} />
+      <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />
       </ScrollView>
 
       <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>
         <View style={{ gap: spacing.sm }}>
-          <Text variant="heading">¿En qué etapa estás ahora?</Text>
+          <Text variant="heading">{t('changeLifeStagePrompt')}</Text>
           {LIFE_STAGES.map((stage) => (
             <Pressable
               key={stage}
