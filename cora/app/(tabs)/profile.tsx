@@ -136,6 +136,11 @@ export default function Profile() {
           variant="secondary"
           onPress={() => router.push('/family')}
         />
+        <Button
+          label={t('appointmentsAgenda')}
+          variant="secondary"
+          onPress={() => router.push('/appointments')}
+        />
       </View>
 
       <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />

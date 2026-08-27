@@ -30,8 +30,10 @@
     "points": "{{points}} puntos acumulados"
   },
   "pregnancyWeek": {
-    "title": "Semana de embarazo",
-    "description": "El seguimiento de embarazo es P1, llega después del MVP."
+    "loading": "Cargando...",
+    "cta": "Registrá tu embarazo para ver tu semana actual",
+    "weekTitle": "Semana {{week}} de embarazo",
+    "dueDate": "Fecha probable de parto: {{date}}"
   },
   "recommendedArticle": {
     "title": "Artículo recomendado",

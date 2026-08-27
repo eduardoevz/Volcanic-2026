@@ -2,6 +2,7 @@ import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import esAppointments from '../../locales/es/appointments.json';
 import esAssistant from '../../locales/es/assistant.json';
 import esAuth from '../../locales/es/auth.json';
 import esCommon from '../../locales/es/common.json';
@@ -11,10 +12,12 @@ import esHome from '../../locales/es/home.json';
 import esLibrary from '../../locales/es/library.json';
 import esMascot from '../../locales/es/mascot.json';
 import esOnboarding from '../../locales/es/onboarding.json';
+import esPregnancy from '../../locales/es/pregnancy.json';
 import esReminders from '../../locales/es/reminders.json';
 import esSettings from '../../locales/es/settings.json';
 import esSummary from '../../locales/es/summary.json';
 import esTracking from '../../locales/es/tracking.json';
+import misAppointments from '../../locales/mis/appointments.json';
 import misAssistant from '../../locales/mis/assistant.json';
 import misAuth from '../../locales/mis/auth.json';
 import misCommon from '../../locales/mis/common.json';
@@ -24,10 +27,12 @@ import misHome from '../../locales/mis/home.json';
 import misLibrary from '../../locales/mis/library.json';
 import misMascot from '../../locales/mis/mascot.json';
 import misOnboarding from '../../locales/mis/onboarding.json';
+import misPregnancy from '../../locales/mis/pregnancy.json';
 import misReminders from '../../locales/mis/reminders.json';
 import misSettings from '../../locales/mis/settings.json';
 import misSummary from '../../locales/mis/summary.json';
 import misTracking from '../../locales/mis/tracking.json';
+import mynAppointments from '../../locales/myn/appointments.json';
 import mynAssistant from '../../locales/myn/assistant.json';
 import mynAuth from '../../locales/myn/auth.json';
 import mynCommon from '../../locales/myn/common.json';
@@ -37,6 +42,7 @@ import mynHome from '../../locales/myn/home.json';
 import mynLibrary from '../../locales/myn/library.json';
 import mynMascot from '../../locales/myn/mascot.json';
 import mynOnboarding from '../../locales/myn/onboarding.json';
+import mynPregnancy from '../../locales/myn/pregnancy.json';
 import mynReminders from '../../locales/myn/reminders.json';
 import mynSettings from '../../locales/myn/settings.json';
 import mynSummary from '../../locales/myn/summary.json';
@@ -57,6 +63,8 @@ const resources = {
     reminders: esReminders,
     directory: esDirectory,
     family: esFamily,
+    pregnancy: esPregnancy,
+    appointments: esAppointments,
   },
   mis: {
     common: misCommon,
@@ -72,6 +80,8 @@ const resources = {
     reminders: misReminders,
     directory: misDirectory,
     family: misFamily,
+    pregnancy: misPregnancy,
+    appointments: misAppointments,
   },
   myn: {
     common: mynCommon,
@@ -87,6 +97,8 @@ const resources = {
     reminders: mynReminders,
     directory: mynDirectory,
     family: mynFamily,
+    pregnancy: mynPregnancy,
+    appointments: mynAppointments,
   },
 };
 

@@ -72,6 +72,14 @@ export default function RootLayout() {
               name="family/accept"
               options={{ headerShown: true, title: t('nav.familyAccept') }}
             />
+            <Stack.Screen
+              name="pregnancy/index"
+              options={{ headerShown: true, title: t('nav.pregnancy') }}
+            />
+            <Stack.Screen
+              name="appointments"
+              options={{ headerShown: true, title: t('nav.appointments') }}
+            />
             <Stack.Screen name="dev/kitchen-sink" options={{ headerShown: true, title: 'Kitchen Sink' }} />
           </Stack>
           <StatusBar style="auto" />

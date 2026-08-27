@@ -1,0 +1,21 @@
+{
+  "title": "Mi embarazo",
+  "loading": "Cargando...",
+  "loadError": "No pudimos cargar tu embarazo. Revisá tu conexión e intentá de nuevo.",
+  "startTitle": "Registrá tu embarazo",
+  "startDescription": "Con la fecha de tu última menstruación calculamos la semana actual y la fecha probable de parto — una estimación, no un diagnóstico.",
+  "lmpLabel": "Fecha de tu última menstruación",
+  "startSubmit": "Empezar seguimiento",
+  "createError": "No pudimos guardar. Probá de nuevo.",
+  "weekLabel": "Semana {{week}}",
+  "trimesterLabel": "Trimestre {{trimester}}",
+  "dueDateLabel": "Fecha probable de parto: {{date}}",
+  "notesLabel": "Notas",
+  "notesPlaceholder": "Algo que quieras anotar sobre tu embarazo (opcional)",
+  "saveNotes": "Guardar notas",
+  "endTracking": "Finalizar seguimiento",
+  "endConfirmTitle": "¿Finalizar el seguimiento de este embarazo?",
+  "endConfirmDescription": "Podés registrar un nuevo embarazo más adelante si hace falta.",
+  "endConfirmSubmit": "Sí, finalizar",
+  "endConfirmCancel": "Cancelar"
+}

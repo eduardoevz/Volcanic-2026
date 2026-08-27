@@ -1,0 +1,40 @@
+{
+  "title": "Agenda de citas",
+  "subtitle": "Tus próximas consultas médicas.",
+  "loading": "Cargando...",
+  "loadError": "No pudimos cargar tus citas. Revisá tu conexión e intentá de nuevo.",
+  "createError": "No pudimos crear la cita. Probá de nuevo.",
+  "updateError": "No pudimos actualizar la cita. Probá de nuevo.",
+  "emptyTitle": "Sin citas registradas",
+  "emptyDescription": "Agregá tu próxima consulta para no olvidarla.",
+  "newAppointment": "Nueva cita",
+  "newAppointmentTitle": "Nueva cita médica",
+  "titleLabel": "Motivo de la cita",
+  "titlePlaceholder": "Ej. Control ginecológico",
+  "specialistLabel": "Especialista (opcional)",
+  "specialistPlaceholder": "Nombre del profesional",
+  "locationLabel": "Lugar (opcional)",
+  "locationPlaceholder": "Clínica u hospital",
+  "notesLabel": "Notas (opcional)",
+  "notesPlaceholder": "Algo más que quieras recordar",
+  "dayLabel": "¿Cuándo?",
+  "dayOptions": {
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "in3Days": "En 3 días",
+    "in1Week": "En 1 semana",
+    "in2Weeks": "En 2 semanas",
+    "in1Month": "En 1 mes"
+  },
+  "hourLabel": "Hora",
+  "minuteLabel": "Minuto",
+  "save": "Guardar",
+  "markCompleted": "Marcar completada",
+  "cancel": "Cancelar cita",
+  "delete": "Eliminar",
+  "status": {
+    "scheduled": "Programada",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
+  }
+}

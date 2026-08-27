@@ -115,6 +115,56 @@ export type Database = {
           },
         ]
       }
+      appointments: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          notification_identifier: string | null
+          scheduled_at: string
+          specialist_name: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          notification_identifier?: string | null
+          scheduled_at: string
+          specialist_name?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          notification_identifier?: string | null
+          scheduled_at?: string
+          specialist_name?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       avatars: {
         Row: {
           code: string
@@ -722,6 +772,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "medical_summaries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pregnancies: {
+        Row: {
+          created_at: string
+          due_date: string
+          ended_at: string | null
+          id: string
+          lmp_date: string
+          notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          ended_at?: string | null
+          id?: string
+          lmp_date: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          ended_at?: string | null
+          id?: string
+          lmp_date?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pregnancies_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"

@@ -25,7 +25,9 @@
     "specialists": "Especialistas",
     "family": "Círculo familiar",
     "familyInvite": "Invitar a mi círculo",
-    "familyAccept": "Unirse a un círculo"
+    "familyAccept": "Unirse a un círculo",
+    "pregnancy": "Mi embarazo",
+    "appointments": "Agenda de citas"
   },
   "index": {
     "sessionCheckError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."

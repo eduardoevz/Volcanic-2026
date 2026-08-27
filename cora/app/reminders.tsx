@@ -16,45 +16,11 @@ import { Input } from '@/ui/components/Input';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
+import { TimeStepper } from '@/ui/components/TimeStepper';
 import { colors, spacing } from '@/ui/theme/tokens';
 
 function pad(n: number) {
   return n.toString().padStart(2, '0');
-}
-
-function TimeStepper({
-  label,
-  value,
-  max,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  max: number;
-  onChange: (next: number) => void;
-}) {
-  const { t } = useTranslation('reminders');
-
-  return (
-    <View style={{ alignItems: 'center', gap: spacing.xs }}>
-      <Text variant="caption">{label}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Button
-          label="−"
-          variant="secondary"
-          accessibilityLabel={t('decrease', { label: label.toLowerCase() })}
-          onPress={() => onChange((value - 1 + (max + 1)) % (max + 1))}
-        />
-        <Text variant="heading">{pad(value)}</Text>
-        <Button
-          label="+"
-          variant="secondary"
-          accessibilityLabel={t('increase', { label: label.toLowerCase() })}
-          onPress={() => onChange((value + 1) % (max + 1))}
-        />
-      </View>
-    </View>
-  );
 }
 
 export default function Reminders() {

@@ -2,6 +2,37 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-27.
 
+## Fase 16 — Etapas y agenda ampliadas (P1)
+
+`CORA-106`/`CORA-107`: seguimiento de embarazo (`pregnancies`) y agenda de citas médicas (`appointments`). Cierra dos cosas pendientes de fases anteriores: reemplaza el `PlaceholderModule` honesto que `PregnancyWeekModule.tsx` mostraba desde que existe `moduleRegistry.ts`, y reactiva el scope `appointments` de `family_share_grants`, dejado inerte a propósito en Fase 15 por no existir esta tabla todavía.
+
+- [x] Migración `0016_pregnancy_and_appointments.sql` (el texto del plan decía "0015"; ese número ya lo usó Fase 15, misma desviación de numeración ya documentada): `pregnancies` (RLS patrón A, idéntico a `cycles`) + `appointments` (RLS patrón A + política aditiva `family_shared_select` vía `has_active_grant(user_id, auth.uid(), 'appointments')` — reusa la función de Fase 15 sin cambios).
+- [x] `src/features/pregnancy/pregnancyEngine.ts` — funciones puras testeadas (`computeDueDate`: regla de Naegele, 280 días desde la última menstruación; `computeWeek`; `computeTrimester`, cortes en semana 12/13 y 26/27), mismo espíritu que `cycleEngine.ts`. `due_date` se calcula una vez en el cliente al crear el registro y se guarda — no se recalcula en cada lectura, mismo criterio que `cycles.is_predicted`.
+- [x] `PregnancyWeekModule.tsx` reemplazado: sin embarazo activo, tarjeta con CTA "Registrá tu embarazo"; con uno activo, semana + fecha probable de parto, ambas pressable hacia `/pregnancy` — sin tocar `moduleRegistry.ts`, que ya tenía el módulo cableado a la etapa `embarazo` desde antes.
+- [x] `app/pregnancy/index.tsx`: formulario de una sola pregunta (fecha de última menstruación) si no hay embarazo activo; semana/trimestre/fecha probable de parto + notas editables + "Finalizar seguimiento" (con confirmación) si lo hay.
+- [x] `src/features/appointments/` nueva, calco de `src/features/reminders/` — reusa la infraestructura de notificaciones de Fase 8 en vez de reinventarla: `scheduleOnce(title, date)` agregado a `src/features/reminders/notifications.ts` (notificación de una sola vez, `SchedulableTriggerInputTypes.DATE`, junto al `scheduleDaily` ya existente), `cancelScheduled` reusado tal cual.
+- [x] **Extracción de `TimeStepper`** de `app/reminders.tsx` a `src/ui/components/TimeStepper.tsx` — dejó de ser código de una sola pantalla en el momento en que `app/appointments.tsx` también lo necesita (regla de oro de `docs/CONVENCIONES.md`, aplicada en la dirección de "sacar de una feature", no de meter). `app/reminders.tsx` actualizado para importarlo, sin cambio de comportamiento.
+- [x] **Selección de fecha sin dependencia nativa nueva** (mismo criterio que Fase 8, evita un rebuild): `app/appointments.tsx` combina `Chip`s de fecha relativa (Hoy/Mañana/En 3 días/En 1 semana/En 2 semanas/En 1 mes) con el `TimeStepper` extraído para armar el `scheduled_at` final, en vez de agregar `@react-native-community/datetimepicker`.
+- [x] Scope `appointments` reactivado en `src/features/family/constants.ts` (`SHARE_SCOPES` ahora incluye las 4 opciones del enum) + `scopeLabels.appointments` en `locales/es/family.json`.
+- [x] Acceso agregado desde Perfil ("Agenda de citas" → `/appointments`) y rutas registradas en `app/_layout.tsx`. Namespaces i18n nuevos `pregnancy`/`appointments` (mismo patrón que fases anteriores), `locales/es/home.json` actualizado (`pregnancyWeek.*` ya no dice "P1, llega después del MVP").
+
+### Log de tareas — Fase 16 (2026-08-27)
+
+- **Migración aplicada y auditada contra el proyecto remoto real vía MCP** (mismo mecanismo de Fases 14/15): `list_tables` confirmó 22→24 tablas, `pg_policies` confirmó las 5 políticas de `appointments` (incluida `family_shared_select`) y las 4 de `pregnancies`, `get_advisors(security)` no reportó ningún hallazgo nuevo atribuible a esta fase.
+- **Verificación funcional ligera del scope reactivado, con las mismas dos cuentas de prueba de Fase 15** (registradas de nuevo, alias `+family-owner`/`+family-member`): 8 checks vía REST con `access_token` de cada sesión confirmaron que sin grant el familiar ve 0 citas del owner, que otorgar `appointments` le da acceso exacto, y que revocarlo lo corta de inmediato — no se repitieron los 20 checks completos de Fase 15 porque la lógica de `has_active_grant` ya está probada, solo la porción nueva (la tabla `appointments` en sí). Cuentas de prueba eliminadas al terminar, sin datos remanentes.
+- Verificación final: `npx tsc --noEmit` (0 errores), `npx eslint .` (0 errores, mismas 4 advertencias inofensivas de siempre), `npx jest` (50/50 OK, incluye los 5 tests nuevos de `pregnancyEngine.ts`).
+
+## Fase 16 — Definition of Done (verificación final)
+
+- [x] `pregnancies`/`appointments` con RLS activo, verificado contra el proyecto remoto real
+- [x] `computeDueDate`/`computeWeek`/`computeTrimester` testeados con casos de frontera (cortes de trimestre, semana 1, fecha exacta de 280 días)
+- [x] `PregnancyWeekModule` deja de ser un placeholder — muestra datos reales o un CTA honesto para registrar el embarazo
+- [x] Scope `appointments` del círculo familiar reactivado y verificado funcionalmente con dos cuentas reales (no solo estático)
+- [x] Sin dependencias nativas nuevas — selección de fecha vía `Chip`s + `TimeStepper` reusado, notificaciones vía la infraestructura ya construida en Fase 8
+- [~] Sin recorrido visual en el emulador (no disponible en este entorno) — misma salvedad honesta que Fases 14/15
+
+**Fase 16 completa.** Única salvedad: sin recorrido visual en emulador. Lista para continuar con Fase 17 (contenido de derechos de salud — no es trabajo de ingeniería, es contenido) o saltar a Fase 18 (P2) según `docs/PLAN_DE_IMPLEMENTACION.md` §29.
+
 ## Fase 15 — Círculo de acompañamiento familiar (P1, mayor riesgo/complejidad)
 
 `CORA-105`: círculo familiar con permisos granulares. Primera RLS del proyecto que permite a una usuaria leer datos de *otra* usuaria — solo si hay una fila activa en `family_share_grants` (regla no negociable de §8: sin grant activo, cero acceso, nunca implícito).

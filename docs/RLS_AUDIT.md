@@ -33,7 +33,7 @@ de tablas creadas en el esquema `public` a través de las migraciones
 | 17 | `medical_summaries` | 0012 | ✅ | `own_select`/`own_insert` en `user_id` (sin update/delete — foto fija inmutable) | `select,insert` → `authenticated` | OK |
 | 18 | `reminders` | 0012 | ✅ | 4 políticas `own_*` en `user_id` | CRUD → `authenticated` | OK |
 
-**22/22 tablas tienen RLS activo** (actualizado en Fase 15, ver sección
+**24/24 tablas tienen RLS activo** (actualizado en Fase 16, ver sección
 abajo). Ninguna tabla del esquema `public` quedó sin
 `alter table ... enable row level security`. Ninguna política `update`
 tiene un `with check` faltante — todas repiten `using (auth.uid() = ...)`
@@ -136,6 +136,32 @@ nivel de riesgo ya aceptado para `award_mascot_points`/`handle_new_user`
 (ver sección siguiente), porque las 4 se autoprotegen internamente con
 `auth.uid()`/`auth.jwt()` y no aceptan ningún parámetro de identidad del
 llamante.
+
+## Actualización — Fase 16 (2 tablas nuevas + 1 política aditiva, reactiva el scope `appointments`)
+
+| # | Tabla | Migración | RLS | Políticas | Grants | Veredicto |
+|---|---|---|:---:|---|---|---|
+| 23 | `pregnancies` | 0016 | ✅ | 4 políticas `own_*` en `user_id` | CRUD → `authenticated` | OK — patrón A idéntico a `cycles` |
+| 24 | `appointments` | 0016 | ✅ | 4 políticas `own_*` en `user_id` + `family_shared_select` (patrón C, vía `has_active_grant`) | CRUD → `authenticated` | OK |
+
+`family_shared_select` en `appointments` reusa `has_active_grant` sin ningún
+cambio — la función ya existía desde Fase 15 (`0015_family_circle.sql`) y
+fue diseñada para esto: el scope `'appointments'` estaba en el enum
+`share_scope` desde `0001_init.sql` pero quedó excluido a propósito del
+selector de la UI (`src/features/family/constants.ts`) hasta que esta tabla
+existiera. Reactivado en Fase 16 sin tocar `has_active_grant` ni las
+políticas de `cycles`/`reminders`.
+
+Verificado contra el proyecto remoto real vía MCP: `list_tables` confirma
+22→24, `pg_policies` confirma las 5 políticas exactas de `appointments`
+(incluida `family_shared_select`) y las 4 de `pregnancies`, `get_advisors`
+sin hallazgos nuevos. Verificación funcional adicional (2026-08-27, mismas
+dos cuentas de prueba de Fase 15, REST con `access_token` de cada sesión):
+sin grant el familiar ve 0 citas del owner, otorgar `appointments` da acceso
+exacto a esa tabla, revocarlo lo corta de inmediato — no se repitieron los
+20 checks completos de Fase 15 (esa lógica de `has_active_grant` ya está
+probada), solo los 8 checks de la porción nueva. Cuentas de prueba
+eliminadas al terminar.
 
 ## Funciones `security definer`
 

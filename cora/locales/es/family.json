@@ -18,7 +18,8 @@
   "scopeLabels": {
     "cycle_dates": "Fechas de ciclo",
     "reminders": "Recordatorios",
-    "mood_summary": "Resumen de ánimo"
+    "mood_summary": "Resumen de ánimo",
+    "appointments": "Citas médicas"
   },
   "moodSummaryLine": "Ánimo predominante: {{mood}} ({{days}} días)",
   "moodSummaryEmpty": "Sin datos suficientes todavía.",
