@@ -2504,6 +2504,153 @@ Verificación final antes de presentar. **Si algo de "Bloqueante" falla, no se p
 
 ---
 
+## 29. Plan por fases — backlog P1/P2 (Fases 11–20)
+
+*Agregado el 2026-08-27, una vez completado el MVP (Fases 0–10, ver `docs/PROGRESO.md`). El equipo tiene tiempo disponible para continuar, así que se retoma exactamente el "Backlog diferido" de la §21 (línea 2160) y se ordena en fases ejecutables, mismo formato que las Fases 0–10.*
+
+### Contexto y estado real de partida (verificado, no asumido)
+
+- Migraciones hasta `0012_summary_and_reminders.sql` — próxima migración: `0013`.
+- Features existentes: `auth, avatars, content, home, mascot, onboarding, profile, reminders, summary, tracking, assistant`.
+- `CORA-100` (Google OAuth) y un botón de mostrar/ocultar contraseña en login/registro **ya se implementaron** fuera de este plan de fases (ajuste puntual pedido por el equipo) — no forman parte de las fases 11–20.
+- `CORA-083` (exportar datos JSON + eliminar cuenta) **ya se hizo** en la Fase 8 — no se repite aquí.
+- Se verificó que la adopción real de i18n (`i18next`) es mínima: solo 3 archivos en todo el código usan `useTranslation`/`t()`; el resto de pantallas (login, registro, calendario, etc.) tiene strings en español escritos directo, pese a que este plan (§19) asumía la regla "cero strings literales" desde el día 1. Se agrega por eso una **fase de migración a i18n** antes de miskito/mayangna, para que el selector de idioma no sea solo cosmético.
+- Para los items que dependen de recursos que un desarrollador no puede generar por sí solo (datos reales de especialistas con consentimiento legal, hablantes nativos de miskito/mayangna, cuentas EAS/Firebase para push): se construye la **arquitectura completa + datos de muestra/mock**, igual que ya se hizo con los 25 artículos y las cuentas demo — dejando explícito en cada fase qué dato real falta cargar después.
+
+Se excluyen permanentemente de este roadmap (decisión de producto ya tomada en este documento, no técnica — ver §4):
+- **Gamificación social/ranking** — "contraindicado, genera presión y culpa" (línea 169).
+- **Realtime del círculo familiar** — "no aporta valor al MVP" (línea 167).
+- **Perfil profesional / panel de revisión de contenido** — "es un segundo producto" (línea 166).
+
+Convención a seguir en todas las fases (§6 "Convenciones de código", ya verificada en el código): `app/` sin lógica, features autocontenidas en `src/features/<dominio>` con barrel `index.ts`, hooks TanStack Query + Supabase, mutaciones que devuelven `Result<T,string>` (`src/shared/utils/result.ts`) donde aplica formulario, RLS en toda tabla privada, solo la migración numerada siguiente por PR (evitar colisiones de número — misma regla de §23).
+
+### Fase 11 — Cuenta y seguridad (P1)
+
+**`CORA-101` Recuperación de contraseña**
+- `supabase.auth.resetPasswordForEmail(email, { redirectTo })` + pantalla nueva `app/(auth)/forgot-password.tsx` → `src/features/auth/components/ForgotPasswordForm.tsx` (mismo patrón que `LoginForm`/`RegisterForm`: `react-hook-form` + zod + `Banner` de error/éxito).
+- Deep link de retorno reutiliza el scheme `cora://` ya configurado; pantalla `app/(auth)/reset-password.tsx` para fijar la nueva contraseña vía `supabase.auth.updateUser({ password })` tras el redirect.
+- Enlace "¿Olvidaste tu contraseña?" agregado a `LoginForm.tsx`.
+
+**`CORA-115` Cifrado de la caché local (P2, se adelanta aquí por ser seguridad, bajo esfuerzo)**
+- Cambiar el `storage` del persister de React Query (`src/lib/queryClient.ts`, hoy `AsyncStorage`) por `expo-secure-store` (o un wrapper híbrido: SecureStore para tokens de sesión ya cubierto por Supabase, y `expo-file-system`/SQLite cifrado para el volumen de caché de queries si SecureStore resulta limitado en tamaño — SecureStore tiene un límite de ~2KB por valor, así que **verificar antes de implementar** si aplica solo al storage adapter de `supabase.auth` — que ya podría beneficiarse — o si hace falta una solución distinta para el persister completo de React Query).
+- Aceptación: sesión y caché sobreviven un `expo prebuild` + reinstalación; inspección del almacenamiento del dispositivo no expone tokens en texto plano.
+
+### Fase 12 — Migración a i18n (nueva, no estaba en la planificación original)
+
+Prerrequisito real para que miskito/mayangna (Fase 18) tenga sentido, y para que el selector de idioma en Configuración traduzca la app completa, no solo una esquina.
+
+- Extraer todos los strings literales en JSX de `src/features/**` y `app/**` a `locales/es/*.json` (namespaces por dominio: `auth.json`, `tracking.json`, `library.json`, `mascot.json`, etc. — ya existe el patrón de carpetas en `locales/{es,mis,myn}/`, hoy solo con `common.json`).
+- Reemplazar cada string por `t('namespace.clave.semantica')` (regla ya documentada en §19: claves jerárquicas, no `texto42`; interpolación vía `t('key', { var })`, nunca concatenación).
+- Agregar el lint rule `i18next/no-literal-string` (ya mencionado como intención en §19, línea 1413) a `eslint.config.js`, acotado a `src/features/**/*.tsx` y `app/**/*.tsx`, para que no vuelva a haber regresiones.
+- Formatear fechas vía `date-fns` con `locale` (ya se usa así en `calendar.tsx` — extender el patrón donde falte, no reinventar).
+- Alcance grande pero mecánico — puede dividirse por feature (una migración por PR: auth, tracking, library, mascot, assistant, profile/config, home) para no bloquear el resto del plan.
+
+### Fase 13 — Analítica de seguimiento (P1)
+
+**`CORA-102` Estadísticas descriptivas + detección de irregularidades**
+- Todo el diseño ya está especificado en §14 (líneas 951–972): frases permitidas explícitamente listadas (duración promedio, frecuencia de síntomas, rango de variación), **prohibido nombrar cualquier condición médica o usar "anormal"**. Reglas de derivación deterministas y su tabla exacta de patrones (ciclo >90 días sin sangrado, sangrado >8 días consecutivos, ≥3 días de `flow_level='heavy'`, variación de ciclo >20 días, `mood='difficult'` en ≥10/14 días) → tarjeta neutra "Notamos algo que vale la pena conversar con un profesional" + link al directorio (Fase 14).
+- Estas reglas son puras y deterministas: viven en `src/features/tracking/cycleEngine.ts` (ya existe y ya tiene tests en `cycleEngine.test.ts`, patrón a seguir: agregar funciones puras nuevas ahí, testeadas igual que `detectCycles`).
+- Nueva pantalla `app/(tabs)/stats.tsx` o dentro de `calendar.tsx` como sección — decidir según cómo quede la navegación (la tab bar ya tiene 5 slots ocupados; puede ir como pantalla accesible desde Calendario en vez de tab nueva).
+- Nuevos hooks en `src/features/tracking/hooks/` (`useCycleStats.ts`, `useHealthSignals.ts`) reusando `useCycles`/`useDailyLogsRange` ya existentes — sin tabla nueva, es cálculo sobre datos ya existentes.
+
+### Fase 14 — Directorios de salud (P1)
+
+**`CORA-103` Centros de salud** + **`CORA-104` Especialistas**
+- Esquema exacto ya definido en §8 (líneas 510–516): `health_centers` (público, con `type`, `department`, `municipality`, geolocalización, `services text[]`, `is_verified`), `specialists` (con `consent_to_publish bool NOT NULL DEFAULT false` — **obligatorio, no opcional**, ligado a `health_center_id`).
+- Migración `0013_health_directory.sql`: ambas tablas + RLS de solo-lectura pública (son catálogos públicos, no datos de usuaria) + índices por `department`/`municipality`.
+- Semilla: dato real donde se pueda conseguir con una fuente pública verificable (p. ej. MINSA Nicaragua, hospitales públicos conocidos); donde no haya datos verificados a tiempo, semilla claramente marcada como dato de ejemplo (`is_verified = false`) — igual que el resto del proyecto ha manejado honestamente sus vacíos (ver `docs/RLS_AUDIT.md`, `docs/PROGRESO.md`). **Para `specialists`: nunca publicar datos de una persona real sin su `consent_to_publish = true` verificable — si no hay consentimientos reales conseguidos, la tabla queda con datos ficticios de ejemplo, explícitamente marcados como tal en el seed.**
+- Nuevo feature `src/features/directory/` (api.ts, hooks, componentes de lista/tarjeta) + pantallas `app/directory/health-centers.tsx`, `app/directory/specialists.tsx`, siguiendo el patrón de `library.tsx` (ya migrado a `FlatList`, filtros, `EmptyState`).
+- Acceso desde Perfil/Configuración y desde la tarjeta de derivación de Fase 13.
+
+### Fase 15 — Círculo de acompañamiento familiar (P1, mayor riesgo/complejidad)
+
+**`CORA-105` Círculo familiar con permisos granulares**
+- Esquema ya definido §8 (líneas 542–547): `family_circle_members` (invitación por email, `status: pending|accepted|revoked`) + `family_share_grants` (permiso por `scope`: `cycle_dates|appointments|reminders|mood_summary`, único por `(membership_id, scope)`). **Regla de diseño explícita y no negociable de §8: sin una fila activa en `family_share_grants`, un familiar no ve absolutamente nada — el acceso nunca es implícito.**
+- Migración `0014_family_circle.sql`: ambas tablas + RLS — esta es la RLS más delicada del proyecto hasta ahora (un usuario debe poder leer *ciertos* datos de *otro* usuario, solo si hay un grant activo y no revocado; recomendable una función `has_active_grant(owner_id, viewer_id, scope)` reusada en las políticas de `daily_logs`/`cycles`/`reminders`/`appointments` en vez de duplicar la lógica en cada política).
+- Flujo de invitación: como no hay email transaccional propio, evaluar si Supabase Auth permite invitar por email a alguien que aún no tiene cuenta (`invite_email` sin `member_user_id` hasta que acepte) — requiere decidir el mecanismo exacto de "aceptar invitación" (deep link + registro/login).
+- Nuevo feature `src/features/family/` + pantallas de gestión (`app/family/index.tsx`: lista de miembros + grants; `app/family/invite.tsx`).
+- **Recomendado auditar esta RLS específicamente al terminar la fase**, mismo patrón que `docs/RLS_AUDIT.md` ya usado en Fase 9, antes de considerarla lista.
+
+### Fase 16 — Etapas y agenda ampliadas (P1)
+
+**`CORA-106` Seguimiento de embarazo**
+- `pregnancies` (ya en el ERD de §8, línea 562, sin columnas detalladas aún — definir en la migración: `id`, `user_id FK`, `start_date`/`due_date` o `lmp_date` (fecha de última menstruación) para calcular semanas, `status` (`active|completed|lost`), `notes`).
+- Es una etapa de vida ya contemplada en el enum `life_stage` (verificar en `0001_init.sql`/`0002_profiles.sql` si `embarazo` ya existe como valor del enum — el código de `app/log/[date].tsx` ya referencia `'embarazo'` en `STAGES_WITHOUT_FLOW`, así que probablemente **ya existe en el enum**, confirmar antes de escribir la migración).
+- Nuevo feature `src/features/pregnancy/` siguiendo el patrón de registro por semana (similar a `tracking` pero con módulos de Home propios vía `moduleRegistry.ts`, el punto de extensión pensado exactamente para esto — §23).
+
+**`CORA-107` Agenda / citas médicas**
+- `appointments` (esquema ya definido §8, línea 540: `title`, `specialist_name`, `location`, `scheduled_at`, `notes`, `status`).
+- Se solapa deliberadamente con `reminders` (ya construido en Fase 8) — reusar el mismo patrón de notificaciones locales con `expo-notifications` ya implementado en `src/features/reminders/` en vez de reinventar la programación de notificaciones.
+- Migración `0015_pregnancy_and_appointments.sql` (agrupar ambas tablas en una migración ya que son P1 pequeñas y no colisionan).
+
+### Fase 17 — Contenido: derechos de salud (P1, no es trabajo de ingeniería)
+
+Este documento ya es explícito (línea 158): esto **es contenido, no código** — entra como una categoría más de la Biblioteca ya existente (`content_categories` + `educational_content`, ya construida y funcionando). No requiere una fase técnica: agregar 2–3 artículos redactados sobre derechos de salud reproductiva/general de la mujer en Nicaragua, con sus `content_sources` citadas, usando el flujo de contenido ya existente (§6 + el proceso ya usado para los 25 artículos semilla). Mencionado aquí solo para que no quede fuera del roadmap, pero es tarea del equipo de contenido, no de una sesión de código.
+
+### Fase 18 — P2: Exportables y alcance de contenido
+
+**`CORA-110` Exportar resumen a PDF**
+- `expo-print` (nueva dependencia nativa → rebuild) generando HTML desde el mismo `payload jsonb` que ya arma `medical_summaries` (Fase 8, ya construida) — reusar `src/features/summary/` existente, agregar una función de export a PDF junto a la ya existente de compartir texto (`expo-sharing`).
+
+**`CORA-111` Miskito y mayangna**
+- Ya viable una vez completada la Fase 12. Alcance realista (igual que §19 ya reconocía honestamente, línea 1426): estructura completa lista + una muestra real traducida, no una traducción completa (requiere hablantes nativos que el equipo debe conseguir). Selector de idioma en Configuración ya con las 3 opciones funcionales sobre la base migrada.
+- Contenido: 1+ artículo con fila nueva en `educational_content` (`slug` igual, `locale = 'mis'`/`'myn'`), catálogos (`avatars`, `symptom_catalog`) con columnas `label_mis`/`label_myn` + `coalesce` en las queries (patrón exacto ya en §19, línea 1409).
+
+**`CORA-112` Audio educativo**
+- `educational_content.audio_path` ya existe como columna en el esquema (línea 503) pero sin uso — subir audios a Supabase Storage, reproductor con `expo-av`, UI en `app/article/[slug].tsx` (ya existe, agregar el reproductor condicionalmente si `audio_path` no es null).
+- Sin locutor propio: usar texto-a-voz (TTS) como alternativa de bajo costo para la muestra, o grabar 2–3 artículos reales si el equipo tiene forma de hacerlo — decisión de contenido, no bloqueante para construir la reproducción.
+
+### Fase 19 — P2: Infraestructura remota
+
+**`CORA-113` Push notifications remotas**
+- Requiere una cuenta EAS y un proyecto Firebase (FCM) que **el equipo debe crear y configurar** (credenciales, `google-services.json`) — no algo que se pueda generar sin acceso a esas cuentas. El código puede quedar listo (Edge Function o tabla mínima de tokens de dispositivo + `expo-notifications` en modo remoto) pero la puesta en marcha real depende de que el equipo provea esas credenciales.
+- Nota: §21 ya explica por qué se pospuso — "el emulador no las recibe de forma fiable" — probar en dispositivo físico real.
+
+**`CORA-114` Búsqueda semántica (pgvector)**
+- Extensión `pgvector` en Supabase + columna `embedding vector` en `educational_content` + función de embeddings (OpenAI/Gemini, ya hay integración con Gemini vía la Edge Function `cora-ai` de Fase 7 — reusar el mismo proveedor en vez de sumar uno nuevo) + RPC de búsqueda por similitud, complementando (no reemplazando) la búsqueda full-text (`search_vector`) ya construida.
+
+### Fase 20 — P2: Pulido final
+
+**`CORA-116` Modo oscuro**
+- El design system ya está centralizado en `src/ui/theme/tokens.ts` (colors/spacing/radii/typography como constantes planas, no contexto) — este es el cambio de mayor alcance transversal de todo el plan: requiere convertir `colors` en un tema consumido vía contexto/hook (`useTheme()`) en vez de import estático, y auditar cada componente de `src/ui/components/**` y cada feature que hoy importa `colors` directo. Alcance grande, dejar para el final por eso mismo.
+
+**Explícitamente excluidos de este roadmap** (decisión de producto ya tomada, no pendiente): Perfil profesional/panel de revisión de contenido, Realtime del círculo familiar, Gamificación social/ranking — ver razones al inicio de esta sección.
+
+### Orden recomendado y dependencias
+
+```text
+Fase 11 (cuenta/seguridad) ──┐
+Fase 12 (migración i18n) ────┼── independientes entre sí, pueden ir en paralelo
+Fase 13 (estadísticas) ──────┘
+        │
+        ▼
+Fase 14 (directorios) → Fase 15 (círculo familiar, usa directorio para derivación)
+        │
+        ▼
+Fase 16 (embarazo + agenda)
+        │
+        ▼
+Fase 17 (contenido derechos — sin bloqueo técnico, paralelo a cualquier fase)
+        │
+        ▼
+Fase 18 (PDF, idiomas, audio) — miskito/mayangna requiere Fase 12 terminada
+        │
+        ▼
+Fase 19 (push, búsqueda semántica) — requiere credenciales externas del equipo
+        │
+        ▼
+Fase 20 (modo oscuro) — el más transversal, al final
+```
+
+Cada fase se implementa como su propia sesión/PR (igual que las Fases 0–10), con migración numerada siguiente (`0013`, `0014`, ...), verificación de `tsc --noEmit` + `eslint` + `jest` al cierre, y actualización de `docs/PROGRESO.md` documentando qué se hizo y qué salvedades honestas quedaron (mismo patrón usado en todas las fases anteriores).
+
+**Verificación específica de esta ronda:**
+- Toda tabla nueva: RLS verificada, extendiendo `docs/RLS_AUDIT.md`.
+- Fase 15 (círculo familiar): verificación cruzada explícita de que un usuario sin grant activo no puede leer datos de otro (probar con dos cuentas reales, no solo revisar el SQL).
+- Fase 12 (i18n): verificar con el selector de idioma que cambiar a miskito (tras Fase 18) realmente traduce las pantallas migradas y cae a español en el resto, no que todo quede en español silenciosamente.
+
+---
+
 ## Verificación end-to-end del plan
 
 Cómo comprobar, al terminar la implementación, que todo funciona de verdad:
