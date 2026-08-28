@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +12,29 @@ import { Button } from '@/ui/components/Button';
 import { Input } from '@/ui/components/Input';
 import { PasswordInput } from '@/ui/components/PasswordInput';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing, type ColorScheme } from '@/ui/theme/tokens';
+
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginTop: spacing.xs,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.border,
+    },
+  });
+}
 
 export function RegisterForm() {
   const { t } = useTranslation('auth');
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -54,9 +73,7 @@ export function RegisterForm() {
   return (
     <View style={{ gap: spacing.sm }}>
       {formError ? <Banner message={formError} tone="danger" /> : null}
-      {success ? (
-        <Banner message={t('register.success')} tone="info" />
-      ) : null}
+      {success ? <Banner message={t('register.success')} tone="info" /> : null}
 
       <Controller
         control={control}
@@ -107,17 +124,3 @@ export function RegisterForm() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.xs,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.border,
-  },
-});

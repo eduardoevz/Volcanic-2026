@@ -18,10 +18,12 @@ import { EmptyState } from '@/ui/components/EmptyState';
 import { Screen } from '@/ui/components/Screen';
 import { Skeleton } from '@/ui/components/Skeleton';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 export default function MascotScreen() {
   const { t } = useTranslation('mascot');
+  const { colors } = useTheme();
   const { data: mascot, isLoading, isError } = useMascotState();
   const { data: events, isLoading: eventsLoading } = useRecentMascotEvents(15);
 
@@ -84,7 +86,10 @@ export default function MascotScreen() {
               const isCurrent = lvl === level;
               const levelMeta = LEVEL_META[lvl];
               return (
-                <View key={lvl} style={{ alignItems: 'center', gap: spacing.xs, opacity: isCurrent ? 1 : 0.4 }}>
+                <View
+                  key={lvl}
+                  style={{ alignItems: 'center', gap: spacing.xs, opacity: isCurrent ? 1 : 0.4 }}
+                >
                   <Text style={{ fontSize: 32 }}>{levelMeta.emoji}</Text>
                   <Text
                     variant="caption"
@@ -103,13 +108,13 @@ export default function MascotScreen() {
           {eventsLoading ? (
             <Skeleton height={60} />
           ) : !events || events.length === 0 ? (
-            <EmptyState
-              title={t('emptyMomentsTitle')}
-              description={t('emptyMomentsDescription')}
-            />
+            <EmptyState title={t('emptyMomentsTitle')} description={t('emptyMomentsDescription')} />
           ) : (
             events.map((event) => (
-              <Card key={event.id} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Card
+                key={event.id}
+                style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+              >
                 <Text variant="body">{actionLabels[event.action_type] ?? event.action_type}</Text>
                 <Text variant="bodyMuted">
                   {t('pointsEarned', {

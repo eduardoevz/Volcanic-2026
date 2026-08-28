@@ -2,6 +2,38 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-28.
 
+## Fase 20 — P2: Pulido final (última fase del roadmap de `docs/PLAN_DE_IMPLEMENTACION.md` §29)
+
+`CORA-116`: modo oscuro. Descrito en el plan como "el cambio de mayor alcance transversal de todo el plan" — requería convertir `src/ui/theme/tokens.ts` de constantes estáticas a un tema servido por contexto, y auditar cada uno de los componentes/pantallas que lo importaban.
+
+- [x] **Alcance real medido antes de tocar código, no asumido:** 66 archivos importan algo de `tokens.ts`; de esos, 31 importan `colors`/`typography`/`shadows` (paleta, necesitan volverse reactivos) y 35 solo `spacing`/`radii` (escalas, sin cambios). De los 31, 19 tenían el color en un `StyleSheet.create` o un objeto de lookup (`toneColors` en `Badge`/`Banner`, además de `ReferralCard`) calculado en el scope del módulo — se movieron al cuerpo del componente envueltos en `useMemo(() => StyleSheet.create(...), [colors])` porque un `StyleSheet.create` a nivel de módulo se ejecuta una sola vez al importar, antes de que exista ningún tema.
+- [x] `src/ui/theme/tokens.ts`: `spacing`/`radii` sin cambios; `lightColors`/`darkColors` con las mismas claves (`white`, `cream`, `charcoal`, `border`, `stemLight`, etc.) pero valores distintos por tema — evita renombrar `colors.X` en 31 archivos, solo cambia de dónde viene `colors`. `buildTypography(colors)`/`buildShadows(colors)` reemplazan los objetos estáticos previos.
+- [x] **Bug de contraste real, encontrado y corregido durante la conversión (no en la revisión final):** `colors.white` se usaba con dos significados distintos — "superficie" (`Card`/`Sheet`/`Screen`, debe invertirse en oscuro) y "texto/ícono sobre un fondo de marca saturado" (texto del botón primario, chip seleccionado, iniciales del avatar sobre el círculo rosa `pitahaya`). Al volverse `colors.white` oscuro en el tema oscuro, esos tres usos habrían quedado casi invisibles (texto oscuro sobre fondo rosa). Corregido agregando `colors.onBrand` (`#FFFFFF` fijo en ambos temas, junto a la paleta de marca que no cambia) y reasignando `Avatar`, `Button` (`ActivityIndicator` + `typography.button`), `Chip` y `MascotEvolutionOverlay` a esa clave en vez de `colors.white`.
+- [x] `src/ui/theme/ThemeContext.tsx` (nuevo): `ThemeProvider`/`useTheme()`, modo `light`/`dark`/`system` persistido en `AsyncStorage` (`cora-theme`, mismo patrón que `cora-language` de Fase 12/18), `useColorScheme()` de React Native para resolver `system`, `expo-system-ui` (`SystemUI.setBackgroundColorAsync`, en `package.json` desde antes pero sin usar) para que el fondo nativo no parpadee en blanco al cambiar de tema.
+- [x] `src/ui/theme/resolveScheme.ts` — función pura (`resolveScheme(mode, systemScheme)`) extraída y testeada (`resolveScheme.test.ts`, 5 casos: sistema claro/oscuro/sin esquema, modo fijo claro/oscuro ignora el sistema), mismo patrón de "lógica pura colocada junto a su test" que `cycleEngine.ts`.
+- [x] `app/_layout.tsx`: `ThemeProvider` envolviendo la navegación; `<StatusBar style={scheme === 'dark' ? 'light' : 'dark'}>` reemplaza `style="auto"`; `Stack` raíz con `headerStyle`/`headerTintColor` tomados del tema (antes quedaban con el header nativo por defecto, blanco fijo, discordante en modo oscuro). `app/(tabs)/_layout.tsx`: `tabBarStyle` con `backgroundColor`/`borderTopColor` del tema — sin esto la barra de tabs se quedaba blanca sobre contenido oscuro (encontrado en el recorrido visual, no antes).
+- [x] `app/(tabs)/profile.tsx`: selector "Tema" (Claro/Oscuro/Sistema) calcado del selector de idioma ya existente — misma fila de `Chip`, mismo patrón de estado local + handler async, `setAppTheme` de `useTheme()`. Claves nuevas en `locales/es/settings.json` (`themeTitle`, `themeLight`, `themeDark`, `themeSystem`, `themeChanging`); `mis`/`myn` quedan vacíos como el resto de namespaces, cayendo a español (mismo mecanismo de fallback demostrado en Fase 18).
+- [x] **Sin migración SQL ni cambio de RLS** — preferencia local en `AsyncStorage`, no sincronizada a `user_preferences` (documentado en `docs/RLS_AUDIT.md`).
+- [x] **Recorrido visual real en el emulador, alternando los 3 modos**, con la cuenta demo (`demo-adulta@cora.test`): Perfil (selector nuevo, los 3 `Chip` alternan visualmente) → Inicio → Biblioteca → Calendario → Recordatorios (pantalla con header nativo + `EmptyState` + botón primario) en modo oscuro, confirmando fondo/tarjetas/texto/badges con contraste legible y sin ningún elemento "quemado" en blanco u oscuro fijo. Verificada también la persistencia: forzar el cierre de la app y reabrirla mantuvo "Oscuro" elegido (lee de `AsyncStorage` antes del primer render con tema).
+- [x] `npx tsc --noEmit` (0 errores — incluyó ajustar el tipo `ColorScheme` a `Record<keyof typeof lightColors, string>` en vez de `typeof lightColors`, porque los literales exactos de `lightColors` no aceptaban los valores de `darkColors` bajo las mismas claves), `npx eslint .` (0 errores, mismas advertencias inofensivas de siempre), `npx jest` (59/59 OK, incluye los 5 tests nuevos de `resolveScheme`).
+
+### Log de tareas — Fase 20 (2026-08-28)
+
+- **Metro se colgó en el puerto 8081 sin responder durante la verificación** (mismo problema recurrente ya documentado en Fases 1/19) — `Stop-Process` sobre el proceso que tenía el puerto escuchando + `npx expo start --clear` lo resolvió; se confirmó con dos recorridos completos post-reinicio, sin más cuelgues.
+- Antes de reproducir el bug de contraste de `colors.white`/`onBrand` como una revisión posterior, se detectó **leyendo el propio código mientras se migraba cada componente** (Avatar, Button, Chip) — no fue necesario verlo fallar en el emulador para corregirlo, aunque el recorrido visual confirmó que con la corrección el texto sobre `pitahaya` es legible en ambos temas.
+- El tab bar y los headers nativos quedando blancos en modo oscuro sí se detectaron en el emulador (no se había prestado atención a `screenOptions.tabBarStyle`/`headerStyle`, que `expo-router`/`@react-navigation` no heredan del tema de la app automáticamente) — corregido y reverificado en el mismo recorrido.
+
+## Fase 20 — Definition of Done (verificación final)
+
+- [x] `ThemeProvider`/`useTheme()` implementados, con los 66 archivos que dependían de `tokens.ts` auditados (31 migrados a `useTheme()`, 35 sin cambios por no depender de color)
+- [x] Selector de tema en Perfil, funcional y persistente entre reinicios — verificado en el emulador, no solo compilado
+- [x] Bug de contraste real (`colors.white` como texto sobre fondo de marca) encontrado y corregido antes de cerrar la fase, no descubierto después
+- [x] Tab bar y headers nativos themeados — corregido tras encontrarlo en el recorrido visual
+- [x] Sin cambios de esquema ni de RLS — documentado en `docs/RLS_AUDIT.md`
+- [x] `npx tsc --noEmit`, `npx eslint .`, `npx jest` en verde
+
+**Fase 20 completa — cierra el roadmap P1/P2 de `docs/PLAN_DE_IMPLEMENTACION.md` §29 (Fases 11–20).** Sin salvedades: hubo acceso real a emulador para el recorrido visual completo en los 3 modos de tema.
+
 ## Fase 19 — P2: Infraestructura remota
 
 `CORA-113`/`CORA-114`: búsqueda semántica con pgvector y push notifications remotas reales (a diferencia de Fase 18, esta vez con credenciales EAS/Firebase reales provistas por el usuario, así que se activó de verdad en vez de dejar solo código listo).

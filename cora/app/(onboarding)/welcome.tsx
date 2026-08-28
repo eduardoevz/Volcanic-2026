@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
@@ -6,15 +6,58 @@ import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { colors, radii, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 const { width } = Dimensions.get('window');
 
 const SLIDE_EMOJI = ['🌱', '🔒', '🐉'];
 const SLIDE_KEYS = ['grow', 'privacy', 'mascot'] as const;
 
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    slide: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.lg,
+    },
+    emoji: {
+      fontSize: 72,
+      marginBottom: spacing.lg,
+    },
+    title: {
+      textAlign: 'center',
+      marginBottom: spacing.sm,
+    },
+    body: {
+      textAlign: 'center',
+    },
+    footer: {
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.lg,
+    },
+    dots: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      marginBottom: spacing.lg,
+    },
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: radii.full,
+      backgroundColor: colors.border,
+    },
+    dotActive: {
+      backgroundColor: colors.pitahaya,
+    },
+  });
+}
+
 export default function Welcome() {
   const { t } = useTranslation('onboarding');
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   const scrollRef = useRef<ScrollView>(null);
   const [slideIndex, setSlideIndex] = useState(0);
 
@@ -62,10 +105,7 @@ export default function Welcome() {
       <View style={styles.footer}>
         <View style={styles.dots}>
           {slides.map((slide, index) => (
-            <View
-              key={slide.key}
-              style={[styles.dot, index === slideIndex && styles.dotActive]}
-            />
+            <View key={slide.key} style={[styles.dot, index === slideIndex && styles.dotActive]} />
           ))}
         </View>
         <Button
@@ -78,41 +118,3 @@ export default function Welcome() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  slide: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  emoji: {
-    fontSize: 72,
-    marginBottom: spacing.lg,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  body: {
-    textAlign: 'center',
-  },
-  footer: {
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.lg,
-  },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    marginBottom: spacing.lg,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: radii.full,
-    backgroundColor: colors.border,
-  },
-  dotActive: {
-    backgroundColor: colors.pitahaya,
-  },
-});

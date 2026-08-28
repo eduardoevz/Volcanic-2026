@@ -4,14 +4,20 @@ import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 
-import { MarkdownBody, getArticleAudioUrl, useArticleBySlug, useMarkArticleRead } from '@/features/content';
+import {
+  MarkdownBody,
+  getArticleAudioUrl,
+  useArticleBySlug,
+  useMarkArticleRead,
+} from '@/features/content';
 import { Badge } from '@/ui/components/Badge';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 const READ_THRESHOLD_MS = 20_000;
 
@@ -34,6 +40,7 @@ function ArticleAudioPlayer({ audioPath }: { audioPath: string }) {
 
 export default function ArticleScreen() {
   const { t } = useTranslation('library');
+  const { colors } = useTheme();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data: article, isLoading, isError } = useArticleBySlug(slug);
   const markArticleRead = useMarkArticleRead();
@@ -89,7 +96,9 @@ export default function ArticleScreen() {
               <Text variant="caption">{article.reviewed_by_credentials}</Text>
             ) : null}
             {article.reviewed_at ? (
-              <Text variant="caption">{t('article.reviewedOn', { date: article.reviewed_at })}</Text>
+              <Text variant="caption">
+                {t('article.reviewedOn', { date: article.reviewed_at })}
+              </Text>
             ) : null}
           </Card>
         ) : (

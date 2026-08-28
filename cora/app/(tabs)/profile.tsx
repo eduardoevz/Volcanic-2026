@@ -18,17 +18,28 @@ import { Chip } from '@/ui/components/Chip';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
+import type { ThemeMode } from '@/ui/theme/resolveScheme';
 
-const LANGUAGE_LABEL_KEYS: Record<SupportedLanguage, 'languageEs' | 'languageMis' | 'languageMyn'> = {
-  es: 'languageEs',
-  mis: 'languageMis',
-  myn: 'languageMyn',
+const THEME_LABEL_KEYS: Record<ThemeMode, 'themeLight' | 'themeDark' | 'themeSystem'> = {
+  light: 'themeLight',
+  dark: 'themeDark',
+  system: 'themeSystem',
 };
+const THEME_MODES: readonly ThemeMode[] = ['light', 'dark', 'system'];
+
+const LANGUAGE_LABEL_KEYS: Record<SupportedLanguage, 'languageEs' | 'languageMis' | 'languageMyn'> =
+  {
+    es: 'languageEs',
+    mis: 'languageMis',
+    myn: 'languageMyn',
+  };
 
 export default function Profile() {
   const { t, i18n } = useTranslation('settings');
   const router = useRouter();
+  const { colors, mode, setAppTheme } = useTheme();
   const { session } = useSession();
   const { data: profile, isLoading, isError } = useProfile();
   const { data: preferences, isError: preferencesError } = useUserPreferences();
@@ -37,6 +48,16 @@ export default function Profile() {
   const [savingStage, setSavingStage] = useState<LifeStage | null>(null);
   const [savingShareContext, setSavingShareContext] = useState(false);
   const [changingLanguage, setChangingLanguage] = useState(false);
+  const [changingTheme, setChangingTheme] = useState(false);
+
+  const handleChangeTheme = async (nextMode: ThemeMode) => {
+    setChangingTheme(true);
+    try {
+      await setAppTheme(nextMode);
+    } finally {
+      setChangingTheme(false);
+    }
+  };
 
   const handleChangeLanguage = async (language: SupportedLanguage) => {
     setChangingLanguage(true);
@@ -81,102 +102,123 @@ export default function Profile() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      <Text variant="title" style={{ marginBottom: spacing.sm }}>
-        {t('title')}
-      </Text>
-      <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
-        {session?.user.email}
-      </Text>
+        <Text variant="title" style={{ marginBottom: spacing.sm }}>
+          {t('title')}
+        </Text>
+        <Text variant="bodyMuted" style={{ marginBottom: spacing.md }}>
+          {session?.user.email}
+        </Text>
 
-      {isLoading ? (
-        <Text variant="bodyMuted">{t('loading')}</Text>
-      ) : isError ? (
-        <Banner message={t('loadError')} tone="danger" />
-      ) : (
-        <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-            <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
+        {isLoading ? (
+          <Text variant="bodyMuted">{t('loading')}</Text>
+        ) : isError ? (
+          <Banner message={t('loadError')} tone="danger" />
+        ) : (
+          <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+              <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
+              <View>
+                <Text variant="body">{profile?.display_name ?? t('noNameYet')}</Text>
+                <Text variant="bodyMuted">{profile?.avatars?.name_es ?? t('noAvatarChosen')}</Text>
+              </View>
+            </View>
+
             <View>
+              <Text variant="caption">{t('lifeStageLabel')}</Text>
               <Text variant="body">
-                {profile?.display_name ?? t('noNameYet')}
+                {profile?.life_stage
+                  ? LIFE_STAGE_META[profile.life_stage].label
+                  : t('lifeStageUndefined')}
               </Text>
-              <Text variant="bodyMuted">
-                {profile?.avatars?.name_es ?? t('noAvatarChosen')}
+              <Button
+                label={t('changeLifeStage')}
+                variant="ghost"
+                onPress={() => setChangingStage(true)}
+              />
+            </View>
+          </View>
+        )}
+
+        <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
+          <Text variant="caption">{t('privacyTitle')}</Text>
+          {preferencesError ? <Banner tone="danger" message={t('privacyLoadError')} /> : null}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <Switch
+              value={preferences?.ai_share_health_context ?? false}
+              onValueChange={handleToggleShareContext}
+              disabled={savingShareContext || !preferences}
+              trackColor={{ true: colors.pitahaya }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text variant="body">{t('aiShareLabel')}</Text>
+              <Text variant="caption">
+                {preferences?.ai_share_health_context
+                  ? t('aiShareOnDescription')
+                  : t('aiShareOffDescription')}
               </Text>
             </View>
           </View>
-
-          <View>
-            <Text variant="caption">{t('lifeStageLabel')}</Text>
-            <Text variant="body">
-              {profile?.life_stage ? LIFE_STAGE_META[profile.life_stage].label : t('lifeStageUndefined')}
-            </Text>
-            <Button
-              label={t('changeLifeStage')}
-              variant="ghost"
-              onPress={() => setChangingStage(true)}
-            />
-          </View>
         </View>
-      )}
 
-      <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
-        <Text variant="caption">{t('privacyTitle')}</Text>
-        {preferencesError ? <Banner tone="danger" message={t('privacyLoadError')} /> : null}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Switch
-            value={preferences?.ai_share_health_context ?? false}
-            onValueChange={handleToggleShareContext}
-            disabled={savingShareContext || !preferences}
-            trackColor={{ true: colors.pitahaya }}
+        <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
+          <Text variant="caption">{t('languageTitle')}</Text>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            {SUPPORTED_LANGUAGES.map((language) => (
+              <Chip
+                key={language}
+                label={t(LANGUAGE_LABEL_KEYS[language])}
+                selected={i18n.language === language}
+                onPress={() => handleChangeLanguage(language)}
+              />
+            ))}
+          </View>
+          {changingLanguage ? <Text variant="caption">{t('languageChanging')}</Text> : null}
+        </View>
+
+        <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
+          <Text variant="caption">{t('themeTitle')}</Text>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            {THEME_MODES.map((themeMode) => (
+              <Chip
+                key={themeMode}
+                label={t(THEME_LABEL_KEYS[themeMode])}
+                selected={mode === themeMode}
+                onPress={() => handleChangeTheme(themeMode)}
+              />
+            ))}
+          </View>
+          {changingTheme ? <Text variant="caption">{t('themeChanging')}</Text> : null}
+        </View>
+
+        <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
+          <Button
+            label={t('medicalSummary')}
+            variant="secondary"
+            onPress={() => router.push('/summary')}
           />
-          <View style={{ flex: 1 }}>
-            <Text variant="body">{t('aiShareLabel')}</Text>
-            <Text variant="caption">
-              {preferences?.ai_share_health_context
-                ? t('aiShareOnDescription')
-                : t('aiShareOffDescription')}
-            </Text>
-          </View>
+          <Button
+            label={t('reminders')}
+            variant="secondary"
+            onPress={() => router.push('/reminders')}
+          />
+          <Button
+            label={t('healthDirectory')}
+            variant="secondary"
+            onPress={() => router.push('/directory')}
+          />
+          <Button
+            label={t('familyCircle')}
+            variant="secondary"
+            onPress={() => router.push('/family')}
+          />
+          <Button
+            label={t('appointmentsAgenda')}
+            variant="secondary"
+            onPress={() => router.push('/appointments')}
+          />
         </View>
-      </View>
 
-      <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
-        <Text variant="caption">{t('languageTitle')}</Text>
-        <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-          {SUPPORTED_LANGUAGES.map((language) => (
-            <Chip
-              key={language}
-              label={t(LANGUAGE_LABEL_KEYS[language])}
-              selected={i18n.language === language}
-              onPress={() => handleChangeLanguage(language)}
-            />
-          ))}
-        </View>
-        {changingLanguage ? <Text variant="caption">{t('languageChanging')}</Text> : null}
-      </View>
-
-      <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-        <Button label={t('medicalSummary')} variant="secondary" onPress={() => router.push('/summary')} />
-        <Button label={t('reminders')} variant="secondary" onPress={() => router.push('/reminders')} />
-        <Button
-          label={t('healthDirectory')}
-          variant="secondary"
-          onPress={() => router.push('/directory')}
-        />
-        <Button
-          label={t('familyCircle')}
-          variant="secondary"
-          onPress={() => router.push('/family')}
-        />
-        <Button
-          label={t('appointmentsAgenda')}
-          variant="secondary"
-          onPress={() => router.push('/appointments')}
-        />
-      </View>
-
-      <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />
+        <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />
       </ScrollView>
 
       <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>

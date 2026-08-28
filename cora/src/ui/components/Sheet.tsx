@@ -1,14 +1,33 @@
 import type { PropsWithChildren } from 'react';
+import { useMemo } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, radii, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 type SheetProps = PropsWithChildren<{
   visible: boolean;
   onClose: () => void;
 }>;
 
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    sheet: {
+      backgroundColor: colors.white,
+      borderTopLeftRadius: radii.lg,
+      borderTopRightRadius: radii.lg,
+      padding: spacing.lg,
+    },
+  });
+}
+
 export function Sheet({ visible, onClose, children }: SheetProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
@@ -16,16 +35,3 @@ export function Sheet({ visible, onClose, children }: SheetProps) {
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(34, 27, 31, 0.4)',
-  },
-  sheet: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: radii.lg,
-    borderTopRightRadius: radii.lg,
-    padding: spacing.lg,
-  },
-});

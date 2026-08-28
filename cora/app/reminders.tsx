@@ -17,7 +17,8 @@ import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
 import { TimeStepper } from '@/ui/components/TimeStepper';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 function pad(n: number) {
   return n.toString().padStart(2, '0');
@@ -25,6 +26,7 @@ function pad(n: number) {
 
 export default function Reminders() {
   const { t } = useTranslation('reminders');
+  const { colors } = useTheme();
   const { data: reminders, isLoading, isError } = useReminders();
   const createReminder = useCreateReminder();
   const toggleReminder = useToggleReminder();

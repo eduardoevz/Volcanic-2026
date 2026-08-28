@@ -7,10 +7,12 @@ import { useSession } from '@/shared/hooks/useSession';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 export default function Index() {
   const { t } = useTranslation('common');
+  const { colors } = useTheme();
   const { status } = useSession();
   const { data: profile, isLoading: profileLoading, isError: profileError, refetch } = useProfile();
 

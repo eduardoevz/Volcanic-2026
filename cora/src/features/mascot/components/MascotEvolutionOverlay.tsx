@@ -12,13 +12,15 @@ import { LEVEL_META, type MascotLevel } from '@/features/mascot/level';
 import { useMascotEvolutionStore } from '@/store/mascotEvolutionStore';
 import { Button } from '@/ui/components/Button';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 // Montado una sola vez en app/_layout.tsx, igual que ErrorBoundary. Se activa
 // desde cualquier pantalla de la app cuando checkMascotEvolution detecta que
 // el nivel subió — no requiere que la usuaria esté en /mascot.
 export function MascotEvolutionOverlay() {
   const { t } = useTranslation('mascot');
+  const { colors } = useTheme();
   const level = useMascotEvolutionStore((state) => state.justEvolvedToLevel);
   const clear = useMascotEvolutionStore((state) => state.clear);
   const scale = useSharedValue(0);
@@ -58,13 +60,13 @@ export function MascotEvolutionOverlay() {
           <Text style={{ fontSize: 110 }}>{meta.emoji}</Text>
           <Text
             variant="title"
-            style={{ color: colors.white, textAlign: 'center', marginTop: spacing.md }}
+            style={{ color: colors.onBrand, textAlign: 'center', marginTop: spacing.md }}
           >
             {t('evolution.title')}
           </Text>
           <Text
             variant="body"
-            style={{ color: colors.white, textAlign: 'center', marginTop: spacing.xs }}
+            style={{ color: colors.onBrand, textAlign: 'center', marginTop: spacing.xs }}
           >
             {t('evolution.subtitle', { name: meta.name, level })}
           </Text>

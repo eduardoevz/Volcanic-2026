@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, type DimensionValue } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -7,7 +7,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { colors, radii } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, type ColorScheme } from '@/ui/theme/tokens';
 
 type SkeletonProps = {
   width?: DimensionValue;
@@ -15,7 +16,17 @@ type SkeletonProps = {
   radius?: number;
 };
 
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    base: {
+      backgroundColor: colors.border,
+    },
+  });
+}
+
 export function Skeleton({ width = '100%', height = 16, radius = radii.sm }: SkeletonProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   const opacity = useSharedValue(0.4);
 
   useEffect(() => {
@@ -25,14 +36,6 @@ export function Skeleton({ width = '100%', height = 16, radius = radii.sm }: Ske
   const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
 
   return (
-    <Animated.View
-      style={[styles.base, { width, height, borderRadius: radius }, animatedStyle]}
-    />
+    <Animated.View style={[styles.base, { width, height, borderRadius: radius }, animatedStyle]} />
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: colors.border,
-  },
-});

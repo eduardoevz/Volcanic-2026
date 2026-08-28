@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, type ViewStyle } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
-import { colors, radii, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 
@@ -15,6 +17,14 @@ type ButtonProps = {
   accessibilityLabel?: string;
 };
 
+function buildVariantStyles(colors: ColorScheme): Record<Variant, ViewStyle> {
+  return {
+    primary: { backgroundColor: colors.pitahaya },
+    secondary: { backgroundColor: colors.stemLight },
+    ghost: { backgroundColor: 'transparent' },
+  };
+}
+
 export function Button({
   label,
   onPress,
@@ -24,6 +34,8 @@ export function Button({
   style,
   accessibilityLabel,
 }: ButtonProps) {
+  const { colors } = useTheme();
+  const variantStyles = useMemo(() => buildVariantStyles(colors), [colors]);
   const isDisabled = disabled || loading;
 
   return (
@@ -42,7 +54,7 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.pitahaya} />
+        <ActivityIndicator color={variant === 'primary' ? colors.onBrand : colors.pitahaya} />
       ) : (
         <Text
           variant="button"
@@ -70,9 +82,3 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
 });
-
-const variantStyles: Record<Variant, ViewStyle> = {
-  primary: { backgroundColor: colors.pitahaya },
-  secondary: { backgroundColor: colors.stemLight },
-  ghost: { backgroundColor: 'transparent' },
-};

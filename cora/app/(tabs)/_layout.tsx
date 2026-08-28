@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { useProfile } from '@/features/profile';
 import { useSession } from '@/shared/hooks/useSession';
-import { colors } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
 
 export default function TabsLayout() {
   const { t } = useTranslation('common');
+  const { colors } = useTheme();
   const { status } = useSession();
   const { data: profile, isLoading: profileLoading } = useProfile();
 
@@ -30,6 +31,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.pitahaya,
         tabBarInactiveTintColor: colors.charcoalMuted,
+        tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.border },
       }}
     >
       <Tabs.Screen name="home" options={{ title: t('nav.home') }} />

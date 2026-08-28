@@ -1,14 +1,42 @@
+import { useMemo } from 'react';
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
-import { colors, radii, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 type InputProps = TextInputProps & {
   label?: string;
   error?: string;
 };
 
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    wrapper: {
+      gap: spacing.xs,
+    },
+    label: {
+      marginLeft: spacing.xs,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm + 2,
+      fontSize: 16,
+      color: colors.charcoal,
+      backgroundColor: colors.white,
+    },
+    inputError: {
+      borderColor: colors.danger,
+    },
+  });
+}
+
 export function Input({ label, error, style, ...rest }: InputProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   return (
     <View style={styles.wrapper}>
       {label ? (
@@ -29,25 +57,3 @@ export function Input({ label, error, style, ...rest }: InputProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    gap: spacing.xs,
-  },
-  label: {
-    marginLeft: spacing.xs,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-    fontSize: 16,
-    color: colors.charcoal,
-    backgroundColor: colors.white,
-  },
-  inputError: {
-    borderColor: colors.danger,
-  },
-});

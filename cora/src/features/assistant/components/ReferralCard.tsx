@@ -2,9 +2,11 @@ import { View } from 'react-native';
 
 import { Card } from '@/ui/components/Card';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 export function ReferralCard({ text }: { text: string }) {
+  const { colors } = useTheme();
   return (
     <Card
       style={{

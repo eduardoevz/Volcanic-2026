@@ -11,10 +11,12 @@ import {
   startOfWeek,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
-import { colors, radii, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 // Días de la semana vía date-fns + locale (nunca hardcodeados) — §19 del plan.
 const WEEKDAY_ANCHORS = eachDayOfInterval({
@@ -34,7 +36,10 @@ type CalendarGridProps = {
 
 function inRange(dateISO: string, range: { start: string; end: string } | null): boolean {
   if (!range) return false;
-  return isWithinInterval(parseISO(dateISO), { start: parseISO(range.start), end: parseISO(range.end) });
+  return isWithinInterval(parseISO(dateISO), {
+    start: parseISO(range.start),
+    end: parseISO(range.end),
+  });
 }
 
 export function CalendarGrid({
@@ -46,6 +51,8 @@ export function CalendarGrid({
   fertileRange,
   onDayPress,
 }: CalendarGridProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   const monthStart = new Date(year, month, 1);
   const gridStart = startOfWeek(startOfMonth(monthStart), { weekStartsOn: 1 });
   const gridEnd = endOfWeek(endOfMonth(monthStart), { weekStartsOn: 1 });
@@ -99,42 +106,44 @@ export function CalendarGrid({
   );
 }
 
-const styles = StyleSheet.create({
-  weekRow: {
-    flexDirection: 'row',
-    marginBottom: spacing.xs,
-  },
-  weekdayLabel: {
-    flex: 1,
-    textAlign: 'center',
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  day: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.sm,
-  },
-  dayBleeding: {
-    backgroundColor: colors.pitahayaLight,
-  },
-  dayPredicted: {
-    borderWidth: 1,
-    borderColor: colors.pitahaya,
-    borderStyle: 'dashed',
-  },
-  dayFertile: {
-    backgroundColor: colors.stemLight,
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.stem,
-    marginTop: 2,
-  },
-});
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    weekRow: {
+      flexDirection: 'row',
+      marginBottom: spacing.xs,
+    },
+    weekdayLabel: {
+      flex: 1,
+      textAlign: 'center',
+    },
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    day: {
+      width: `${100 / 7}%`,
+      aspectRatio: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: radii.sm,
+    },
+    dayBleeding: {
+      backgroundColor: colors.pitahayaLight,
+    },
+    dayPredicted: {
+      borderWidth: 1,
+      borderColor: colors.pitahaya,
+      borderStyle: 'dashed',
+    },
+    dayFertile: {
+      backgroundColor: colors.stemLight,
+    },
+    dot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: colors.stem,
+      marginTop: 2,
+    },
+  });
+}

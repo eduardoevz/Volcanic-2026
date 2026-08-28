@@ -21,7 +21,8 @@ import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Text } from '@/ui/components/Text';
 import { TimeStepper } from '@/ui/components/TimeStepper';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 const DAY_OFFSETS = [
   { key: 'today', days: 0 },
@@ -43,6 +44,7 @@ const STATUS_TONE = { scheduled: 'neutral', completed: 'success', cancelled: 'da
 
 export default function Appointments() {
   const { t } = useTranslation('appointments');
+  const { colors } = useTheme();
   const { data: appointments, isLoading, isError } = useAppointments();
   const createAppointment = useCreateAppointment();
   const updateStatus = useUpdateAppointmentStatus();
@@ -107,7 +109,10 @@ export default function Appointments() {
                 <Text variant="body" style={{ fontWeight: '700', flex: 1 }}>
                   {appointment.title}
                 </Text>
-                <Badge label={t(`status.${appointment.status}`)} tone={STATUS_TONE[appointment.status as keyof typeof STATUS_TONE]} />
+                <Badge
+                  label={t(`status.${appointment.status}`)}
+                  tone={STATUS_TONE[appointment.status as keyof typeof STATUS_TONE]}
+                />
               </View>
               <Text variant="bodyMuted">
                 {format(new Date(appointment.scheduled_at), "d 'de' MMMM, HH:mm", { locale: es })}
@@ -118,7 +123,14 @@ export default function Appointments() {
               {appointment.location ? <Text variant="caption">{appointment.location}</Text> : null}
 
               {appointment.status === 'scheduled' ? (
-                <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: spacing.sm,
+                    marginTop: spacing.xs,
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <Button
                     label={t('markCompleted')}
                     variant="secondary"
@@ -150,7 +162,12 @@ export default function Appointments() {
       <Sheet visible={creating} onClose={() => setCreating(false)}>
         <ScrollView contentContainerStyle={{ gap: spacing.md }}>
           <Text variant="heading">{t('newAppointmentTitle')}</Text>
-          <Input label={t('titleLabel')} placeholder={t('titlePlaceholder')} value={title} onChangeText={setTitle} />
+          <Input
+            label={t('titleLabel')}
+            placeholder={t('titlePlaceholder')}
+            value={title}
+            onChangeText={setTitle}
+          />
           <Input
             label={t('specialistLabel')}
             placeholder={t('specialistPlaceholder')}

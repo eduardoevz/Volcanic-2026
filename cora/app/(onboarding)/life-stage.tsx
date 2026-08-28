@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -8,10 +8,36 @@ import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants
 import { Banner } from '@/ui/components/Banner';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { colors, radii, shadows, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme, type Shadows } from '@/ui/theme/tokens';
+
+function buildStyles(colors: ColorScheme, shadows: Shadows) {
+  return StyleSheet.create({
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.white,
+      borderRadius: radii.lg,
+      padding: spacing.md,
+      ...shadows.card,
+    },
+    cardPressed: {
+      opacity: 0.8,
+    },
+    cardSaving: {
+      opacity: 0.6,
+    },
+    emoji: {
+      fontSize: 36,
+    },
+  });
+}
 
 export default function LifeStageScreen() {
   const { t } = useTranslation('onboarding');
+  const { colors, shadows } = useTheme();
+  const styles = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
   const [saving, setSaving] = useState<LifeStage | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,24 +91,3 @@ export default function LifeStageScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    ...shadows.card,
-  },
-  cardPressed: {
-    opacity: 0.8,
-  },
-  cardSaving: {
-    opacity: 0.6,
-  },
-  emoji: {
-    fontSize: 36,
-  },
-});

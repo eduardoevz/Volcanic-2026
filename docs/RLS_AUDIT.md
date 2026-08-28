@@ -215,6 +215,16 @@ habría sido una superficie de RLS nueva para un caso de uso que la
 verificación de la función ya cubre con más precisión (un evento puntual,
 no una lectura continua).
 
+## Actualización — Fase 20 (sin tablas ni RLS nuevas)
+
+`CORA-116` (modo oscuro) es un cambio de UI puro: convierte `colors`/
+`typography`/`shadows` de `src/ui/theme/tokens.ts` en un tema servido por
+contexto (`ThemeProvider`/`useTheme()`), con la preferencia (claro/oscuro/
+sistema) persistida solo en `AsyncStorage` del dispositivo, sin sincronizar
+a `user_preferences` ni a ninguna otra tabla. No se creó ninguna migración
+SQL, no se tocó ninguna política existente, y no hay ninguna superficie de
+RLS nueva que auditar.
+
 ## Funciones `security definer`
 
 - **`handle_new_user()`** (0002) — trigger `after insert on auth.users`, usa

@@ -1,9 +1,10 @@
 import type { PropsWithChildren } from 'react';
 import { Text as RNText, type TextStyle } from 'react-native';
 
-import { typography } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import type { Typography } from '@/ui/theme/tokens';
 
-type Variant = keyof typeof typography;
+type Variant = keyof Typography;
 
 type TextProps = PropsWithChildren<{
   variant?: Variant;
@@ -12,6 +13,7 @@ type TextProps = PropsWithChildren<{
 }>;
 
 export function Text({ children, variant = 'body', style, numberOfLines }: TextProps) {
+  const { typography } = useTheme();
   return (
     <RNText style={[typography[variant], style]} numberOfLines={numberOfLines}>
       {children}

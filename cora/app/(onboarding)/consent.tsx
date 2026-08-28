@@ -11,10 +11,12 @@ import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { colors, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { spacing } from '@/ui/theme/tokens';
 
 export default function ConsentScreen() {
   const { t } = useTranslation('onboarding');
+  const { colors } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [aiShareHealthContext, setAiShareHealthContext] = useState(false);
   const [saving, setSaving] = useState(false);

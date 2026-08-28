@@ -1,14 +1,33 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { colors, radii } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, type ColorScheme } from '@/ui/theme/tokens';
 
 type LevelProgressBarProps = {
   progress: number; // 0..1
 };
 
+function buildStyles(colors: ColorScheme) {
+  return StyleSheet.create({
+    track: {
+      height: 12,
+      borderRadius: radii.full,
+      backgroundColor: colors.stemLight,
+      overflow: 'hidden',
+    },
+    fill: {
+      height: '100%',
+      borderRadius: radii.full,
+      backgroundColor: colors.stem,
+    },
+  });
+}
+
 export function LevelProgressBar({ progress }: LevelProgressBarProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => buildStyles(colors), [colors]);
   const width = useSharedValue(0);
 
   useEffect(() => {
@@ -25,17 +44,3 @@ export function LevelProgressBar({ progress }: LevelProgressBarProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  track: {
-    height: 12,
-    borderRadius: radii.full,
-    backgroundColor: colors.stemLight,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    borderRadius: radii.full,
-    backgroundColor: colors.stem,
-  },
-});

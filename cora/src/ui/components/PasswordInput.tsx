@@ -26,7 +26,10 @@ export function PasswordInput({ label, error, style, ...rest }: PasswordInputPro
         onPress={() => setVisible((v) => !v)}
         accessibilityRole="button"
         accessibilityLabel={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-        style={[styles.toggle, { top: label ? LABEL_ROW_HEIGHT + ICON_TOP_IN_INPUT : ICON_TOP_IN_INPUT }]}
+        style={[
+          styles.toggle,
+          { top: label ? LABEL_ROW_HEIGHT + ICON_TOP_IN_INPUT : ICON_TOP_IN_INPUT },
+        ]}
         hitSlop={8}
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -12,13 +12,45 @@ import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
 import { Skeleton } from '@/ui/components/Skeleton';
 import { Text } from '@/ui/components/Text';
-import { colors, radii, shadows, spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing, type ColorScheme, type Shadows } from '@/ui/theme/tokens';
 import type { Database } from '@/shared/types/database.types';
 
 type Avatar = Database['public']['Tables']['avatars']['Row'];
 
+function buildStyles(colors: ColorScheme, shadows: Shadows) {
+  return StyleSheet.create({
+    grid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    avatarCard: {
+      width: 92,
+      height: 92,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      backgroundColor: colors.white,
+      borderRadius: radii.lg,
+      padding: spacing.xs,
+      borderWidth: 2,
+      borderColor: 'transparent',
+      ...shadows.card,
+    },
+    avatarCardSelected: {
+      borderColor: colors.pitahaya,
+    },
+    avatarEmoji: {
+      fontSize: 32,
+    },
+  });
+}
+
 export default function AvatarScreen() {
   const { t } = useTranslation('onboarding');
+  const { colors, shadows } = useTheme();
+  const styles = useMemo(() => buildStyles(colors, shadows), [colors, shadows]);
   const { data: avatars, isLoading, isError } = useAvatars();
   const [selected, setSelected] = useState<Avatar | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,20 +91,14 @@ export default function AvatarScreen() {
           ))}
         </View>
       ) : avatars && avatars.length === 0 ? (
-        <EmptyState
-          title={t('avatar.emptyTitle')}
-          description={t('avatar.emptyDescription')}
-        />
+        <EmptyState title={t('avatar.emptyTitle')} description={t('avatar.emptyDescription')} />
       ) : (
         <ScrollView contentContainerStyle={styles.grid}>
           {avatars?.map((avatar) => (
             <Pressable
               key={avatar.id}
               onPress={() => setSelected(avatar)}
-              style={[
-                styles.avatarCard,
-                selected?.id === avatar.id && styles.avatarCardSelected,
-              ]}
+              style={[styles.avatarCard, selected?.id === avatar.id && styles.avatarCardSelected]}
             >
               <Text style={styles.avatarEmoji}>{AVATAR_EMOJI[avatar.code] ?? '🐾'}</Text>
               <Text variant="caption" style={{ textAlign: 'center' }}>
@@ -118,30 +144,3 @@ export default function AvatarScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  avatarCard: {
-    width: 92,
-    height: 92,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.white,
-    borderRadius: radii.lg,
-    padding: spacing.xs,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    ...shadows.card,
-  },
-  avatarCardSelected: {
-    borderColor: colors.pitahaya,
-  },
-  avatarEmoji: {
-    fontSize: 32,
-  },
-});

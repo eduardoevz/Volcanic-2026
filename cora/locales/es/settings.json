@@ -22,6 +22,11 @@
   "languageMis": "Miskitu",
   "languageMyn": "Mayangna",
   "languageChanging": "Cambiando idioma...",
+  "themeTitle": "Tema",
+  "themeLight": "Claro",
+  "themeDark": "Oscuro",
+  "themeSystem": "Sistema",
+  "themeChanging": "Cambiando tema...",
   "signOut": "Cerrar sesión",
   "changeLifeStagePrompt": "¿En qué etapa estás ahora?"
 }
