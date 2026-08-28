@@ -1,6 +1,47 @@
 # Progreso — Cora
 
-> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-27.
+> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-28.
+
+## Fase 19 — P2: Infraestructura remota
+
+`CORA-113`/`CORA-114`: búsqueda semántica con pgvector y push notifications remotas reales (a diferencia de Fase 18, esta vez con credenciales EAS/Firebase reales provistas por el usuario, así que se activó de verdad en vez de dejar solo código listo).
+
+- [x] **3 bugs reales encontrados y corregidos verificando en el emulador, no solo compilando** — mismo estándar que todas las fases anteriores:
+  1. **Descalce de paquete Firebase**, encontrado antes de escribir código nativo: el `google-services.json` inicial traía la app Android registrada como `com.cora`, pero la app real es `com.volcanic.cora` desde la Fase 0. El usuario agregó una segunda app Android al mismo proyecto Firebase con el paquete correcto y volvió a descargar el archivo (ahora con ambos `client[]`) antes de tocar `app.json`.
+  2. **`service_role` sin ningún GRANT de tabla en todo el proyecto**, desde la migración `0001` — `rolbypassrls=true` (bypassa RLS, correcto) pero cero privilegios `select/insert/update/delete` en las 24 tablas existentes (confirmado con `information_schema.role_table_grants` y `pg_default_acl`: los defaults de `public` para objetos creados por el rol `postgres` nunca incluyeron nada para `service_role`). Nunca se había notado porque ninguna Edge Function anterior (`cora-ai`, Fase 7) necesitó `service_role` — siempre corrió con el JWT de la usuaria. `embed-content` fue la primera en necesitarlo de verdad y expuso el gap con `permission denied for table educational_content`. Corregido en la migración `0020` (`grant all ... to service_role` + `alter default privileges` para que no se repita en tablas futuras).
+  3. **`subscribeToPushTokenRotation` guardaba el token nativo crudo (FCM), no el de Expo** — `addPushTokenListener` de `expo-notifications` entrega el token nativo, nunca `ExponentPushToken[...]`; solo `getExpoPushTokenAsync` da el formato que la Expo Push API acepta. Se encontró en el emulador real: apareció una fila con un token con forma `xxxx:APA91b...` en vez de `ExponentPushToken[...]`. Corregido en `src/features/notifications/pushTokens.ts` (la rotación ahora vuelve a pedir el token de Expo, no reusa el payload del evento) + `CHECK (expo_push_token like 'ExponentPushToken[%')` en la migración `0021` como última línea de defensa en Postgres.
+- [x] **`SUPABASE_SERVICE_ROLE_KEY` nunca existió como secreto en este proyecto** (otro hallazgo real, no asumido): el runtime moderno de Edge Functions ya no la auto-inyecta — el reemplazo es `SUPABASE_SECRET_KEYS` (JSON, campo `default`), verificado contra la documentación viva de Supabase. `embed-content` y `send-push` prueban la legacy primero y caen a `SUPABASE_SECRET_KEYS` si no existe.
+- [x] Migración `0019_semantic_search_and_push.sql`: extensión `vector`, `educational_content.embedding vector(768)` + índice `hnsw`, RPC `match_articles_by_embedding` (`security definer`, mismo filtro de etapa/edad/publicado que ya usan `fetchArticles`), tabla `device_push_tokens` (RLS Patrón A completo).
+- [x] **`CORA-114` — Búsqueda semántica**, dos superficies:
+  - `supabase/functions/cora-ai/index.ts`: `fetchGroundingArticles` ahora tiene un tercer nivel — si el full-text (primario + fallback OR-manual, ya existentes desde Fase 7/13) no encuentra nada, pide el embedding de la pregunta a Gemini y llama a la RPC.
+  - Biblioteca: nueva Edge Function `search-articles-semantic` (JWT verificado, Zod) + `src/features/content/api.ts#searchArticlesSemantic` + `useSearchArticles.ts` con el mismo patrón de fallback de dos niveles.
+  - Nueva Edge Function `embed-content` (backfill, protegida con `x-admin-key`/`EMBED_CONTENT_ADMIN_KEY`) para poblar `embedding` en los ~28 artículos existentes y en contenido futuro — documentado el paso en `docs/CONVENCIONES.md`.
+  - **Backfill corrido de punta a punta contra los 28 artículos reales** (una vez resueltos los 2 bugs de permisos de arriba) — pero las 28 llamadas a Gemini devolvieron `429 RESOURCE_EXHAUSTED` ("Your prepayment credits are depleted"), la misma limitación de `GEMINI_API_KEY` ya documentada en Fase 7/13. **No se simuló ningún resultado**: la infraestructura completa (migración, permisos, Edge Functions, RPC, fallback de dos niveles en cliente y en `cora-ai`) queda verificada y lista, pero ningún artículo tiene `embedding` real todavía — pendiente honesto hasta que el equipo recargue créditos y se vuelva a invocar `embed-content` (un solo POST, sin cambios de código).
+- [x] **`CORA-113` — Push notifications remotas, verificado de punta a punta con evidencia real, no solo un token obtenido:**
+  - `src/features/notifications/` (`pushTokens.ts`, `useRegisterPushToken`) registra el token tras el primer login y se re-suscribe a rotaciones — verificado en el emulador: el prompt nativo de permiso apareció solo, se aceptó, y quedó una fila real `ExponentPushToken[YcaUtRDqxmqWPpe5lWJd5X]` en `device_push_tokens` para la cuenta demo.
+  - **Envío real vía Expo Push API → FCM confirmado dos veces**: (1) un POST directo a `exp.host/--/api/v2/push/send` con el token real llegó como notificación visible en la bandeja del emulador con la app en segundo plano (confirmado con `dumpsys notification` y captura de pantalla). (2) El flujo real de producto —`useAcceptInvite` → Edge Function `send-push`— probado con dos cuentas reales (`hackathonvolcanic+fase19-owner@gmail.com`/`+fase19-member@gmail.com`, creadas y eliminadas al terminar): la cuenta member acepta la invitación, `send-push` valida que quien llama es exactamente `member_user_id` de esa membresía con `status='accepted'`, busca los tokens del owner y envía — la notificación "Alguien se unió a tu círculo de acompañamiento." llegó real al mismo emulador (se le asignó el token real de prueba a la cuenta owner de prueba para poder verlo).
+  - **Verificación de seguridad explícita**: un `membershipId` inventado devuelve `404 not_found` sin tocar ningún token — no hay forma de que una usuaria dispare push hacia una cuenta arbitraria.
+  - `eas.json` creado; confirmado que la cuenta EAS del usuario (`eduardo1712`) ya estaba autenticada y el proyecto ya vinculado (`extra.eas.projectId` en `app.json` desde antes). El usuario subió la service account de Firebase a las credenciales de EAS por su cuenta (paso interactivo que este entorno no puede automatizar, igual que `supabase login` en Fase 0).
+- [x] Rebuild nativo (`expo prebuild` + `expo run:android`) exitoso con `google-services.json` correcto y `expo-device` nuevo — `BUILD SUCCESSFUL`, Firebase inicializó (`FirebaseApp initialization successful` en logcat), sin excepciones fatales.
+- [x] `npx tsc --noEmit` (0 errores — incluye una corrección manual a `database.types.ts`: el generador de tipos de esta sesión marcó los argumentos de `upsert_daily_log` como no-nullable por error, revertido a mano porque `tracking/api.ts` los pasa nullable legítimamente), `npx eslint .` (0 errores), `npx jest` (54/54 OK).
+
+### Log de tareas — Fase 19 (2026-08-28)
+
+- Se investigó primero qué requería credenciales externas (`CORA-113`) y qué no (`CORA-114`), confirmando con el usuario que ya tenía cuenta EAS y proyecto Firebase reales antes de empezar a escribir código — evitó repetir el patrón de Fase 18 (dejar solo infraestructura sin activar).
+- Forma exacta del endpoint de embeddings de Gemini (`models/gemini-embedding-001:embedContent`, campo `embedContentConfig.outputDimensionality`/`taskType`) y del endpoint de Expo Push (`exp.host/--/api/v2/push/send`) verificadas contra documentación viva antes de escribir código, mismo criterio que ya fijó `MODEL` en `cora-ai` en Fase 7 — dos fuentes discreparon sobre dónde va `outputDimensionality` (top-level deprecado vs anidado en `embedContentConfig`); se confirmó con la referencia de la API cuál es la vigente.
+- Metro quedó colgado en el puerto 8081 sin responder dos veces durante la verificación (mismo problema recurrente ya documentado en Fase 1) — `Stop-Process` + reinicio con `--clear` lo resolvió ambas veces.
+- Cuentas de prueba (`fase19-owner`/`fase19-member`) creadas vía API de Auth, usadas para el recorrido real de aceptar invitación → push, eliminadas con `delete from auth.users` al terminar (cascada limpia `device_push_tokens`, confirmado con conteo).
+
+## Fase 19 — Definition of Done (verificación final)
+
+- [x] Migraciones `0019`–`0021` aplicadas al proyecto remoto real y versionadas.
+- [x] `device_push_tokens` con RLS completa, auditado en `docs/RLS_AUDIT.md`.
+- [x] Notificación push real recibida en el emulador por dos caminos distintos (envío directo + flujo de producto real).
+- [x] Verificación de seguridad de `send-push` (membershipId ajeno/inventado → rechazado).
+- [x] Búsqueda semántica con infraestructura completa y verificada hasta el límite real (créditos de Gemini agotados, documentado sin simular).
+- [x] 3 bugs reales corregidos antes de cerrar la fase, no descubiertos después: descalce de paquete Firebase, grants faltantes de `service_role`, token de rotación con formato equivocado.
+
+**Fase 19 completa.** Única limitación real: no hay ningún artículo con `embedding` generado todavía por falta de créditos de `GEMINI_API_KEY` (mismo bloqueo recurrente de Fase 7/13) — la infraestructura entera está lista y verificada, correr `embed-content` una vez que haya créditos es lo único que falta para que la búsqueda semántica devuelva resultados reales en vez de listas vacías.
 
 ## Fase 18 — P2: Exportables y alcance de contenido
 

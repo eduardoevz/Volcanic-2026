@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { acceptInvite } from '@/features/family/api';
+import { acceptInvite, notifyOwnerOfAcceptance } from '@/features/family/api';
 import { useSession } from '@/shared/hooks/useSession';
 
 export function useAcceptInvite() {
@@ -10,8 +10,9 @@ export function useAcceptInvite() {
 
   return useMutation({
     mutationFn: acceptInvite,
-    onSuccess: () => {
+    onSuccess: (_data, membershipId) => {
       queryClient.invalidateQueries({ queryKey: ['family', 'sharedWithMe', userId] });
+      notifyOwnerOfAcceptance(membershipId);
     },
   });
 }

@@ -182,6 +182,39 @@ inmediatamente después de subir el archivo — confirmado por
 devolviendo 0 filas al terminar. El bucket queda, como estaba declarado,
 sin ninguna política de escritura para `authenticated`/`anon`.
 
+## Actualización — Fase 19 (1 tabla nueva + 1 RPC nueva)
+
+| # | Tabla | Migración | RLS | Políticas | Grants | Veredicto |
+|---|---|:---:|---|---|---|---|
+| 25 | `device_push_tokens` | 0019 | ✅ | 4 políticas `own_*` en `user_id` (patrón A idéntico al resto) | CRUD → `authenticated` | OK |
+
+Verificado contra el proyecto remoto real (no solo revisión de SQL) el
+2026-08-27: `pg_tables.rowsecurity = true`, y `pg_policies` confirma el
+`qual`/`with_check` exacto de las 4 políticas (`auth.uid() = user_id` en
+las cuatro, sin excepción). No hay ninguna política de lectura pública —
+a diferencia de `educational_content`, un token de push es dato privado
+de la usuaria sin ningún caso de uso de lectura ajena.
+
+**`match_articles_by_embedding(p_query_embedding, p_stage, p_age, p_match_count)`**
+(0019) es `security definer`, pero no expone nada nuevo: el `where` interno
+repite exactamente el mismo filtro que la política `public_read_published`
+de `educational_content` (`status='published' and deleted_at is null`) más
+`life_stages`/`min_age`, que ya son de lectura pública. Es `security
+definer` únicamente para que el operador `<=>` use el índice `hnsw` de
+forma eficiente, no para saltarse RLS.
+
+**Nota sobre `send-push` (Edge Function, no RLS):** el acceso cruzado entre
+usuarias (leer `device_push_tokens` del *owner* de un círculo familiar
+para notificarlo) no pasa por una política RLS nueva — vive enteramente en
+la Edge Function con `service_role`, que primero verifica con el JWT de
+quien llama que es exactamente `member_user_id` de la membresía y que su
+`status` ya es `'accepted'` antes de tocar los tokens de otra cuenta. Ver
+`supabase/functions/send-push/index.ts` para el detalle; no se agregó una
+política `family_shared_select` sobre `device_push_tokens` a propósito —
+habría sido una superficie de RLS nueva para un caso de uso que la
+verificación de la función ya cubre con más precisión (un evento puntual,
+no una lectura continua).
+
 ## Funciones `security definer`
 
 - **`handle_new_user()`** (0002) — trigger `after insert on auth.users`, usa

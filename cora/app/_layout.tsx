@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { MascotEvolutionOverlay } from '@/features/mascot';
+import { useRegisterPushToken } from '@/features/notifications';
 import { registerNotificationHandler } from '@/features/reminders';
 import { restoreSavedLanguage } from '@/lib/i18n';
 import { asyncStoragePersister, configureOnlineManager, queryClient } from '@/lib/queryClient';
@@ -21,6 +22,8 @@ export default function RootLayout() {
     registerNotificationHandler();
     restoreSavedLanguage();
   }, []);
+
+  useRegisterPushToken();
 
   return (
     <ErrorBoundary>

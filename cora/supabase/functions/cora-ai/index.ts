@@ -16,6 +16,7 @@ import {
   REFERRAL_CARD_TEXT,
   stripInvalidCitations,
 } from './guardrails.ts';
+import { embedText, toPgVectorLiteral } from './gemini.ts';
 
 // Proveedor de IA: Gemini (desviación consciente del plan original, que fijaba
 // Anthropic — decisión del equipo durante la Fase 7, ver docs/PROGRESO.md).
@@ -91,7 +92,10 @@ async function buildProfileContext(supabase: SupabaseClient, userId: string) {
   const stage = data?.life_stage ?? 'adultez';
   const age = data?.birth_year ? new Date().getFullYear() - data.birth_year : null;
   const ageRange = age !== null ? bucketAge(age) : 'no especificado';
-  return { stage, ageRange };
+  // Mismo fallback que ageFromBirthYear() en src/features/content/api.ts:
+  // sin año de nacimiento se trata como adulta (sin restricción de min_age)
+  // en vez de bloquear el filtro semántico por edad.
+  return { stage, ageRange, age: age ?? 99 };
 }
 
 async function buildHealthAggregates(supabase: SupabaseClient, userId: string) {
@@ -150,7 +154,11 @@ function buildOrTsQuery(message: string): string {
   return significant.map((w) => w.replace(/'/g, "''")).join(' | ');
 }
 
-async function fetchGroundingArticles(supabase: SupabaseClient, message: string) {
+async function fetchGroundingArticles(
+  supabase: SupabaseClient,
+  message: string,
+  semantic: { apiKey: string; stage: string; age: number }
+) {
   try {
     const primary = await supabase
       .from('educational_content')
@@ -162,16 +170,30 @@ async function fetchGroundingArticles(supabase: SupabaseClient, message: string)
     if (primary.data && primary.data.length > 0) return primary.data;
 
     const orQuery = buildOrTsQuery(message);
-    if (!orQuery) return [];
+    if (orQuery) {
+      const fallback = await supabase
+        .from('educational_content')
+        .select('id, title, summary')
+        .textSearch('search_vector', orQuery, { config: 'spanish' })
+        .order('importance', { ascending: false })
+        .limit(4);
+      if (fallback.error) throw fallback.error;
+      if (fallback.data && fallback.data.length > 0) return fallback.data;
+    }
 
-    const fallback = await supabase
-      .from('educational_content')
-      .select('id, title, summary')
-      .textSearch('search_vector', orQuery, { config: 'spanish' })
-      .order('importance', { ascending: false })
-      .limit(4);
-    if (fallback.error) throw fallback.error;
-    return fallback.data ?? [];
+    // Tercer nivel (Fase 19, CORA-114): el full-text falla seguido con
+    // preguntas parafraseadas que no comparten lexemas con ningún artículo
+    // (ver nota de buildOrTsQuery). Antes de rendirse, se prueba similitud
+    // semántica sobre el mismo mensaje de la usuaria.
+    const queryEmbedding = await embedText(semantic.apiKey, message, 'RETRIEVAL_QUERY');
+    const semanticResult = await supabase.rpc('match_articles_by_embedding', {
+      p_query_embedding: toPgVectorLiteral(queryEmbedding),
+      p_stage: semantic.stage,
+      p_age: semantic.age,
+      p_match_count: 4,
+    });
+    if (semanticResult.error) throw semanticResult.error;
+    return semanticResult.data ?? [];
   } catch {
     // Sin coincidencias no debe tumbar el chat entero — Cora simplemente no
     // cita nada si no hay grounding.
@@ -387,7 +409,8 @@ Deno.serve(async (req) => {
   }
 
   // ── Contexto (capa 3 — grounding) ──────────────────────────────────────
-  const { stage, ageRange } = await buildProfileContext(supabase, user.id);
+  const { stage, ageRange, age } = await buildProfileContext(supabase, user.id);
+  const geminiApiKey = Deno.env.get('GEMINI_API_KEY')!;
 
   const { data: prefs } = await supabase
     .from('user_preferences')
@@ -398,7 +421,7 @@ Deno.serve(async (req) => {
 
   const [aggregates, articles, recentMessages] = await Promise.all([
     shareContext ? buildHealthAggregates(supabase, user.id) : Promise.resolve(null),
-    fetchGroundingArticles(supabase, message),
+    fetchGroundingArticles(supabase, message, { apiKey: geminiApiKey, stage, age }),
     incomingConversationId
       ? supabase
           .from('ai_messages')
@@ -412,8 +435,6 @@ Deno.serve(async (req) => {
 
   const contextBlock = buildContextBlock(stage, ageRange, aggregates, articles);
   const validArticleIds = articles.map((a) => a.id);
-
-  const geminiApiKey = Deno.env.get('GEMINI_API_KEY')!;
 
   const stream = new ReadableStream({
     async start(controller) {

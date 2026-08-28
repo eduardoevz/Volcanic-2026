@@ -10,32 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -437,6 +412,41 @@ export type Database = {
           },
         ]
       }
+      device_push_tokens: {
+        Row: {
+          created_at: string
+          device_info: string | null
+          expo_push_token: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_info?: string | null
+          expo_push_token: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_info?: string | null
+          expo_push_token?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       educational_content: {
         Row: {
           audio_path: string | null
@@ -445,6 +455,7 @@ export type Database = {
           category_id: string
           cover_emoji: string
           deleted_at: string | null
+          embedding: string | null
           id: string
           importance: number
           life_stages: Database["public"]["Enums"]["life_stage"][]
@@ -469,6 +480,7 @@ export type Database = {
           category_id: string
           cover_emoji?: string
           deleted_at?: string | null
+          embedding?: string | null
           id?: string
           importance?: number
           life_stages: Database["public"]["Enums"]["life_stage"][]
@@ -493,6 +505,7 @@ export type Database = {
           category_id?: string
           cover_emoji?: string
           deleted_at?: string | null
+          embedding?: string | null
           id?: string
           importance?: number
           life_stages?: Database["public"]["Enums"]["life_stage"][]
@@ -1098,13 +1111,21 @@ export type Database = {
         Args: { p_membership_id: string }
         Returns: undefined
       }
-      level_for_points: {
-        Args: { p_points: number }
-        Returns: number
-      }
-      mark_article_read: {
-        Args: { p_article_id: string }
-        Returns: undefined
+      level_for_points: { Args: { p_points: number }; Returns: number }
+      mark_article_read: { Args: { p_article_id: string }; Returns: undefined }
+      match_articles_by_embedding: {
+        Args: {
+          p_age: number
+          p_match_count?: number
+          p_query_embedding: string
+          p_stage: Database["public"]["Enums"]["life_stage"]
+        }
+        Returns: {
+          id: string
+          similarity: number
+          summary: string
+          title: string
+        }[]
       }
       set_life_stage: {
         Args: { new_stage: Database["public"]["Enums"]["life_stage"] }
@@ -1126,7 +1147,11 @@ export type Database = {
     Enums: {
       content_status: "draft" | "published" | "archived"
       flow_level: "none" | "spotting" | "light" | "medium" | "heavy"
-      health_center_type: "hospital" | "centro_salud" | "clinica" | "casa_materna"
+      health_center_type:
+        | "hospital"
+        | "centro_salud"
+        | "clinica"
+        | "casa_materna"
       life_stage:
         | "adolescencia"
         | "adultez"
@@ -1267,14 +1292,16 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       content_status: ["draft", "published", "archived"],
       flow_level: ["none", "spotting", "light", "medium", "heavy"],
-      health_center_type: ["hospital", "centro_salud", "clinica", "casa_materna"],
+      health_center_type: [
+        "hospital",
+        "centro_salud",
+        "clinica",
+        "casa_materna",
+      ],
       life_stage: [
         "adolescencia",
         "adultez",

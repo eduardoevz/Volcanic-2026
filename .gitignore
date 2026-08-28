@@ -30,6 +30,14 @@ ios/build/
 .env.*.local
 !.env.example
 
+# Firebase/FCM (Fase 19) — google-services.json no es tan sensible como la
+# service account (contiene una API key scopeada al paquete, mismo criterio
+# conservador que .env.local), pero la service account SÍ es un secreto real
+# (permite enviar push como el proyecto) y nunca debe versionarse.
+google-services.json
+cora-app-service.json
+cora/google-services.json
+
 # Supabase
 supabase/.temp/
 supabase/.branches/

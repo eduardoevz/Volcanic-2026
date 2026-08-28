@@ -59,6 +59,17 @@
 - **`jest` + `jest-expo`**, no Vitest — es el preset soportado oficialmente por Expo para React Native y el que realmente funciona en este proyecto en Windows. Versiones fijadas a propósito: `jest@^29.7.0` + `@react-native/jest-preset@0.86.2` (son las que `jest-expo` espera internamente; `jest@30` rompe con `clearMocksOnScope is not a function`).
 - Alias `@/*` mapeado en `package.json#jest.moduleNameMapper` además de en `tsconfig.json` — hace falta en los dos lugares.
 
+## Publicar contenido nuevo en la Biblioteca (desde Fase 19)
+
+Insertar la fila en `educational_content` ya no es el último paso: el
+artículo queda invisible para la búsqueda semántica y el grounding de Cora
+IA hasta correr el backfill de embeddings. Después de insertar (o editar
+`title`/`summary` de) uno o más artículos, invocar la Edge Function
+`embed-content` una vez con el header `x-admin-key` (secreto de función
+`EMBED_CONTENT_ADMIN_KEY`, no confundir con ninguna otra key del proyecto).
+Solo procesa filas con `embedding is null`, así que es seguro correrla
+después de cada tanda de contenido nuevo sin recalcular lo ya existente.
+
 ## Git
 
 - Ramas `main` (estable) y `develop` (integración). Trabajo cotidiano en ramas de feature sobre `develop`.

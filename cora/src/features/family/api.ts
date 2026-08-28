@@ -91,6 +91,22 @@ export async function acceptInvite(membershipId: string) {
   return data;
 }
 
+/**
+ * Fase 19 (CORA-113): avisa por push remoto al dueño del círculo — hoy no
+ * se entera si no tiene la app abierta. Best-effort a propósito: quien
+ * acepta ya vio su propia confirmación en pantalla, un fallo acá (sin
+ * tokens registrados, Edge Function caída, etc.) nunca debe romper ese
+ * flujo. Ver supabase/functions/send-push/index.ts para el diseño de
+ * seguridad (por qué el contrato es membershipId y no un userId directo).
+ */
+export async function notifyOwnerOfAcceptance(membershipId: string) {
+  try {
+    await supabase.functions.invoke('send-push', { body: { membershipId } });
+  } catch {
+    // silencioso a propósito
+  }
+}
+
 export async function fetchFamilyMoodSummary(ownerId: string) {
   const { data, error } = await supabase.rpc('get_family_mood_summary', {
     p_owner_id: ownerId,

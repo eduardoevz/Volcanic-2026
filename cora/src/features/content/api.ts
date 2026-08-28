@@ -99,6 +99,47 @@ export async function searchArticles({
   return data;
 }
 
+/**
+ * Fallback semántico (Fase 19, CORA-114): solo se llama cuando searchArticles
+ * (full-text, gratis) devuelve 0 resultados — una pregunta parafraseada no
+ * comparte lexemas con ningún artículo, pero sí puede ser semánticamente
+ * cercana. Requiere GEMINI_API_KEY, que nunca puede tocar el cliente, así
+ * que vive en la Edge Function search-articles-semantic. La función solo
+ * devuelve id/title/summary/similarity (lo que da la RPC) — se reconsulta
+ * ARTICLE_LIST_FIELDS para que la lista de resultados tenga la misma forma
+ * que searchArticles (cover_emoji, reading_minutes, etc. para la UI), y se
+ * reordena porque `.in()` no conserva el orden de similitud.
+ */
+export async function searchArticlesSemantic({
+  query,
+  stage,
+  age,
+}: {
+  query: string;
+  stage: LifeStage;
+  age: number;
+}) {
+  const { data, error } = await supabase.functions.invoke('search-articles-semantic', {
+    body: { query, stage, age },
+  });
+  if (error) return [];
+
+  const ranked = (data?.results ?? []) as { id: string }[];
+  if (ranked.length === 0) return [];
+
+  const { data: articles, error: articlesError } = await supabase
+    .from('educational_content')
+    .select(ARTICLE_LIST_FIELDS)
+    .in(
+      'id',
+      ranked.map((r) => r.id)
+    );
+  if (articlesError || !articles) return [];
+
+  const byId = new Map(articles.map((a) => [a.id, a]));
+  return ranked.map((r) => byId.get(r.id)).filter((a): a is NonNullable<typeof a> => a !== undefined);
+}
+
 export async function fetchArticlesByIds(ids: string[]) {
   if (ids.length === 0) return [];
   const { data, error } = await supabase
