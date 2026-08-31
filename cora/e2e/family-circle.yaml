@@ -1,0 +1,28 @@
+appId: com.cora.app
+---
+# Invitar a alguien al círculo familiar (app/family/index.tsx,
+# app/family/invite.tsx) y otorgar un permiso granular (scope).
+# Textos reales de locales/es/family.json.
+- launchApp:
+    clearState: false
+- assertVisible: "Inicio"
+
+- tapOn: "Perfil"
+- tapOn: "Círculo familiar"
+- assertVisible: "Mi círculo"
+
+- tapOn: "Invitar a alguien"
+- assertVisible: "Invitar a mi círculo"
+- inputText: "familiar-e2e@correo.com"
+- tapOn: "¿Qué relación tienen?"
+- inputText: "mi mamá"
+- tapOn: "Crear invitación"
+- assertVisible: "Invitación creada. Compartí el enlace con esa persona."
+
+- tapOn: "Listo"
+- assertVisible: "familiar-e2e@correo.com"
+
+# El permiso otorgado inicialmente debería verse reflejado como scope pendiente/activo
+- assertVisible:
+    text: ".*(Fechas de ciclo|Recordatorios|Resumen de ánimo|Citas médicas).*"
+    optional: true

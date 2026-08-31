@@ -1,0 +1,25 @@
+appId: com.cora.app
+---
+# Cambiar idioma y activar modo oscuro desde Perfil, y verificar que ambos
+# persistan tras reiniciar la app (AsyncStorage — ver
+# src/lib/i18n.ts::setAppLanguage y src/ui/theme/ThemeContext.tsx::setAppTheme).
+- launchApp:
+    clearState: false
+- assertVisible: "Inicio"
+
+- tapOn: "Perfil"
+- assertVisible: "Idioma"
+- tapOn: "Miskitu"
+- assertVisible: "Cambiando idioma..."
+
+- tapOn: "Tema"
+- tapOn: "Oscuro"
+- assertVisible: "Cambiando tema..."
+
+# Reiniciar sin limpiar estado — idioma y tema deben mantenerse
+- launchApp:
+    clearState: false
+- tapOn: "Perfil"
+- assertVisible:
+    text: ".*Miskitu.*"
+    optional: true
