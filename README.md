@@ -1,59 +1,97 @@
 <div align="center">
 
-  <img src="assets/logo.png" alt="Logo Acompáñame" width="140" height="140" />
+  <img src="cora/assets/icon.png" alt="Cora" width="120" height="120" />
 
-  # 🌸 Acompáñame
-  **Plataforma móvil integral para el acompañamiento y autocuidado de la mujer en todas sus etapas de vida.**
+  # Cora
+
+  **Acompañamiento de salud para mujeres, personalizado por etapa de vida — pensado para Nicaragua.**
 
   [![Hackathon Nicaragua 2026](https://img.shields.io/badge/Hackathon_Nicaragua-2026-blueviolet?style=for-the-badge)](https://hackathonnicaragua.com.ni/)
-  [![Categoría](https://img.shields.io/badge/Categoría-Aficionado-orange?style=for-the-badge)](#)
-  [![Temática](https://img.shields.io/badge/Temática-Salud-red?style=for-the-badge)](#)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+  [![Expo SDK 57](https://img.shields.io/badge/Expo-57-000020?style=for-the-badge&logo=expo&logoColor=white)](https://docs.expo.dev/versions/v57.0.0/)
+  [![React Native](https://img.shields.io/badge/React_Native-0.86-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev/)
+  [![Supabase](https://img.shields.io/badge/Supabase-Postgres_%2B_RLS-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
 </div>
 
 ---
 
-## 📌 Sobre el Reto
+## Sobre el proyecto
 
-* **Nombre del Reto:** Aplicación móvil para el acompañamiento integral a mujeres.
-* **Problema:** Existencia de brechas de información, mitos y falta de soluciones tecnológicas integrales adaptadas al contexto local y lenguas originarias que acompañen la salud de la mujer (menstruación, embarazo y menopausia).
-* **Solución:** **Acompáñame** es una solución móvil inclusiva que combina seguimiento de salud por etapas, educación multilingüe (Español/Miskito/Mayangna), orientación asistida por IA y módulos de acompañamiento para la familia.
+La mayoría de apps de salud femenina son calendarios menstruales genéricos, en inglés, sin
+adaptación al contexto local. **Cora** acompaña a una mujer nicaragüense a lo largo de todas sus
+etapas de vida — adolescencia, adultez, embarazo, perimenopausia — adaptando contenido,
+herramientas y tono a la etapa que ella misma declara. La personalización por etapa de vida es el
+eje del producto: el calendario, la biblioteca educativa, la mascota y el asistente de IA existen
+para sostener esa idea, no al revés.
 
----
+Cora **no diagnostica, no reemplaza atención médica y no comparte datos con terceros** — toda
+superficie con contenido clínico muestra un descargo visible de "esto no es un diagnóstico".
 
-## 🎯 Estrategia y Marketing
+## Funcionalidades
 
-* **Propuesta Única de Valor:** Acompañamiento continuo en una sola app para todas las etapas de la mujer, adaptada al contexto multicultural de Nicaragua con soporte offline y en lenguas originarias.
-* **Público Objetivo:** Mujeres adolescentes, adultas, adultas mayores y sus familias en comunidades urbanas y rurales.
+**Seguimiento de salud**
+- Registro diario de síntomas, ánimo y energía, con calendario de ciclo menstrual
+- Predicción de ciclo y ventana fértil, detección de irregularidades y señales de alerta (sin
+  nombrar nunca una condición médica — solo deriva a hablar con un profesional)
+- Seguimiento de embarazo (semana, trimestre, fecha probable de parto) y agenda de citas médicas
+- Estadísticas y tendencias del ciclo
+- Resumen médico exportable a PDF, compartible con un profesional de salud
 
----
+**IA y biblioteca educativa**
+- Asistente de IA (Gemini) con guardrails en capas: nunca diagnostica ni prescribe, cita fuentes
+  reales de la biblioteca, y deriva ante señales de alerta en vez de responder
+- Biblioteca con ~28 artículos revisados y citados, filtrados por etapa de vida, con búsqueda
+  semántica y audio educativo
 
-## 🛠️ Stack Tecnológico
+**Acompañamiento y personalización**
+- Círculo de acompañamiento familiar con permisos granulares por usuaria (RLS: sin invitación
+  activa, cero acceso — nunca implícito)
+- Directorio de centros de salud y especialistas (con consentimiento explícito para publicar)
+- Mascota "pitahaya" que evoluciona con hábitos de autocuidado
+- Recordatorios y notificaciones push reales
+- Modo oscuro, y arquitectura de idioma lista para español/miskito/mayangna — hoy solo el
+  contenido en español está completo; miskito y mayangna caen a español por falta de traducciones
+  reales, documentado así en vez de simulado
 
-* **Frontend Mobile / Web:** React / Next.js (o React Native / Flutter para entorno móvil).
-* **Backend:** Python (FastAPI / Flask) con arquitectura RESTful.
-* **Base de Datos:** PostgreSQL / SQL Server para registro de usuarios y métricas de salud.
-* **IA & Lenguaje:** Integración de API de IA entrenada con base de conocimiento médica oficial y motor de audio para lenguas originarias.
+**Cuenta y seguridad**
+- Auth por correo/contraseña y Google OAuth, recuperación de contraseña, sesión y caché cifradas
+  localmente
+- Row Level Security en las 25+ tablas de la base de datos — auditado en `docs/RLS_AUDIT.md`
 
----
+## Stack tecnológico
 
-## 👥 Equipo de Trabajo
+| Capa | Tecnología |
+| --- | --- |
+| App | [Expo](https://expo.dev/) 57 + React Native 0.86 + React 19, TypeScript, [expo-router](https://docs.expo.dev/router/introduction/) |
+| Estado y datos | Zustand, TanStack Query (con caché offline persistida en `AsyncStorage`) |
+| Formularios | react-hook-form + Zod |
+| i18n | i18next / react-i18next |
+| Backend | [Supabase](https://supabase.com/) (Postgres, Row Level Security, Auth, Storage) — 21 migraciones versionadas |
+| Edge Functions | `cora-ai` (asistente), `embed-content` / `search-articles-semantic` (búsqueda semántica con pgvector), `send-push` (notificaciones) |
+| IA | Gemini, vía Edge Function propia con guardrails determinísticos + de prompt |
+| Notificaciones | `expo-notifications` + Expo Push API / FCM |
+| Otros | `expo-print` (PDF), `expo-audio` (audio educativo), `expo-secure-store` + cifrado AES local |
+| Calidad | Jest + React Native Testing Library, ESLint, TypeScript estricto, pgTAP (RLS), Maestro (E2E), GitHub Actions |
 
-| Rol | Integrante | Responsabilidad |
-| :--- | :--- | :--- |
-| **PM & Documentación** | Integrante 1 | Gestión Trello, Lean Canvas, Pitch y README |
-| **Backend & BD** | Integrante 2 | API, Base de Datos y Lógica de Negocio |
-| **Frontend Mobile** | Integrante 3 | Desarrollo de Interfaces y UX Responsivo |
-| **Diseño UX/UI** | Integrante 4 | Figma, Branding, Logo y Manual de Marca |
-| **Marketing & Contenido** | Integrante 5 | Buyer Persona, Traducciones y Video Demo |
+## Estructura del repo
 
----
+```
+Volcanic-2026/
+├─ cora/                 # App Expo/React Native
+│  ├─ app/               # Rutas (expo-router)
+│  ├─ src/features/      # Un módulo por feature (auth, tracking, assistant, family, ...)
+│  ├─ src/ui/             # Componentes y tema (claro/oscuro)
+│  ├─ e2e/               # Flujos Maestro
+│  └─ supabase/          # Migraciones, Edge Functions y pruebas pgTAP
+├─ docs/                 # Documentación real del proceso (ver abajo)
+└─ releases/             # APKs de release listos para instalar
+```
 
-## 🚀 Cómo correr la app (Android Studio / emulador)
+## Cómo correr la app
 
-La app vive en la carpeta `cora/` (Expo + React Native). Las carpetas nativas
-`android/` e `ios/` **no están versionadas** (se generan localmente), así que
-hace falta un paso de `prebuild` antes de abrir el proyecto en Android Studio.
+La app vive en `cora/` (Expo + React Native). Las carpetas nativas `android/` e `ios/` no están
+versionadas — se generan localmente con `prebuild`.
 
 1. **Clonar e instalar dependencias**
    ```bash
@@ -66,36 +104,55 @@ hace falta un paso de `prebuild` antes de abrir el proyecto en Android Studio.
    ```bash
    cp .env.example .env.local
    ```
-   Editar `.env.local` y completar `EXPO_PUBLIC_SUPABASE_URL` y
-   `EXPO_PUBLIC_SUPABASE_ANON_KEY` con las credenciales del proyecto de
-   Supabase (pedirlas al equipo — no se suben al repo por seguridad).
+   Completar `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` con las credenciales del
+   proyecto de Supabase.
 
 3. **Generar el proyecto nativo de Android**
    ```bash
    npx expo prebuild
    ```
-   Esto crea la carpeta `android/` a partir de `app.json`.
 
-4. **Abrir en Android Studio**
-   - Abrir Android Studio → *Open* → seleccionar la carpeta `cora/android`.
-   - Levantar un emulador (AVD Manager) o conectar un dispositivo físico con
-     depuración USB activada.
+4. **Ejecutar**
+   ```bash
+   npx expo run:android   # build + instala + abre Metro
+   # o, con el dev client ya instalado:
+   npm run start
+   ```
 
-5. **Ejecutar la app**
-   - Desde Android Studio: botón ▶️ Run, o
-   - Desde terminal (más rápido, hace build + instala + abre Metro):
-     ```bash
-     npx expo run:android
-     ```
+5. **Probar sin compilar**: hay un APK de release firmado en [`releases/`](releases/), instalable
+   directamente en un dispositivo Android (sideload).
 
 6. **Otros comandos útiles** (dentro de `cora/`)
    ```bash
-   npm run start   # solo Metro bundler (requiere dev client ya instalado)
-   npm run lint    # eslint
-   npm test        # jest
-   npx tsc --noEmit  # chequeo de tipos
+   npm run lint         # ESLint
+   npm run typecheck    # tsc --noEmit
+   npm test             # Jest
+   npm run test:coverage
    ```
 
-> Nota: si `EXPO_PUBLIC_AI_MOCK=true` está activo en `.env.local`, Cora IA
-> responde con respuestas pregrabadas en vez de llamar a la Edge Function
-> (ver `.env.example`) — útil si el proveedor de IA falla o va lento.
+   > Si `EXPO_PUBLIC_AI_MOCK=true` está activo en `.env.local`, Cora IA responde con respuestas
+   > pregrabadas en vez de llamar a la Edge Function — útil si el proveedor de IA falla o va lento.
+
+## Calidad y pruebas
+
+22 suites Jest / 142 tests (unitarias, de componentes e integración), guardrails de IA verificados
+con Gemini mockeado, suites pgTAP para Row Level Security, flujos E2E con Maestro, e integración
+continua en GitHub Actions (lint + typecheck + cobertura en cada PR). Detalle completo, incluyendo
+qué está automatizado y qué queda como checklist manual y por qué, en
+[`docs/TESTING.md`](docs/TESTING.md).
+
+## Documentación del proceso
+
+Este proyecto documenta su propio proceso de construcción, fase por fase, con hallazgos reales
+(bugs encontrados, decisiones tomadas, limitaciones honestas) en vez de solo el resultado final:
+
+- [`docs/PROGRESO.md`](docs/PROGRESO.md) — registro completo, fase por fase (23 fases)
+- [`docs/PLAN_DE_IMPLEMENTACION.md`](docs/PLAN_DE_IMPLEMENTACION.md) — visión, alcance y roadmap
+- [`docs/RLS_AUDIT.md`](docs/RLS_AUDIT.md) — auditoría de seguridad de la base de datos
+- [`docs/AI_GUARDRAILS.md`](docs/AI_GUARDRAILS.md) — batería de verificación del asistente de IA
+- [`docs/CONVENCIONES.md`](docs/CONVENCIONES.md) — convenciones de código y de marca
+- [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md) — guion de demo del hackathon
+
+## Licencia
+
+[MIT](LICENSE)
