@@ -2,6 +2,85 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-31.
 
+## Fase 22 — Diagnóstico: "iniciar sesión con Google" y "recuperar contraseña" no funcionan
+
+El usuario reportó que ambos flujos fallan en el dispositivo real. Antes de tocar código se hizo
+una revisión completa de `src/features/auth/` y un diagnóstico en vivo contra el proyecto real de
+Supabase (`qrrnhigitxqfjrmncwxu`), en vez de asumir dónde estaba el bug.
+
+- [x] **Revisión del código: sin bugs nuevos.** `signInWithGoogle()` (`api.ts:56-78`),
+  `requestPasswordReset()`/`updatePassword()` (`api.ts:42-54`) y `app/(auth)/reset-password.tsx`
+  ya reflejan los 3 bugs reales que se encontraron y corrigieron en **Fase 11 (2026-08-27)**:
+  `exchangeCodeForSession` recibe el `code` crudo (no la URL completa), el deep link de
+  recuperación es `cora://reset-password` (no `cora://auth/reset-password`, por ser `(auth)` un
+  grupo de rutas invisible en la URL), y no hay listener manual de `Linking` compitiendo con
+  expo-router. Nada de esto está roto hoy.
+- [x] **Pista clave encontrada en `docs/PROGRESO.md` mismo, no en el código:** el APK que el
+  usuario venía probando es `releases/Cora-release-2026-08-26.apk`, compilado el **26 de agosto**
+  — **un día antes** de que la Fase 11 (27 de agosto) corrigiera el bug de
+  `exchangeCodeForSession`. Ese bug producía exactamente el síntoma reportado ("recuperar
+  contraseña no funciona": la pantalla se quedaba colgada en "Verificando el enlace..." para
+  siempre, según el log de Fase 11). Es la explicación más probable para ambos síntomas, más
+  probable que un problema de configuración nuevo.
+- [x] **Diagnóstico en vivo contra el proyecto real** (script Node temporal con
+  `@supabase/supabase-js`, no comiteado), confirmando que la configuración del lado de Supabase
+  está bien, no rota:
+  - `signInWithOAuth({ provider: 'google', redirectTo: 'cora://auth/callback' })` devuelve una URL
+    de autorización sin error. Se siguió esa URL con `curl` de punta a punta:
+    `.../auth/v1/authorize` responde `302` hacia `accounts.google.com` con un `client_id` real y
+    `redirect_uri=https://qrrnhigitxqfjrmncwxu.supabase.co/auth/v1/callback` — y Google acepta ese
+    `redirect_uri` (responde `302` hacia la pantalla real de login, no un error
+    `redirect_uri_mismatch`). Esto confirma **las tres piezas server-side a la vez**: el provider
+    de Google está habilitado en Supabase con credenciales válidas, ese `redirect_uri` está
+    registrado en Google Cloud Console, y `cora://auth/callback` está en la allowlist de Redirect
+    URLs de Supabase (si no lo estuviera, `/authorize` habría devuelto un error antes de llegar a
+    Google).
+  - `resetPasswordForEmail('hackathonvolcanic@gmail.com', { redirectTo: 'cora://reset-password' })`
+    devuelve `{ data: {}, error: null }` — **sin poder confirmar la entrega real**: por diseño,
+    Supabase siempre responde éxito en este endpoint exista o no la cuenta (previene enumeración
+    de usuarios), así que `error: null` no prueba que el correo haya llegado. Pendiente de que el
+    usuario confirme si llegó a esa bandeja (incluida spam).
+- [x] **Endurecimiento defensivo agregado, no un fix de un bug confirmado:** `cora://auth/callback`
+  no tenía ninguna ruta de expo-router que lo matcheara — `WebBrowser.openAuthSessionAsync`
+  normalmente intercepta ese deep link en memoria sin necesitar una pantalla, pero si esa
+  intercepción llegara a fallar (la app se reabre en frío con el deep link en vez de resolver la
+  promesa), no había ninguna pantalla y expo-router caía en "Unmatched Route". `app/auth/callback.tsx`
+  nuevo hace `<Redirect href="/" />` — `app/index.tsx` ya decide a dónde ir según el estado real
+  de sesión, sin duplicar esa lógica. Registrado en `app/_layout.tsx`.
+
+### Log de tareas — Fase 22 (2026-08-31)
+
+- Investigación inicial delegada a un agente de solo lectura: confirmó que ambos flujos están
+  completamente implementados (sin TODOs), citó las líneas exactas de `api.ts`/`reset-password.tsx`,
+  y señaló que ninguna herramienta MCP de Supabase disponible en este entorno expone lectura de
+  configuración de Auth (`Providers`/`URL Configuration`/`SMTP`) — de ahí la necesidad del
+  diagnóstico en vivo en vez de solo inspección estática.
+- El diagnóstico en vivo se corrió con confirmación explícita del usuario (dispara una llamada
+  OAuth real y un correo real, aunque no destructivo — son las mismas llamadas que ya hace la app
+  en producción).
+- No se pudo verificar el flujo de Google de punta a punta en un dispositivo real desde este
+  entorno (requeriría iniciar sesión con una cuenta real de Google, algo que este entorno no debe
+  automatizar) — la verificación se detuvo en el punto máximo alcanzable sin credenciales
+  interactivas: confirmar que Google muestra la pantalla de login real, no un error.
+
+## Fase 22 — Definition of Done (verificación final)
+
+- [x] Código de `src/features/auth/` revisado línea por línea — confirmado que ya incluye los 3
+  fixes de Fase 11, sin bugs nuevos encontrados
+- [x] Cadena completa de configuración server-side de Google OAuth verificada en vivo (Supabase →
+  Google Cloud → de vuelta a Supabase) — las tres piezas responden correctamente
+- [x] `npx tsc --noEmit`, `npx eslint .`, `npx jest` en verde tras agregar `app/auth/callback.tsx`
+- [ ] **Confirmación pendiente del usuario:** si el correo de recuperación llegó a
+  `hackathonvolcanic@gmail.com` (revisar spam), y si el login con Google y la recuperación de
+  contraseña ya funcionan probando con el APK nuevo (`Cora-release-2026-08-31.apk`, compilado
+  *después* del fix de Fase 11, a diferencia del `Cora-release-2026-08-26.apk` que se venía usando)
+
+**Fase 22: diagnóstico completo, causa raíz más probable identificada (APK desactualizado, previo
+al fix de Fase 11) y toda la configuración server-side verificable confirmada correcta — sin
+ningún bug de código nuevo que corregir.** Único paso pendiente, y no automatizable desde este
+entorno: que el usuario confirme el resultado real probando con el APK del 31-08 recién compilado
+e instalado por Wi-Fi, y si el correo de recuperación llegó a su bandeja.
+
 ## Fase 21 — QA: suite de pruebas automatizadas + CI
 
 El usuario pidió cubrir 66 categorías de prueba (unitarias, widgets, integración, autenticación,
