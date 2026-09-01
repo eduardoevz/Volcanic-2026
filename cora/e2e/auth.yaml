@@ -1,0 +1,40 @@
+appId: com.cora.app
+---
+# Registro → login → logout → recuperación de sesión (reabrir ya logueada).
+# Textos reales de locales/es/auth.json y locales/es/settings.json.
+- launchApp:
+    clearState: true
+
+- tapOn: "Crear cuenta"
+- inputText: "e2e-${timestamp}@correo.com"
+- tapOn:
+    below: "Correo"
+    text: "mínimo 8 caracteres"
+- inputText: "password123"
+- tapOn: "Registrarme"
+- assertVisible: "Cuenta creada. Iniciando sesión..."
+
+# Debería aterrizar en Inicio tras el registro (confirmación de correo
+# desactivada en dev, según nota en RegisterForm.tsx)
+- assertVisible: "Inicio"
+
+# Logout desde Perfil
+- tapOn: "Perfil"
+- tapOn: "Cerrar sesión"
+- assertVisible: "Iniciar sesión"
+
+# Login de nuevo
+- tapOn:
+    below: "Correo"
+    text: "vos@correo.com"
+- inputText: "e2e-${timestamp}@correo.com"
+- tapOn: "••••••••"
+- inputText: "password123"
+- tapOn: "Entrar"
+- assertVisible: "Inicio"
+
+# Recuperación de sesión: reabrir la app sin limpiar estado debería saltar
+# directo a Inicio, sin pasar por login de nuevo.
+- launchApp:
+    clearState: false
+- assertVisible: "Inicio"

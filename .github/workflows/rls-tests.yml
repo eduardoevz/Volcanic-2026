@@ -1,0 +1,36 @@
+name: RLS tests (pgTAP)
+
+# Manual únicamente — a diferencia de ci.yml, esto corre pgTAP contra una
+# branch real de Supabase (necesita SUPABASE_ACCESS_TOKEN y
+# SUPABASE_PROJECT_ID como secrets del repo) y consume cuota de la cuenta de
+# Supabase. No se dispara en cada push/PR a propósito. Ver docs/TESTING.md.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  pgtap:
+    name: pgTAP contra una branch de prueba de Supabase
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cora
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Login
+        run: supabase login --token "$SUPABASE_ACCESS_TOKEN"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Vincular al proyecto
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+      - name: Correr pruebas pgTAP (supabase/tests/database)
+        run: supabase test db

@@ -1,0 +1,34 @@
+appId: com.cora.app
+---
+# Requiere una sesión ya iniciada (correr después de auth.yaml, o con un
+# estado de dispositivo que ya tenga sesión activa) — registra varios días
+# de flujo abundante consecutivo para disparar heavy_flow_streak
+# (cycleEngine.ts) y verifica que aparezca en Estadísticas.
+- launchApp:
+    clearState: false
+- assertVisible: "Inicio"
+
+- tapOn: "Calendario"
+
+# Registrar 3 días consecutivos de flujo abundante — dispara heavy_flow_streak
+- tapOn:
+    id: ".*today.*"
+- assertVisible: "Registro diario"
+- tapOn: "Abundante"
+- tapOn: "Guardar"
+
+- tapOn: "Calendario"
+- swipe:
+    direction: LEFT
+- tapOn:
+    id: ".*day.*"
+- tapOn: "Abundante"
+- tapOn: "Guardar"
+
+- tapOn: "Estadísticas"
+- assertVisible: "Estadísticas"
+# La tarjeta de señal de alerta usa siempre el mismo texto neutro (nunca un
+# diagnóstico) — ver detectReferralSignals en cycleEngine.ts.
+- assertVisible:
+    text: ".*(atención|profesional|consultar).*"
+    optional: true

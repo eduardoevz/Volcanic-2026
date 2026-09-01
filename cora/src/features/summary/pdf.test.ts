@@ -41,4 +41,19 @@ describe('buildSummaryHtml', () => {
     expect(html).toContain('Sin síntomas registrados en el período.');
     expect(html).toContain('Sin notas registradas en el período.');
   });
+
+  it('escapa HTML en el título de un síntoma', () => {
+    const html = buildSummaryHtml({
+      ...basePayload,
+      topSymptoms: [{ label: '<img src=x onerror=alert(1)>', count: 1 }],
+    });
+    expect(html).not.toContain('<img src=x onerror=alert(1)>');
+    expect(html).toContain('&lt;img');
+  });
+
+  it('con texto muy largo en una nota, lo incluye completo sin truncar (el layout es responsabilidad del visor de PDF)', () => {
+    const longText = 'y'.repeat(3000);
+    const html = buildSummaryHtml({ ...basePayload, notes: [{ date: '2026-01-05', text: longText }] });
+    expect(html).toContain(longText);
+  });
 });
