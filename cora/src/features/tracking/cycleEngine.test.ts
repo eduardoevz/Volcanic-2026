@@ -194,6 +194,56 @@ describe('cycleLengthStats', () => {
   });
 });
 
+describe('casos límite adicionales', () => {
+  it('predictNext con un solo ciclo plausible devuelve null aunque haya 2+ ciclos', () => {
+    const cycles: Cycle[] = [
+      { start_date: '2026-01-01', end_date: '2026-01-04', period_length: 4, cycle_length: 200, is_predicted: false },
+      { start_date: '2026-07-19', end_date: '2026-07-22', period_length: 4, cycle_length: null, is_predicted: false },
+    ];
+    // 200 días queda fuera del rango plausible (15-90), así que "recent" queda vacío
+    expect(predictNext(cycles)).toBeNull();
+  });
+
+  it('cycleLengthStats ignora ciclos fuera del rango plausible (15-90 días)', () => {
+    const cycles: Cycle[] = [
+      { start_date: '2026-01-01', end_date: '2026-01-04', period_length: 4, cycle_length: 5, is_predicted: false },
+      { start_date: '2026-01-06', end_date: '2026-01-09', period_length: 4, cycle_length: 500, is_predicted: false },
+      { start_date: '2026-06-01', end_date: '2026-06-04', period_length: 4, cycle_length: null, is_predicted: false },
+    ];
+    expect(cycleLengthStats(cycles)).toBeNull();
+  });
+
+  it('detectCycles con un año bisiesto (29 de febrero) calcula cycle_length correctamente', () => {
+    const logs = [log('2028-01-30', 'medium'), log('2028-01-31', 'medium'), log('2028-02-29', 'medium')];
+    const cycles = detectCycles(logs);
+    expect(cycles).toHaveLength(2);
+    expect(cycles[0].cycle_length).toBe(30);
+  });
+
+  it('detectReferralSignals sin ningún log ni ciclo no revienta y devuelve array vacío', () => {
+    expect(detectReferralSignals([], [])).toEqual([]);
+  });
+});
+
+describe('rendimiento — proxy liviano de "carga" (no es una prueba de carga real)', () => {
+  it('detectCycles procesa 5 años de registros diarios en menos de 200ms', () => {
+    const logs: DailyLogInput[] = [];
+    const start = new Date('2021-01-01');
+    for (let i = 0; i < 365 * 5; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const isBleeding = i % 28 < 4;
+      logs.push(log(dateStr, isBleeding ? 'medium' : 'none'));
+    }
+    const startTime = Date.now();
+    const cycles = detectCycles(logs);
+    const elapsedMs = Date.now() - startTime;
+    expect(cycles.length).toBeGreaterThan(0);
+    expect(elapsedMs).toBeLessThan(200);
+  });
+});
+
 describe('detectReferralSignals', () => {
   it('sin patrones preocupantes no devuelve señales', () => {
     const logs = [log('2026-01-01', 'medium'), log('2026-01-02', 'light')];

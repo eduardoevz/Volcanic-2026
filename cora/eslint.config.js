@@ -8,8 +8,16 @@ module.exports = [
   {
     // Deno runtime (Edge Functions): usa especificadores npm:/import maps
     // que no resuelve el linter de Node — se revisa manualmente y en
-    // ejecución real, no con este linter.
+    // ejecución real, no con este linter. (guardrails.ts es TS puro y corre
+    // bajo Jest igual, ver docs/TESTING.md, pero se deja fuera del linter
+    // de Node junto con el resto de la carpeta por consistencia.)
     ignores: ['dist/*', 'android/*', 'ios/*', 'supabase/functions/**'],
+  },
+  {
+    files: ['jest.setup.js', '**/*.test.ts', '**/*.test.tsx'],
+    languageOptions: {
+      globals: { jest: 'readonly' },
+    },
   },
   {
     // Fase 12 (docs/PLAN_DE_IMPLEMENTACION.md §29): evita regresiones de
