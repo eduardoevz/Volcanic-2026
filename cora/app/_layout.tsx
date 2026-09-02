@@ -62,6 +62,7 @@ function RootNavigation() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="welcome" />
         <Stack.Screen name="auth/callback" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(onboarding)" />

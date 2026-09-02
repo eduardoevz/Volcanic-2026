@@ -25,7 +25,7 @@ export default function Index() {
   }
 
   if (status === 'signedOut') {
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/welcome" />;
   }
 
   // Sin perfil en caché ni de red no podemos saber si ya completó el

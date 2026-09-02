@@ -5,7 +5,7 @@ import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline';
 
 type ButtonProps = {
   label: string;
@@ -22,6 +22,7 @@ function buildVariantStyles(colors: ColorScheme): Record<Variant, ViewStyle> {
     primary: { backgroundColor: colors.pitahaya },
     secondary: { backgroundColor: colors.stemLight },
     ghost: { backgroundColor: 'transparent' },
+    outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.charcoal },
   };
 }
 
@@ -58,7 +59,11 @@ export function Button({
       ) : (
         <Text
           variant="button"
-          style={variant === 'primary' ? undefined : { color: colors.pitahaya }}
+          style={
+            variant === 'primary'
+              ? undefined
+              : { color: variant === 'outline' ? colors.charcoal : colors.pitahaya }
+          }
         >
           {label}
         </Text>

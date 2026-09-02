@@ -32,7 +32,7 @@ it('LoginForm: con datos válidos llama a signIn con el correo y la contraseña 
 
   fireEvent.changeText(getByPlaceholderText('vos@correo.com'), 'user@correo.com');
   fireEvent.changeText(getByPlaceholderText('••••••••'), 'password123');
-  fireEvent.press(getByText('Entrar'));
+  fireEvent.press(getByText('Iniciar Sesión'));
 
   await waitFor(() => {
     expect(signIn).toHaveBeenCalledWith({ email: 'user@correo.com', password: 'password123' });

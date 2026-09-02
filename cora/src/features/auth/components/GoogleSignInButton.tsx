@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, type ViewStyle } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
 import { GoogleIcon } from '@/ui/components/icons/GoogleIcon';
@@ -11,6 +11,7 @@ type GoogleSignInButtonProps = {
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
+  style?: ViewStyle;
 };
 
 function buildStyles(colors: ColorScheme) {
@@ -43,6 +44,7 @@ export function GoogleSignInButton({
   onPress,
   loading = false,
   disabled = false,
+  style,
 }: GoogleSignInButtonProps) {
   const { t } = useTranslation('auth');
   const { colors } = useTheme();
@@ -60,6 +62,7 @@ export function GoogleSignInButton({
         styles.base,
         isDisabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
+        style,
       ]}
     >
       {loading ? (

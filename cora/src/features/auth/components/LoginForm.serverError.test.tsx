@@ -28,7 +28,7 @@ it('LoginForm: muestra el mensaje de error del servidor cuando signIn falla', as
 
   fireEvent.changeText(getByPlaceholderText('vos@correo.com'), 'user@correo.com');
   fireEvent.changeText(getByPlaceholderText('••••••••'), 'password123');
-  fireEvent.press(getByText('Entrar'));
+  fireEvent.press(getByText('Iniciar Sesión'));
 
   await waitFor(() => {
     expect(getByText('Correo o contraseña incorrectos.')).toBeTruthy();

@@ -34,7 +34,7 @@ describe('LoginForm — validación de formulario', () => {
         <LoginForm />
       </ThemeProvider>
     );
-    fireEvent.press(getByText('Entrar'));
+    fireEvent.press(getByText('Iniciar Sesión'));
 
     await waitFor(() => {
       expect(getByText('Ingresá tu correo')).toBeTruthy();
@@ -51,7 +51,7 @@ describe('LoginForm — validación de formulario', () => {
     );
     fireEvent.changeText(getByPlaceholderText('vos@correo.com'), 'no-es-un-correo');
     fireEvent.changeText(getByPlaceholderText('••••••••'), 'x');
-    fireEvent.press(getByText('Entrar'));
+    fireEvent.press(getByText('Iniciar Sesión'));
 
     await waitFor(() => {
       expect(getByText('Ese correo no es válido')).toBeTruthy();
