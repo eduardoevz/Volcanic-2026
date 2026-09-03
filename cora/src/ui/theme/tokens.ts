@@ -32,20 +32,28 @@ const brand = {
 // cuál tema está activo. Por eso `white`/`cream` guardan una superficie
 // oscura en el tema oscuro — el nombre describe el rol (superficie/fondo),
 // no el color literal.
+// Paleta propuesta por el usuario (2026-09-03): marfil cálido, rosa malva,
+// terracota suave, amarillo mantequilla, verde salvia, marrón chocolate.
+// Solo se aplica al tema claro — el oscuro se deja intacto a propósito, así
+// que estos 4 sobreescriben lo heredado de `brand` únicamente aquí.
 export const lightColors = {
   ...brand,
-  stemLight: '#DDF0E3',
-  cream: '#FFF8F2',
-  charcoal: '#221B1F',
-  charcoalMuted: '#6B6266',
-  border: '#EBDFE3',
+  pitahaya: '#B05B6F',
+  pitahayaLight: '#D68F7A',
+  pitahayaDark: '#7B404E',
+  stem: '#74AC91',
+  stemLight: '#C0DACE',
+  cream: '#FAF3EA',
+  charcoal: '#3E2723',
+  charcoalMuted: '#958886',
+  border: '#EBE3DA',
   white: '#FFFFFF',
   danger: '#C0392B',
   dangerLight: '#FBEAE8',
-  warning: '#B8860B',
-  warningLight: '#FBF3DD',
-  success: '#2E7D4F',
-  successLight: '#E4F4EA',
+  warning: '#867C49',
+  warningLight: '#F4E285',
+  success: '#57816D',
+  successLight: '#DCEAE4',
 } as const;
 
 export const darkColors = {

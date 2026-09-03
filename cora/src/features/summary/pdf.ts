@@ -39,11 +39,11 @@ export function buildSummaryHtml(payload: SummaryPayload): string {
 <head>
 <meta charset="utf-8" />
 <style>
-  body { font-family: -apple-system, Roboto, sans-serif; color: #221B1F; padding: 24px; }
-  h1 { color: #C2185B; font-size: 20px; }
+  body { font-family: -apple-system, Roboto, sans-serif; color: #3E2723; padding: 24px; }
+  h1 { color: #B05B6F; font-size: 20px; }
   h2 { font-size: 15px; margin-top: 20px; }
-  .disclaimer { background: #FCE4EC; color: #C2185B; padding: 12px; border-radius: 8px; font-size: 12px; }
-  .muted { color: #6B6266; font-size: 13px; }
+  .disclaimer { background: #F6EBEE; color: #B05B6F; padding: 12px; border-radius: 8px; font-size: 12px; }
+  .muted { color: #958886; font-size: 13px; }
   ul { padding-left: 18px; }
 </style>
 </head>
