@@ -17,6 +17,10 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // Sin esto GoTrue responde con tokens en el fragmento de la URL
+    // (#access_token=...) en vez de un ?code=... — signInWithGoogle
+    // (src/features/auth/api.ts) espera PKCE y usa exchangeCodeForSession.
+    flowType: 'pkce',
   },
 });
 

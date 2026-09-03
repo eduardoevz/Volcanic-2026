@@ -29,6 +29,7 @@ ios/build/
 .env.local
 .env.*.local
 !.env.example
+CREDENTIALS.local.md
 
 # Firebase/FCM (Fase 19) — google-services.json no es tan sensible como la
 # service account (contiene una API key scopeada al paquete, mismo criterio

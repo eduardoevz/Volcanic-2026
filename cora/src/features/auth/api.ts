@@ -63,9 +63,10 @@ export async function signInWithGoogle(): Promise<Result<null, string>> {
   const result = await WebBrowser.openAuthSessionAsync(data.url, GOOGLE_OAUTH_REDIRECT_URL);
   if (result.type !== 'success') return err(i18n.t('auth:errors.googleSignInCancelled'));
 
-  // supabase-js usa flujo PKCE por defecto (sin flowType explícito en
-  // createClient): el redirect trae un ?code=... que hay que canjear, no
-  // tokens sueltos en el fragmento de la URL. exchangeCodeForSession espera
+  // El cliente de Supabase (src/lib/supabase.ts) fuerza flowType: 'pkce' —
+  // sin eso GoTrue responde con tokens sueltos en el fragmento de la URL
+  // (#access_token=...) en vez de un ?code=..., y Linking.parse() no los ve
+  // (solo lee query params, no el fragment). exchangeCodeForSession espera
   // el código crudo, no la URL completa (@supabase/auth-js@2.112.3).
   const { queryParams } = Linking.parse(result.url);
   const code = typeof queryParams?.code === 'string' ? queryParams.code : null;
