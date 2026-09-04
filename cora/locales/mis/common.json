@@ -1,1 +1,45 @@
-{}
+{
+  "common": {
+    "continue": "Tabaia",
+    "back": "Kli bilaia",
+    "cancel": "Swiaia",
+    "save": "Swakaia",
+    "loading": "Karkabi ba...",
+    "retry": "Kli pura kaikaia",
+    "somethingWentWrong": "Diara kum saura takan",
+    "errorBoundaryMessage": "Trabil kum takan. Kli pura kaiks."
+  },
+  "nav": {
+    "home": "Watla",
+    "calendar": "Kati ulbanka",
+    "library": "Buk watla",
+    "assistant": "Cora",
+    "profile": "Yawa laka",
+    "dailyLog": "Yuu bani ulbanka",
+    "article": "Sturi ulbanka",
+    "mascot": "Man pitahayam",
+    "summary": "Siknis sturi ulbanka",
+    "reminders": "Lukanka nani",
+    "stats": "Kulkanka nani",
+    "directory": "Daktara watla nani",
+    "specialists": "Sins daktika nani",
+    "family": "Kupia kumi laka",
+    "familyInvite": "Círculora paibaia",
+    "familyAccept": "Círculora aimaia",
+    "pregnancy": "Yang lupia brira",
+    "appointments": "Dakta prautka"
+  },
+  "index": {
+    "sessionCheckError": "Sesionka sip kaiki sakras. Kli pura kaiks."
+  },
+  "home": {
+    "greeting": {
+      "adolescencia": "Naiwa nahki sma?",
+      "adultez": "Naiwa nahki sma?",
+      "embarazo": "Lupiam nahki ba naiwa?",
+      "perimenopausia": "Naiwa nahki sma?",
+      "mayor": "Naiwa nahki sma?",
+      "default": "Yauhka! Kli maisa pakisa!"
+    }
+  }
+}

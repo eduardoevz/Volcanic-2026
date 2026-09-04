@@ -1,1 +1,26 @@
-{}
+{
+  "title": "Daktara watla nani",
+  "viewCenters": "Watla nani",
+  "viewSpecialists": "Sins daktika nani",
+  "allDepartments": "Departamento naman baku",
+  "allTypes": "Baku naman",
+  "allSpecialties": "Especialidad naman baku",
+  "loading": "Karkabi ba...",
+  "loadError": "Daktara watla nani kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "emptyCentersTitle": "Naha filtro dukiara watla apu sa",
+  "emptyCentersDescription": "Departamento apia baku sut pruwa kaikas.",
+  "emptySpecialistsTitle": "Naha filtro dukiara sins daktika apu sa",
+  "emptySpecialistsDescription": "Especialidad sut pruwa kaikas.",
+  "unverified": "Marikras",
+  "call": "Kalbi",
+  "sendEmail": "Correo sula",
+  "viewOnMap": "Mapa ra kaikas",
+  "viewSpecialistsHere": "Sins daktika kaikas",
+  "noHealthCenter": "Daktara watla apu",
+  "type": {
+    "hospital": "Hospital",
+    "centro_salud": "Daktara watla",
+    "clinica": "Clínica",
+    "casa_materna": "Yapti nani watla"
+  }
+}

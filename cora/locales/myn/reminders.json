@@ -1,1 +1,21 @@
-{}
+{
+  "title": "Dukia balna",
+  "subtitle": "Naha dukia ba man selularka ra baman sa — Internet apia ra sin sula kabia.",
+  "loadError": "Man dukia balna kaikaia sip apia kan.",
+  "createError": "Dukia daukaia sip apia kan. Cora ra permiso mai yaba kaikma.",
+  "updateError": "Dukia lakaia sip apia kan. Kli talwa.",
+  "loading": "Karkabi ba...",
+  "dailyAt": "{{hour}}:{{minute}} — yuu bani",
+  "delete": "Sikwa",
+  "emptyTitle": "Dukia apia sa",
+  "emptyDescription": "As daukwi, Cora ba man yuu piaya ra sula waia dukiara.",
+  "newReminder": "+ Dukia raya",
+  "newReminderTitle": "Dukia raya",
+  "titleLabel": "Bila",
+  "titlePlaceholder": "Ulw. Yang yuu ulna",
+  "hourLabel": "Wark",
+  "minuteLabel": "Minuta",
+  "decrease": "{{label}} ba wilwa",
+  "increase": "{{label}} ba pura briwa",
+  "save": "Yamwa"
+}

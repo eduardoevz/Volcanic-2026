@@ -1,1 +1,40 @@
-{}
+{
+  "title": "Dakta prautka ulna",
+  "subtitle": "Man dakta walna aisi kaikaia piaya balna.",
+  "loading": "Karkabi ba...",
+  "loadError": "Man prautka balna kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "createError": "Prautka daukaia sip apia kan. Kli talwa.",
+  "updateError": "Prautka lakaia sip apia kan. Kli talwa.",
+  "emptyTitle": "Prautka ulwa apu sa",
+  "emptyDescription": "Man prautka piaya ba mahka luaia apia, ulwa.",
+  "newAppointment": "Prautka raya",
+  "newAppointmentTitle": "Dakta prautka raya",
+  "titleLabel": "Dukia dukiara prautka",
+  "titlePlaceholder": "Ulw. Yal dakta walna aisi kaikaia",
+  "specialistLabel": "Sins daktika (opcional)",
+  "specialistPlaceholder": "Dakta ninam",
+  "locationLabel": "Balna ra (opcional)",
+  "locationPlaceholder": "Clínica apia hospital",
+  "notesLabel": "Ulna (opcional)",
+  "notesPlaceholder": "Dukia sin lukwi gustara",
+  "dayLabel": "¿Naha piaya?",
+  "dayOptions": {
+    "today": "Naiwa",
+    "tomorrow": "Yawa",
+    "in3Days": "Yuu 3 piaya",
+    "in1Week": "Sandi as piaya",
+    "in2Weeks": "Sandi bu piaya",
+    "in1Month": "Waiku as piaya"
+  },
+  "hourLabel": "Wark",
+  "minuteLabel": "Minuta",
+  "save": "Yamwa",
+  "markCompleted": "Alki bapan marikwa",
+  "cancel": "Prautka swi",
+  "delete": "Sikwa",
+  "status": {
+    "scheduled": "Ulwa",
+    "completed": "Bapan",
+    "cancelled": "Swiwa"
+  }
+}

@@ -1,1 +1,23 @@
-{}
+{
+  "loadError": "Man pitahayam kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "pointsAccumulated": "{{points}} puanta pura briaia",
+  "levelName": "{{name}} · Nibel {{level}}",
+  "remainingToNextLevel": "{{remaining}} puanta piaya ba {{nextLevelName}} takaia dukiara",
+  "maxLevelReached": "Man pitahayam nibel pura ba brih sa. Man wal tabaia baman sa.",
+  "growthNote": "Man aihwa laka bani ulbanka wal tabaia — panika apu, castigo apu. Nibel wina wal sin wilras.",
+  "levelsTitle": "Nibel 5 nani",
+  "recentMomentsTitle": "Aihwa laka bani ulbanka mahka nani",
+  "emptyMomentsTitle": "Man ulbanka apu sa naiwa",
+  "emptyMomentsDescription": "Ulbanka, buk aisan bara Cora wal aisanka bani naha ra pura brisa.",
+  "actions": {
+    "onboarding_completed": "Man tabaikan kaikanka daukan",
+    "daily_log": "Man yuu ba ulban",
+    "article_read": "Man sturi kum aisan"
+  },
+  "pointsEarned": "+{{points}} · {{date}}",
+  "evolution": {
+    "title": "¡Man pitahayam pura tabikan!",
+    "subtitle": "Naiwa {{name}} · Nibel {{level}} sa",
+    "accept": "Pain sa"
+  }
+}

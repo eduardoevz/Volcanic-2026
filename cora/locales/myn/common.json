@@ -1,1 +1,45 @@
-{}
+{
+  "common": {
+    "continue": "Tawi",
+    "back": "Kli tawi",
+    "cancel": "Swi",
+    "save": "Yamwa",
+    "loading": "Karkabi ba...",
+    "retry": "Kli talwi",
+    "somethingWentWrong": "Dukia as saura takna",
+    "errorBoundaryMessage": "Trabil as takna. Kli talwa."
+  },
+  "nav": {
+    "home": "Û",
+    "calendar": "Waiku ulna",
+    "library": "Buk watla",
+    "assistant": "Cora",
+    "profile": "Yawa lani",
+    "dailyLog": "Yuu bani ulna",
+    "article": "Sturi ulna",
+    "mascot": "Man pitahayam",
+    "summary": "Siknis sturi ulna",
+    "reminders": "Dukia balna",
+    "stats": "Kulkanka balna",
+    "directory": "Daktara watla balna",
+    "specialists": "Sins daktika balna",
+    "family": "Kupia kumi lani",
+    "familyInvite": "Círculora paibaia",
+    "familyAccept": "Círculora aimaia",
+    "pregnancy": "Yang tula brira",
+    "appointments": "Dakta prautka"
+  },
+  "index": {
+    "sessionCheckError": "Sesionka sip kaiki sakras. Kli talwa."
+  },
+  "home": {
+    "greeting": {
+      "adolescencia": "Naiwa nahki man?",
+      "adultez": "Naiwa nahki man?",
+      "embarazo": "Tulam nahki ba naiwa?",
+      "perimenopausia": "Naiwa nahki man?",
+      "mayor": "Naiwa nahki man?",
+      "default": "Yauhka! Kli maisa pakisa!"
+    }
+  }
+}

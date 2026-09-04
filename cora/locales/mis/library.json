@@ -1,1 +1,24 @@
-{}
+{
+  "title": "Buk watla",
+  "searchPlaceholder": "Pruwa kaikaia (ulb. biaraklahwan, mairin almuka)",
+  "allCategories": "Naman baku",
+  "loadError": "Buk watla kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "loading": "Karkabi ba...",
+  "noResultsTitle": "Dia apia baiki",
+  "noResultsDescription": "Bila wal pruwa kaikas, ulb. \"biaraklahwan\" apia sa \"mairin almuka\".",
+  "emptyTitle": "Sturi apu sa naiwa",
+  "emptyDescription": "Naha kategoria dukiara sturi apu sa naiwa.",
+  "readingMinutes": "{{minutes}} minuta aisanka dukiara",
+  "pendingReview": "Kaikaia pruwaia sa",
+  "article": {
+    "loadError": "Naha sturi kaikaia sip apia kan. Sika apia iwras, apia konekshanka kaikas.",
+    "reviewedBy": "{{name}} kaikan",
+    "reviewedOn": "{{date}} ra kaikan",
+    "pendingProfessionalReview": "Daktar wina kaikaia pruwaia sa",
+    "sourcesTitle": "Sturka nani",
+    "disclaimer": "Naha sturka pain kaikaia dukiara sa, daktar wal aisi kaikaia wina apia sa.",
+    "audioPlay": "Aisi kaikaia",
+    "audioPause": "Utbaia",
+    "audioLabel": "Audio sturi"
+  }
+}

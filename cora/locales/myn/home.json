@@ -1,1 +1,63 @@
-{}
+{
+  "loadError": "Man Û ba kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "loading": "Man Û karkabi ba...",
+  "cycleStatus": {
+    "title": "Waiku lani piaya",
+    "loading": "Man waiku lani karkabi ba...",
+    "needMoreData": "Waiku lani 2 baman ulwi, naha ra estimación as kaikaia dukiara.",
+    "prediction": "Man waiku â piaya ba {{start}} bara {{end}} kainara balbia sipsna.",
+    "confidenceGood": "Alki yamni sa · siknis marikaia apia sa",
+    "confidenceInitial": "Estimación tawikan · siknis marikaia apia sa",
+    "dayLabel": "yuu",
+    "phaseMenstrual": "Waiku â piaya",
+    "phaseFollicular": "Folicular piaya",
+    "phaseFertile": "Tula briaia piaya",
+    "phaseLuteal": "Lútea piaya"
+  },
+  "dailyCheckIn": {
+    "loggedTitle": "Naiwa man ulwan kaman",
+    "loggedSubtitle": "Man ulna ba lakaia sip man taim balna.",
+    "notLoggedTitle": "¿Naiwa nahki man?",
+    "notLoggedSubtitle": "Minuta apu baman aisaia sa.",
+    "editButton": "Lakwa",
+    "registerButton": "Ulwa"
+  },
+  "firstPeriodGuide": {
+    "title": "Man waiku â pas",
+    "loading": "Karkabi ba..."
+  },
+  "hydration": {
+    "title": "Li paikwa",
+    "description": "Aihwa lani baman kaikanka — piaya wina balbia."
+  },
+  "mascot": {
+    "summary": "Man pitahayam · {{name}} · Nibel {{level}}",
+    "points": "{{points}} puanta pura briwa"
+  },
+  "pregnancyWeek": {
+    "loading": "Karkabi ba...",
+    "cta": "Man tula brira ulwi, semana naiwa kaikaia dukiara",
+    "weekTitle": "Semana {{week}} tula brira",
+    "dueDate": "Yuu tula iwaia: {{date}}"
+  },
+  "recommendedArticle": {
+    "title": "Sturi walna marikwa",
+    "loading": "Karkabi ba...",
+    "empty": "Man piaya dukiara sturi apu sa naiwa."
+  },
+  "reminders": {
+    "title": "Dukia balna",
+    "description": "Dukia selularka balna ba piaya wina balbia."
+  },
+  "symptomTrends": {
+    "title": "Dukia sauhkira lani",
+    "loading": "Karkabi ba...",
+    "count_one": "Man \"{{label}}\" ba yuu 30 balna ra as ulwa.",
+    "count_other": "Man \"{{label}}\" ba yuu 30 balna ra {{count}} pali ulwa.",
+    "empty": "Dukia sauhkira ulna apu sa naha kaikaia dukiara."
+  },
+  "wellbeingTip": {
+    "title": "Aihwa lani sturka",
+    "description": "Sturka pyu ba piaya wina balbia."
+  }
+}

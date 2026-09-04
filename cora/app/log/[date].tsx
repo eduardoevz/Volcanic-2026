@@ -50,6 +50,9 @@ export default function DailyLogScreen() {
   const [energyLevel, setEnergyLevel] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [selectedSymptoms, setSelectedSymptoms] = useState<Map<string, number>>(new Map());
+  const [sexualActivity, setSexualActivity] = useState<boolean | null>(null);
+  const [periodStart, setPeriodStart] = useState(false);
+  const [periodEnd, setPeriodEnd] = useState(false);
   const [prefilled, setPrefilled] = useState(false);
 
   // Precarga los valores guardados una sola vez, ajustando el estado durante
@@ -62,6 +65,9 @@ export default function DailyLogScreen() {
       setMood(existingLog.mood);
       setEnergyLevel(existingLog.energy_level);
       setNotes(existingLog.notes ?? '');
+      setSexualActivity(existingLog.sexual_activity);
+      setPeriodStart(existingLog.period_start);
+      setPeriodEnd(existingLog.period_end);
       const map = new Map<string, number>();
       for (const s of existingLog.daily_log_symptoms ?? []) {
         map.set(s.symptom_id, s.intensity);
@@ -111,6 +117,9 @@ export default function DailyLogScreen() {
           symptomId,
           intensity,
         })),
+        sexualActivity,
+        periodStart,
+        periodEnd,
       },
       { onSuccess: () => router.back() }
     );
@@ -143,6 +152,18 @@ export default function DailyLogScreen() {
                   onPress={() => setFlowLevel(opt.value)}
                 />
               ))}
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs }}>
+              <Chip
+                label={t('log.periodStart')}
+                selected={periodStart}
+                onPress={() => setPeriodStart((prev) => !prev)}
+              />
+              <Chip
+                label={t('log.periodEnd')}
+                selected={periodEnd}
+                onPress={() => setPeriodEnd((prev) => !prev)}
+              />
             </View>
           </View>
         ) : null}
@@ -214,6 +235,22 @@ export default function DailyLogScreen() {
               })}
             </View>
           )}
+        </View>
+
+        <View style={{ gap: spacing.xs }}>
+          <Text variant="heading">{t('log.sexualActivityTitle')}</Text>
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <Chip
+              label={t('log.sexualActivityYes')}
+              selected={sexualActivity === true}
+              onPress={() => setSexualActivity(true)}
+            />
+            <Chip
+              label={t('log.sexualActivityNo')}
+              selected={sexualActivity === false}
+              onPress={() => setSexualActivity(false)}
+            />
+          </View>
         </View>
 
         <View style={{ gap: spacing.xs }}>

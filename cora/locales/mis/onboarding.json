@@ -1,1 +1,63 @@
-{}
+{
+  "progress": {
+    "stepOf": "Ban {{step}} / {{total}}"
+  },
+  "welcome": {
+    "slides": {
+      "grow": { "title": "Cora man wal tabaia", "body": "Man Watla, man ulbanka nani bara man sturka nani ba man aihwa laka piaya ra aiwananka daukisa." },
+      "privacy": { "title": "Man sturka wan pain diara", "body": "Diara apu upla piaya ra sula. Man alkisma dia sut Cora IA ra sula waia, bara pas ba utban baku sa." },
+      "mascot": { "title": "Man pitahayam kaikas", "body": "Naha pitahaya ba man aihwa laka wal tabaia, panika apu, castigo apu — nibel baman pura brih." }
+    },
+    "next": "Piaya",
+    "start": "Tabaia",
+    "skip": "Sikbaia"
+  },
+  "lifeStage": {
+    "title": "¿Naiwa nan piaya ra sma?",
+    "subtitle": "Naha ra Cora ba man dukiara aiwananka daukisa. Man yawa laka wina taim bani lakaia sip sma.",
+    "saveError": "Man piaya ba swakaia sip apia kan. Kli pruwa kaiks."
+  },
+  "avatar": {
+    "title": "Man avatar ba wali",
+    "subtitle": "Nicaragua tasba wina animal nani — kum ta lak alki kaikaia dukiara.",
+    "loadError": "Avatar nani kaikaia sip apia kan.",
+    "emptyTitle": "Avatar apu sa naiwa",
+    "emptyDescription": "Piaya wina kum wali sma sip, man yawa laka wina.",
+    "chooseThisOne": "Naha avatar wali",
+    "chooseLater": "Piaya wina wali",
+    "saveError": "Man avatar ba swakaia sip apia kan. Kli pruwa kaiks.",
+    "habitat": "Aihwa laka nani: {{habitat}}",
+    "conservationStatus": "Bri kaia piaya: {{status}}"
+  },
+  "medicalBackground": {
+    "title": "Mahka siknis nani",
+    "subtitle": "Naha ra man wal tabaia sip yang. Opcional sa — piaya wina bapisma, man yawa laka wina.",
+    "allergiesLabel": "Diara sauhkira",
+    "allergiesPlaceholder": "Ulb. penicilina, kabu diara, polen...",
+    "familyHistoryLabel": "Kumi laka mahka siknis",
+    "familyHistoryPlaceholder": "Ulb. diabetes, tala pura kaia man kumi laka ra...",
+    "chronicConditionsLabel": "Siknis lalka",
+    "chronicConditionsPlaceholder": "Ulb. asma, hipotiroidismo...",
+    "currentMedicationsLabel": "Saika naiwa piakisma",
+    "currentMedicationsPlaceholder": "Ulb. saika naiwa piakisma...",
+    "bloodTypeLabel": "Tala baku",
+    "saveAndContinue": "Swakaia bara tabaia",
+    "skipForNow": "Naiwa dukiara sikbaia",
+    "saveError": "Man mahka siknis nani swakaia sip apia kan. Kli pruwa kaiks."
+  },
+  "mascotIntro": {
+    "title": "Man pitahayam kaikas",
+    "body": "Aihwa laka bani ulbanka wal tabaia — panika apu, castigo apu. Nibel wina wal sin wilras.",
+    "continue": "Tabaia"
+  },
+  "consent": {
+    "title": "Wan sturka bara Cora IA",
+    "notificationsLabel": "Lukanka nani",
+    "notificationsDescription": "Aihwa laka lukanka lamara.",
+    "aiShareLabel": "Cora IA wal sturka wali sula",
+    "aiShareDescription": "Pas ba utban baku sa. Man alki lakisma, Cora ba man ulbanka wina alki kaikaia sip sa — permiso apu apia baku apia.",
+    "disclaimer": "Cora siknis marikras, daktar wal aisi kaikaia wina apia sa.",
+    "accept": "Alkaia bara tabaia",
+    "saveError": "Man alki laka nani swakaia sip apia kan. Kli pruwa kaiks."
+  }
+}

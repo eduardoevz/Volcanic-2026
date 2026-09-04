@@ -1,1 +1,26 @@
-{}
+{
+  "title": "Dakta watla balna",
+  "viewCenters": "Watla balna",
+  "viewSpecialists": "Sins daktika balna",
+  "allDepartments": "Departamento naman balna",
+  "allTypes": "Baku naman",
+  "allSpecialties": "Especialidad naman balna",
+  "loading": "Karkabi ba...",
+  "loadError": "Dakta watla balna kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "emptyCentersTitle": "Naha filtro dukiara watla apu sa",
+  "emptyCentersDescription": "Departamento apia baku sut tawra kaikwa.",
+  "emptySpecialistsTitle": "Naha filtro dukiara sins daktika apu sa",
+  "emptySpecialistsDescription": "Especialidad sut tawra kaikwa.",
+  "unverified": "Marikras",
+  "call": "Kalwi",
+  "sendEmail": "Correo sula",
+  "viewOnMap": "Mapa ra kaikwa",
+  "viewSpecialistsHere": "Sins daktika kaikwa",
+  "noHealthCenter": "Dakta watla apu",
+  "type": {
+    "hospital": "Hospital",
+    "centro_salud": "Dakta watla",
+    "clinica": "Clínica",
+    "casa_materna": "Mâm balna watla"
+  }
+}

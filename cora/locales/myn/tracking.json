@@ -1,1 +1,77 @@
-{}
+{
+  "calendar": {
+    "title": "Waiku ulna",
+    "prevMonth": "Waiku mahka",
+    "nextMonth": "Waiku piaya",
+    "loadError": "Man ulna balna kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+    "noHistoryTitle": "Sturka apu sa naiwa",
+    "noHistoryDescription": "Waiku lani 2 baman ulwi, naha ra estimación kaikaia dukiara.",
+    "nextPeriodTitle": "Waiku â piaya balbia",
+    "nextPeriodRange": "{{start}} bara {{end}} kainara",
+    "daysUnit": "yuu balna",
+    "confidenceGood": "alki yamni",
+    "confidenceInitial": "estimación",
+    "fertileWindowTitle": "Tula briaia piaya estimación",
+    "fertileWindowRange": "{{start}} wina {{end}} kat",
+    "fertileInProgress": "Naiwa ra sa",
+    "fertileDaysToGo_one": "Yuu {{count}} piaya",
+    "fertileDaysToGo_other": "Yuu {{count}} piaya",
+    "fertilePast": "Iwwan kaman",
+    "fertileWindowWarning": "Naha estimación método anticonceptivo apia sa.",
+    "legendPeriod": "Waiku â",
+    "legendPredicted": "Estimación",
+    "legendFertile": "Tula briaia",
+    "last30DaysTitle": "Yuu 30 balna",
+    "emptyTitle": "Ulna apu sa naiwa",
+    "emptyDescription": "Waiku ulna ra yuu as ta lak ulwaia tawi.",
+    "viewStats": "Kulkanka kaikwa"
+  },
+  "mood": {
+    "great": "Yamni kaiki",
+    "good": "Yamni",
+    "neutral": "Baman",
+    "low": "Sauhkira",
+    "difficult": "Kau sauhkira"
+  },
+  "flow": {
+    "none": "Apu",
+    "spotting": "Sirpi",
+    "light": "Baisa",
+    "medium": "Klasik",
+    "heavy": "Kau kau"
+  },
+  "log": {
+    "loadError": "Man yuu naha wina ulna mahka ba kaikaia sip apia kan — sika as yamwan kaman, alki kaikma man dukia utwan ba lawana.",
+    "flowTitle": "Waiku â",
+    "periodStart": "Waiku â tawikan",
+    "periodEnd": "Waiku â utwan",
+    "moodTitle": "Aihwa lani",
+    "energyTitle": "Alki lani",
+    "symptomsTitle": "Dukia sauhkira",
+    "symptomsLoadError": "Dukia sauhkira lista ba kaikaia sip apia kan.",
+    "symptomsLoading": "Dukia sauhkira karkabi ba...",
+    "sexualActivityTitle": "Waitna walna iwaia",
+    "sexualActivityYes": "Au",
+    "sexualActivityNo": "Awas",
+    "noteTitle": "Ulna",
+    "notePlaceholder": "Dukia sin ulwi gustara (opcional)",
+    "saveError": "Yamwa sip apia kan. Kli talwa.",
+    "save": "Yamwa"
+  },
+  "stats": {
+    "title": "Kulkanka balna",
+    "loadError": "Man kulkanka balna kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+    "notEnoughDataTitle": "Sturka apu sa naiwa",
+    "notEnoughDataDescription": "Waiku lani 2 baman ulwi, man waiku lani kulkanka kaikaia dukiara.",
+    "cycleLengthTitle": "Waiku lani lalka",
+    "averageLength": "Man waiku lani klasik ba yuu {{days}} sa, waiku lani {{count}} mahka balna ra.",
+    "lengthRange": "Man waiku lani balna ba yuu {{min}} bara {{max}} kainara lakwa.",
+    "symptomFrequencyTitle": "Dukia sauhkira lain",
+    "symptomFrequencyEmpty": "Dukia sauhkira ulna pyu apu sa naiwa.",
+    "symptomFrequency": "Man {{label}} ba yuu 30 mahka balna ra {{count}} pali ulwa."
+  },
+  "referral": {
+    "message": "Dukia as baikwa, dakta walna aisi kaikaia yamni kabia.",
+    "action": "Dakta watla balna ba kaikaia dukiara alki mai"
+  }
+}

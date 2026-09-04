@@ -1,1 +1,11 @@
-{}
+{
+  "title": "Siknis sturi ulbanka",
+  "disclaimer": "Naha siknis marikaia apia sa. Man ulbanka nani ba daktar wal aisi kaikaia ra brisma.",
+  "preset30Days": "Yuu 30 nani baman",
+  "preset90Days": "Yuu 90 nani baman",
+  "generating": "Sturi ulbanka daukisa...",
+  "generateError": "Sturi ulbanka daukaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "share": "Sula",
+  "exportPdf": "PDF ra ulbi sula",
+  "exportPdfError": "PDF daukaia sip apia kan. Kli pruwa kaiks."
+}

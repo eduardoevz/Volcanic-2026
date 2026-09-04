@@ -1,1 +1,24 @@
-{}
+{
+  "title": "Buk watla",
+  "searchPlaceholder": "Tawra kaikwa (ulw. alka klahwana, yal almuka)",
+  "allCategories": "Naman balna",
+  "loadError": "Buk watla kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "loading": "Karkabi ba...",
+  "noResultsTitle": "Dukia apia baiki",
+  "noResultsDescription": "Bila walna tawra kaikwa, ulw. \"alka klahwana\" apia sa \"yal almuka\".",
+  "emptyTitle": "Sturi apu sa naiwa",
+  "emptyDescription": "Naha kategoria dukiara sturi apu sa naiwa.",
+  "readingMinutes": "{{minutes}} minuta aiska dukiara",
+  "pendingReview": "Kaikaia tawraia sa",
+  "article": {
+    "loadError": "Naha sturi kaikaia sip apia kan. Sika apia iwras, apia konekshanka kaikma.",
+    "reviewedBy": "{{name}} kaikwa",
+    "reviewedOn": "{{date}} ra kaikwa",
+    "pendingProfessionalReview": "Dakta wina kaikaia tawraia sa",
+    "sourcesTitle": "Sturka balna",
+    "disclaimer": "Naha sturka yamni kaikaia dukiara sa, dakta walna aisi kaikaia wina apia sa.",
+    "audioPlay": "Aisi kaikwa",
+    "audioPause": "Utwa",
+    "audioLabel": "Audio sturi"
+  }
+}

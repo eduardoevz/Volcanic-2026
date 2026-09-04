@@ -2,6 +2,49 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 26 — Traducciones miskito/mayagna completas + registro de periodo y relaciones sexuales en calendario
+
+El usuario preguntó si ya se podía cambiar el idioma de la app a miskito/mayagna, y
+notó que el calendario no tenía forma de registrar el periodo ni las relaciones
+sexuales. Investigación: la infraestructura de idiomas ya existía (i18next con
+`es`/`mis`/`myn` registrados, selector en Perfil), pero de 15 namespaces por idioma
+solo `common.json` (33 claves) estaba traducido — los otros 14 (415 claves) eran `{}`
+vacíos y caían a español por `fallbackLng`. El calendario, por su parte, solo
+registraba `flow_level` por día; no había marca explícita de inicio/fin de periodo
+(los ciclos se infieren solo del flujo, `detectCycles` en `cycleEngine.ts`) ni ninguna
+opción de relaciones sexuales, ni en la UI ni en la base de datos.
+
+- **Idiomas**: traducidos con IA los 14 namespaces faltantes (`appointments`,
+  `assistant`, `auth`, `directory`, `family`, `home`, `library`, `mascot`,
+  `onboarding`, `pregnancy`, `reminders`, `settings`, `summary`, `tracking`) para
+  `mis` y `myn`, usando como referencia terminológica los glosarios
+  `cora/locales/miskito.json` / `mayangna.json` (URACCAN/CIDCA/MINSA). Verificado que
+  las 448 claves por idioma coinciden exactamente con `es` (sin huecos) y que los 84
+  archivos JSON resultantes son sintácticamente válidos.
+  - **Importante**: son traducciones generadas por IA sin revisión de un hablante
+    nativo miskito/mayagna. Se recomienda validación humana antes de considerar el
+    contenido publicable, especialmente en textos médicos/sensibles (onboarding,
+    pregnancy, auth, consentimiento).
+  - Eliminados los 4 archivos glosario huérfanos y no usados por la app
+    (`miskito.json`/`mayangna.json` en la raíz del repo y en `cora/locales/`), tras
+    confirmación del usuario — ya fueron minados como referencia terminológica para
+    las traducciones de arriba y no estaban importados en ningún lado del código.
+- **Calendario**: migración `0025_daily_log_extras.sql` — agrega `sexual_activity`
+  (boolean, nullable), `period_start` y `period_end` (boolean, default false) a
+  `daily_logs`; `upsert_daily_log` recreado (con `drop function` explícito de la firma
+  vieja de 7 argumentos para evitar overload ambiguo) aceptando los 3 parámetros
+  nuevos. `period_start`/`period_end` son informativos — complementan `flow_level`,
+  no reemplazan la inferencia de ciclos existente. Aplicada contra el proyecto
+  Supabase real (`qrrnhigitxqfjrmncwxu`) y verificada con `list_tables`/`execute_sql`;
+  sin hallazgos nuevos en `get_advisors` (security).
+  - `cora/src/features/tracking/api.ts`: `SaveDailyLogInput` extendido y pasado al RPC.
+  - `cora/app/log/[date].tsx`: nuevos toggles "Inicio de periodo" / "Fin de periodo"
+    junto a la sección de Flujo, y nueva sección "Relaciones sexuales" (Sí/No),
+    siguiendo el patrón de chips existente. Nuevas claves en `tracking.json` (es/mis/myn).
+  - `database.types.ts` actualizado a mano (edición dirigida, no regeneración
+    completa) por el bug conocido del generador con argumentos RPC nullable.
+- Verificado con `npx tsc --noEmit` (sin errores).
+
 ## Fase 25 — Anillos interactivos en Calendario + directorio de salud con datos reales (ficticios)
 
 El usuario pidió dos cosas independientes: (1) las tarjetas de "Próximo período

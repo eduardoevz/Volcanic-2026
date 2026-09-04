@@ -1,1 +1,11 @@
-{}
+{
+  "title": "Siknis sturi ulna",
+  "disclaimer": "Naha siknis marikaia apia sa. Man ulna balna dakta walna aisi kaikaia ra brikma.",
+  "preset30Days": "Yuu 30 balna baman",
+  "preset90Days": "Yuu 90 balna baman",
+  "generating": "Sturi ulna daukisna...",
+  "generateError": "Sturi ulna daukaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "share": "Sula",
+  "exportPdf": "PDF ra ulwi sula",
+  "exportPdfError": "PDF daukaia sip apia kan. Kli talwa."
+}

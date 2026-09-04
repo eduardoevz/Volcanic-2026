@@ -1,1 +1,27 @@
-{}
+{
+  "title": "Yang tula brira",
+  "loading": "Karkabi ba...",
+  "loadError": "Man tula brira kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "startTitle": "Man tula brira ba ulwi",
+  "startDescription": "Man waiku â piaya wina semana naiwa ba bara yuu tula iwaia ba kulkisa — estimación baman sa, siknis marikaia apia sa.",
+  "lmpLabel": "Man waiku â piaya wan yuu",
+  "startSubmit": "Kaikanka daukaia tawi",
+  "createError": "Yamwa sip apia kan. Kli talwa.",
+  "weekLabel": "Semana {{week}}",
+  "weeksUnit": "semana balna",
+  "trimesterLabel": "Trimestre {{trimester}}",
+  "dueDateLabel": "Yuu tula iwaia: {{date}}",
+  "emotionalTitle": "¿Naiwa nahki man?",
+  "recentEntriesTitle": "Ulna mahka balna",
+  "noRecentEntries": "Naha tula brira ra aihwa lani ulna apu sa naiwa.",
+  "articlesTitle": "Man tula brira dukiara sturi balna",
+  "articlesEmpty": "Sturi apu sa naiwa.",
+  "notesLabel": "Ulna",
+  "notesPlaceholder": "Man tula brira dukiara dukia sut ulwi gustara (opcional)",
+  "saveNotes": "Ulna yamwa",
+  "endTracking": "Kaikanka utwa",
+  "endConfirmTitle": "¿Naha tula brira kaikanka ba utwaia gustara?",
+  "endConfirmDescription": "Piaya ra tula brira raya ulwaia sip man, sika iwbia.",
+  "endConfirmSubmit": "Au, utwa",
+  "endConfirmCancel": "Swi"
+}

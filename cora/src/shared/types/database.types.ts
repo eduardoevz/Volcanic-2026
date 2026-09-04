@@ -374,6 +374,9 @@ export type Database = {
           log_date: string
           mood: Database["public"]["Enums"]["mood"] | null
           notes: string | null
+          period_end: boolean
+          period_start: boolean
+          sexual_activity: boolean | null
           sleep_hours: number | null
           updated_at: string
           user_id: string
@@ -386,6 +389,9 @@ export type Database = {
           log_date: string
           mood?: Database["public"]["Enums"]["mood"] | null
           notes?: string | null
+          period_end?: boolean
+          period_start?: boolean
+          sexual_activity?: boolean | null
           sleep_hours?: number | null
           updated_at?: string
           user_id: string
@@ -398,6 +404,9 @@ export type Database = {
           log_date?: string
           mood?: Database["public"]["Enums"]["mood"] | null
           notes?: string | null
+          period_end?: boolean
+          period_start?: boolean
+          sexual_activity?: boolean | null
           sleep_hours?: number | null
           updated_at?: string
           user_id?: string
@@ -1191,6 +1200,9 @@ export type Database = {
           p_log_date: string
           p_mood: Database["public"]["Enums"]["mood"] | null
           p_notes: string | null
+          p_period_end?: boolean
+          p_period_start?: boolean
+          p_sexual_activity?: boolean | null
           p_sleep_hours: number | null
           p_symptoms?: Json
         }

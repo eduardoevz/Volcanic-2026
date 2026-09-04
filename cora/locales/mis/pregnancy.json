@@ -1,1 +1,27 @@
-{}
+{
+  "title": "Yang lupia brira",
+  "loading": "Karkabi ba...",
+  "loadError": "Man lupia brira kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "startTitle": "Man lupia brira ba ulbi",
+  "startDescription": "Man kati tala piaya wina semana naiwa ba bara yuu lupia iwaia ba kulkisa — estimación baman sa, siknis marikaia apia sa.",
+  "lmpLabel": "Man kati tala piaya wan yuu",
+  "startSubmit": "Kaikanka daukaia tabaia",
+  "createError": "Swakaia sip apia kan. Kli pruwa kaiks.",
+  "weekLabel": "Semana {{week}}",
+  "weeksUnit": "semana nani",
+  "trimesterLabel": "Trimestre {{trimester}}",
+  "dueDateLabel": "Yuu lupia iwaia: {{date}}",
+  "emotionalTitle": "¿Naiwa nahki sma?",
+  "recentEntriesTitle": "Ulbanka mahka nani",
+  "noRecentEntries": "Naha lupia brira ra aihwa laka ulbanka apu sa naiwa.",
+  "articlesTitle": "Man lupia brira dukiara sturi nani",
+  "articlesEmpty": "Sturi apu sa naiwa.",
+  "notesLabel": "Ulbanka",
+  "notesPlaceholder": "Man lupia brira dukiara dia sut ulbi gustara (opcional)",
+  "saveNotes": "Ulbanka swakaia",
+  "endTracking": "Kaikanka utbaia",
+  "endConfirmTitle": "¿Naha lupia brira kaikanka ba utbaia gustara?",
+  "endConfirmDescription": "Piaya ra lupia brira raya ulbaia sip sma, sika iwbia.",
+  "endConfirmSubmit": "Au, utbaia",
+  "endConfirmCancel": "Swiaia"
+}

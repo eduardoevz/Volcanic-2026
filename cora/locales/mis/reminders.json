@@ -1,1 +1,21 @@
-{}
+{
+  "title": "Lukanka nani",
+  "subtitle": "Naha lukanka ba man selularka ra baman sa — Internet apia ra sin sula kabia.",
+  "loadError": "Man lukanka nani kaikaia sip apia kan.",
+  "createError": "Lukanka daukaia sip apia kan. Cora ra permiso mai yaba kaikas.",
+  "updateError": "Lukanka lakaia sip apia kan. Kli pruwa kaiks.",
+  "loading": "Karkabi ba...",
+  "dailyAt": "{{hour}}:{{minute}} — yuu bani",
+  "delete": "Sikbaia",
+  "emptyTitle": "Lukanka apia sa",
+  "emptyDescription": "Kum daukaia, Cora ba man yuu piaya ra sula waia dukiara.",
+  "newReminder": "+ Lukanka raya",
+  "newReminderTitle": "Lukanka raya",
+  "titleLabel": "Bila",
+  "titlePlaceholder": "Ulb. Yang yuu ulbanka",
+  "hourLabel": "Wark",
+  "minuteLabel": "Minuta",
+  "decrease": "{{label}} ba wilaia",
+  "increase": "{{label}} ba pura brih",
+  "save": "Swakaia"
+}

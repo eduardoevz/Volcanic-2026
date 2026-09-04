@@ -89,6 +89,9 @@ export type SaveDailyLogInput = {
   sleepHours: number | null;
   notes: string | null;
   symptoms: { symptomId: string; intensity: number }[];
+  sexualActivity: boolean | null;
+  periodStart: boolean;
+  periodEnd: boolean;
 };
 
 export async function saveDailyLog(input: SaveDailyLogInput) {
@@ -100,6 +103,9 @@ export async function saveDailyLog(input: SaveDailyLogInput) {
     p_sleep_hours: input.sleepHours,
     p_notes: input.notes,
     p_symptoms: input.symptoms.map((s) => ({ symptom_id: s.symptomId, intensity: s.intensity })),
+    p_sexual_activity: input.sexualActivity,
+    p_period_start: input.periodStart,
+    p_period_end: input.periodEnd,
   });
 
   if (error) throw error;

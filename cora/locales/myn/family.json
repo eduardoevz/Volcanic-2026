@@ -1,1 +1,45 @@
-{}
+{
+  "myCircleTitle": "Yang kupia kumi lani",
+  "sharedWithMeTitle": "Yang walna sturka wali balna",
+  "loading": "Karkabi ba...",
+  "loadError": "Man kupia kumi lani kaikaia sip apia kan. Konekshanka kaikma, kli talwa.",
+  "emptyMyCircleTitle": "Upla apu paiwna naiwa",
+  "emptyMyCircleDescription": "Upla as walna sturka wali paiwi, man alki lakwan as walna, man permiso ba brisa taim baman.",
+  "emptySharedWithMeTitle": "Upla apu kupia kumi lani wali sula",
+  "emptySharedWithMeDescription": "Upla as man paiwi bara man alkbia sip taim, naha ra bal takbia.",
+  "invite": "Upla paiwa",
+  "revoke": "Utwa",
+  "leave": "Kupia kumi lani wina taskwa",
+  "statusLabels": {
+    "pending": "Kaikaia sa",
+    "accepted": "Alkwa",
+    "revoked": "Utwa"
+  },
+  "scopeLabels": {
+    "cycle_dates": "Waiku lani yuu balna",
+    "reminders": "Dukia balna",
+    "mood_summary": "Aihwa lani sturi",
+    "appointments": "Dakta prautka balna"
+  },
+  "moodSummaryLine": "Aihwa lani lain: {{mood}} ({{days}} yuu)",
+  "moodSummaryEmpty": "Sturka pyu apu sa naiwa.",
+  "inviteTitle": "Yang kupia kumi lani ra paiwa",
+  "emailLabel": "Upla paiwna wan correo",
+  "emailPlaceholder": "ninam@correo.com",
+  "relationshipLabel": "¿Naha upla dukia man?",
+  "relationshipPlaceholder": "Ulw. yang mâm, yang yal",
+  "inviteSubmit": "Paiwnka daukaia",
+  "inviteError": "Paiwnka daukaia sip apia kan. Kli talwa.",
+  "inviteSuccess": "Paiwnka dawan. Enlace ba upla walna sula.",
+  "shareLinkButton": "Enlace sula",
+  "shareMessage": "Yang Cora kupia kumi lani ra man paikma. Naha enlace ba man selularka ra baiwi, Cora brikma taim: {{link}}",
+  "done": "Bapan",
+  "defaultOwnerName": "Cora ra upla as",
+  "acceptTitle": "Kupia kumi lani ra iwaia",
+  "acceptInvalidLink": "Naha enlace yamni apia sa.",
+  "acceptNeedsLogin": "Sesionka ra iwi apia man ulwi, naha enlace ba kli baiwi kupia kumi lani ra iwaia dukiara.",
+  "acceptGoToLogin": "Sesionka ra iwaia",
+  "acceptGoToRegister": "Wan ninam ulwa",
+  "acceptVerifying": "Paiwnka marikisna...",
+  "acceptError": "Naha paiwnka yamni apia sa, piba yuswan, apia man correo walna baisras."
+}

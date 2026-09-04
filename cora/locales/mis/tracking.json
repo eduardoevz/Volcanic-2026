@@ -1,1 +1,77 @@
-{}
+{
+  "calendar": {
+    "title": "Kati ulbanka",
+    "prevMonth": "Kati mahka",
+    "nextMonth": "Kati piaya",
+    "loadError": "Man ulbanka nani kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+    "noHistoryTitle": "Sturka apu sa naiwa",
+    "noHistoryDescription": "Kati laka 2 baman ulbi, naha ra estimación kaikaia dukiara.",
+    "nextPeriodTitle": "Kati tala piaya balbia",
+    "nextPeriodRange": "{{start}} bara {{end}} kainara",
+    "daysUnit": "yuu nani",
+    "confidenceGood": "alki pain",
+    "confidenceInitial": "estimación",
+    "fertileWindowTitle": "Lupia briaia piaya estimación",
+    "fertileWindowRange": "{{start}} wina {{end}} kat",
+    "fertileInProgress": "Naiwa ra sa",
+    "fertileDaysToGo_one": "Yuu {{count}} piaya",
+    "fertileDaysToGo_other": "Yuu {{count}} piaya",
+    "fertilePast": "Iwan kaman",
+    "fertileWindowWarning": "Naha estimación método anticonceptivo apia sa.",
+    "legendPeriod": "Kati tala",
+    "legendPredicted": "Estimación",
+    "legendFertile": "Lupia briaia",
+    "last30DaysTitle": "Yuu 30 nani",
+    "emptyTitle": "Ulbanka apu sa naiwa",
+    "emptyDescription": "Kati ulbanka ra yuu kum ta lak ulbaia tabaia.",
+    "viewStats": "Kulkanka kaikas"
+  },
+  "mood": {
+    "great": "Pain kaiki",
+    "good": "Pain",
+    "neutral": "Baman",
+    "low": "Sauhkira",
+    "difficult": "Kau sauhkira"
+  },
+  "flow": {
+    "none": "Apu",
+    "spotting": "Sirpi",
+    "light": "Baisa",
+    "medium": "Klasik",
+    "heavy": "Kau kau"
+  },
+  "log": {
+    "loadError": "Man yuu naha wina ulbanka mahka ba kaikaia sip apia kan — sika kum swaban kaman, alki kaikas man dukia utban ba lawana.",
+    "flowTitle": "Kati tala",
+    "periodStart": "Kati tala tabaikan",
+    "periodEnd": "Kati tala utban",
+    "moodTitle": "Aihwa laka",
+    "energyTitle": "Alki laka",
+    "symptomsTitle": "Diara sauhkira",
+    "symptomsLoadError": "Diara sauhkira lista ba kaikaia sip apia kan.",
+    "symptomsLoading": "Diara sauhkira karkabi ba...",
+    "sexualActivityTitle": "Waitna wal iwaia",
+    "sexualActivityYes": "Au",
+    "sexualActivityNo": "Apia",
+    "noteTitle": "Ulbanka",
+    "notePlaceholder": "Dia sin ulbi gustara (opcional)",
+    "saveError": "Swakaia sip apia kan. Kli pruwa kaiks.",
+    "save": "Swakaia"
+  },
+  "stats": {
+    "title": "Kulkanka nani",
+    "loadError": "Man kulkanka nani kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+    "notEnoughDataTitle": "Sturka apu sa naiwa",
+    "notEnoughDataDescription": "Kati laka 2 baman ulbi, man kati laka kulkanka kaikaia dukiara.",
+    "cycleLengthTitle": "Kati laka lalka",
+    "averageLength": "Man kati laka klasik ba yuu {{days}} sa, kati laka {{count}} mahka nani ra.",
+    "lengthRange": "Man kati laka nani ba yuu {{min}} bara {{max}} kainara lakan.",
+    "symptomFrequencyTitle": "Diara sauhkira lain",
+    "symptomFrequencyEmpty": "Diara sauhkira ulbanka pyu apu sa naiwa.",
+    "symptomFrequency": "Man {{label}} ba yuu 30 mahka nani ra {{count}} pali ulban."
+  },
+  "referral": {
+    "message": "Diara kum baikan, daktar wal aisi kaikaia pain kabia.",
+    "action": "Daktara watla nani ba kaikaia dukiara alki mai"
+  }
+}

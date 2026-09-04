@@ -1,1 +1,45 @@
-{}
+{
+  "myCircleTitle": "Yang kupia kumi laka",
+  "sharedWithMeTitle": "Yang wal sturka wali sut",
+  "loading": "Karkabi ba...",
+  "loadError": "Man kupia kumi laka kaikaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
+  "emptyMyCircleTitle": "Upla apu paiwan naiwa",
+  "emptyMyCircleDescription": "Upla kum wal sturka wali paibi, man alki lakan kum wal, man permiso ba brisa taim baman.",
+  "emptySharedWithMeTitle": "Upla apu kupia kumi laka wali sula",
+  "emptySharedWithMeDescription": "Upla kum man paibi bara man alkbia sip taim, naha ra bal takbia.",
+  "invite": "Upla paibaia",
+  "revoke": "Utbaia",
+  "leave": "Kupia kumi laka wina taskaia",
+  "statusLabels": {
+    "pending": "Kaikaia sa",
+    "accepted": "Alkban",
+    "revoked": "Utban"
+  },
+  "scopeLabels": {
+    "cycle_dates": "Kati laka yuu nani",
+    "reminders": "Lukanka nani",
+    "mood_summary": "Aihwa laka sturi",
+    "appointments": "Dakta prautka nani"
+  },
+  "moodSummaryLine": "Aihwa laka lain: {{mood}} ({{days}} yuu)",
+  "moodSummaryEmpty": "Sturka pyu apu sa naiwa.",
+  "inviteTitle": "Yang kupia kumi laka ra paibaia",
+  "emailLabel": "Upla paiban wan correo",
+  "emailPlaceholder": "nina@correo.com",
+  "relationshipLabel": "¿Naha upla dia sma?",
+  "relationshipPlaceholder": "Ulb. yang yapti, yang mairka",
+  "inviteSubmit": "Paiwanka daukaia",
+  "inviteError": "Paiwanka daukaia sip apia kan. Kli pruwa kaiks.",
+  "inviteSuccess": "Paiwanka daban. Enlace ba upla wal sula.",
+  "shareLinkButton": "Enlace sula",
+  "shareMessage": "Yang Cora kupia kumi laka ra man paikisma. Naha enlace ba man selularka ra baiki, Cora brisma taim: {{link}}",
+  "done": "Bapan",
+  "defaultOwnerName": "Cora ra upla kum",
+  "acceptTitle": "Kupia kumi laka ra iwaia",
+  "acceptInvalidLink": "Naha enlace pain apia sa.",
+  "acceptNeedsLogin": "Sesionka ra iwi apia man ulbi, naha enlace ba kli baiki kupia kumi laka ra iwaia dukiara.",
+  "acceptGoToLogin": "Sesionka ra iwaia",
+  "acceptGoToRegister": "Wan nina ulbaia",
+  "acceptVerifying": "Paiwanka marikisa...",
+  "acceptError": "Naha paiwanka pain apia sa, piba yusban, apia man correo wal baisras."
+}
