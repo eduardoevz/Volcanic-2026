@@ -2,6 +2,136 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 24 — Ventana de embarazo enriquecida, expediente médico en onboarding, export PDF
+
+El usuario pidió tres cosas relacionadas, todas alrededor de la etapa `embarazo` y del
+registro de usuarias nuevas: (1) enriquecer la pantalla de embarazo con seguimiento
+emocional y ~10 artículos nuevos con fuentes verificadas, (2) una pantalla nueva en el
+onboarding para un "mini expediente médico" (alergias, antecedentes familiares,
+condiciones crónicas/medicamentos, tipo de sangre) opcional/saltable, editable después
+desde Perfil, incluido en el PDF del resumen médico, y (3) diseñar todo primero como
+mockups (canvas de Claude Design) con la misma paleta ya aplicada al resto de la app,
+aprobados antes de tocar código — mismo flujo que la Fase 23.
+
+- [x] **Mockups aprobados antes de escribir código de producto:** 2 artboards nuevos
+  agregados al mismo canvas de la Fase 23 (`Embarazo` y `Registro — Antecedentes
+  médicos`), reutilizando los tokens y patrones ya establecidos (anillo SVG de
+  `CycleStatusModule`, fila de emojis de `DailyCheckInModule`, filas de artículo de
+  `library.tsx`, `Chip`/`OnboardingProgress` ya existentes). Aprobados por el usuario
+  antes de la fase de implementación.
+- [x] **`supabase/migrations/0022_medical_background.sql`** — tabla nueva
+  `medical_background` (1:1 con `profiles`, RLS Patrón A completa, todos los campos
+  nullable a propósito: sin fila si la usuaria saltó el paso). Aplicada al proyecto real
+  (`qrrnhigitxqfjrmncwxu`) vía MCP de Supabase.
+- [x] **`supabase/migrations/0023_pregnancy_articles_batch2.sql`** — 10 artículos nuevos
+  de la categoría `embarazo` (14 en total con los 4 de `0009_seed_content.sql`):
+  náuseas y vómitos, salud emocional, ejercicio seguro, sueño y descanso, vacunas
+  recomendadas, diabetes gestacional, preeclampsia, preparación para la lactancia, plan
+  de parto, cuidados en el posparto inmediato. **Cada fuente citada
+  (`content_sources`) fue verificada con WebFetch antes de escribir el artículo** — NHS
+  (7 artículos) y OMS/WHO (2), mismas organizaciones ya usadas en `0009`, ninguna URL
+  inventada; dos búsquedas iniciales (WHO maternal-mental-health, NHS birth-plan)
+  devolvieron 404 y se reemplazaron por las URLs reales encontradas por búsqueda antes
+  de redactar el contenido, no después. Mismo criterio editorial que `0009`:
+  `author_name = 'Equipo editorial Cora'`, `reviewed_by_name` sin poblar (honesto, sin
+  reviewer real todavía), sin dosis ni medicamentos indicados.
+  **Pendiente honesto:** no se invocó la Edge Function `embed-content` para estos 10
+  artículos nuevos (búsqueda semántica/RAG) — este entorno no tiene el secreto
+  `EMBED_CONTENT_ADMIN_KEY`; los artículos ya son visibles y buscables por texto
+  completo/por etapa, solo la búsqueda semántica queda pendiente de un `POST` una vez
+  que alguien con el secreto lo invoque (un solo paso, sin cambios de código, mismo
+  patrón ya documentado en `docs/CONVENCIONES.md`).
+- [x] `src/shared/types/database.types.ts` regenerado vía MCP de Supabase.
+  **Mismo bug del generador ya documentado en Fase 19** (marca argumentos de RPC como
+  no-nullable por error) reapareció en `upsert_daily_log` y se corrigió a mano de nuevo.
+- [x] **`src/features/medicalBackground/` (feature nueva):** `api.ts` (upsert directo,
+  mismo patrón que `updateAvatar` — sin RPC porque no necesita historial/gamificación),
+  hooks (`useMedicalBackground`, `useSaveMedicalBackground`), y
+  `MedicalBackgroundForm.tsx` — un formulario compartido (4 `Input` multilinea + fila de
+  `Chip` de tipo de sangre) reusado en dos lugares: la pantalla nueva de onboarding
+  (`app/(onboarding)/medical-background.tsx`, insertada entre `avatar` y `mascot`,
+  `OnboardingProgress` pasa de 5 a 6 pasos) y una pantalla nueva independiente
+  (`app/medical-record.tsx`) accesible desde una fila nueva "Expediente médico" en el
+  menú de Perfil, para editarlo después de completado el registro.
+- [x] **`app/pregnancy/index.tsx` rediseñado**, misma lógica existente
+  (`useActivePregnancy`/`pregnancyEngine.ts`), superficie nueva: anillo SVG de semana
+  (mismo patrón que `CycleStatusModule`), sección de seguimiento emocional (misma fila
+  de emojis y misma infraestructura de `daily_logs` que Inicio — **sin tabla nueva**,
+  con una lista de los últimos registros de ánimo dentro del rango del embarazo vía
+  `useDailyLogsRange`), y lista de artículos de la etapa `embarazo` (reusa `useArticles`
+  ya existente, sin fetch nuevo).
+- [x] **PDF/resumen médico extendido:** `SummaryPayload` gana dos campos opcionales
+  (`pregnancy`, `medicalBackground`, ambos `null` si no aplica — mismo criterio "sin
+  datos suficientes" del resto del resumen). `buildSummaryText`/`buildSummaryHtml`
+  agregan las secciones correspondientes solo si hay datos; `useGenerateSummary.ts`
+  agrega `fetchMedicalBackground`/`fetchActivePregnancy` (esta última solo si
+  `profile.life_stage === 'embarazo'`) al `Promise.all` existente. 3 tests nuevos en
+  `pdf.test.ts` (sin datos, con embarazo activo, con antecedentes completos).
+- [x] **Verificación real de punta a punta en el emulador Android** (dev build ya
+  instalado — sin recompilar nativo, ver nota abajo), con la cuenta demo
+  (`demo-adulta@cora.test`): cambio de etapa a "Embarazo" desde Perfil → Inicio compuso
+  automáticamente el módulo de embarazo y mostró como artículo recomendado uno de los 10
+  artículos nuevos (confirma el filtro por `life_stages` funcionando con contenido
+  real) → registro de embarazo (FUM `2026-04-20`) → hub mostró correctamente semana 20,
+  trimestre 2, fecha probable de parto 25/01/2027, historial real de ánimo de la cuenta
+  demo dentro del rango, y 8 artículos de embarazo → "Expediente médico" desde Perfil:
+  campo "Alergias" con "Penicilina" guardado y confirmado con `execute_sql` directo
+  contra la tabla real → "Resumen médico" (90 días): el texto generado incluyó
+  correctamente las secciones "Embarazo actual" (semana 20 · trimestre 2 · fecha) y
+  "Antecedentes médicos" (alergias: Penicilina; el resto: "sin datos", honesto). Sin
+  ninguna excepción fatal en todo el recorrido (`adb logcat | grep FATAL` vacío).
+- [x] `npx tsc --noEmit`, `npx eslint .` (0 errores, mismas advertencias preexistentes
+  de siempre), `npx jest` (135/135 OK, incluye los 3 tests nuevos de `pdf.test.ts`).
+
+### Log de tareas — Fase 24 (2026-09-04)
+
+- **`expo run:android` falló dos veces seguidas con un error nuevo, no relacionado con
+  el código:** Gradle no pudo leer un archivo temporal `.so` de `react-native-reanimated`
+  (`Acceso denegado`) — confirmado que era un lock de Windows Defender (proceso
+  `MsMpEng`/`MpDefenderCoreService` corriendo, `takeown`/`icacls` con permisos de
+  administrador también fallaron sobre ese archivo específico) y no un problema de
+  permisos del proyecto ni del código. **Como esta fase no agregó ninguna dependencia
+  nativa nueva** (a diferencia de la Fase 23, que sí instaló `expo-linear-gradient`), se
+  evitó el problema por completo: se reusó el APK ya instalado en el emulador desde la
+  Fase 23 y solo se recargó el bundle de JavaScript vía Metro (`am force-stop` +
+  relanzar) — mismo resultado de verificación, sin pelear con el bloqueo de Windows.
+- Antes de escribir la migración de artículos nuevos, cada URL candidata (NHS/OMS) se
+  verificó con `WebFetch` — dos de las URLs iniciales (mental-health en OMS, birth-plan
+  en NHS) devolvieron `404`, se buscaron las URLs reales con `WebSearch` y se
+  reverificaron antes de redactar el `body_md`, siguiendo al pie de la letra la política
+  ya documentada en el encabezado de `0009_seed_content.sql`.
+- Se hicieron 3 investigaciones en paralelo (subagentes de solo lectura) antes de
+  planear: arquitectura de embarazo/onboarding existente, convenciones de migraciones y
+  autoría de contenido, e inventario del sistema de diseño ya aplicado — evitó proponer
+  patrones nuevos donde ya existían (por ejemplo, el mecanismo de ánimo de `daily_logs`
+  para el seguimiento emocional, en vez de una tabla nueva).
+
+## Fase 24 — Definition of Done (verificación final)
+
+- [x] Mockups aprobados por el usuario antes de escribir código de producto
+- [x] Migraciones `0022`/`0023` aplicadas al proyecto real, con RLS y fuentes citadas
+  verificadas — 14 artículos de embarazo publicados en total
+- [x] Expediente médico opcional en onboarding + editable desde Perfil, verificado
+  guardando y leyendo un dato real (`Penicilina`) contra la base de datos real
+- [x] Ventana de embarazo con seguimiento emocional (reusa `daily_logs`, sin tabla
+  nueva) y artículos de la etapa, verificados con datos reales de la cuenta demo
+- [x] PDF/resumen médico incluye ambas secciones nuevas solo cuando hay datos reales —
+  verificado generando un resumen real con embarazo activo y expediente parcial
+- [x] Sin ninguna dependencia nativa nueva esta fase — verificación hecha recargando el
+  bundle JS sobre el APK ya instalado, evitando un bloqueo de Windows Defender no
+  relacionado con el código
+- [x] `npx tsc --noEmit`, `npx eslint .`, `npx jest` (135/135) en verde
+- [ ] **Pendiente, no bloqueante:** invocar `embed-content` para los 10 artículos nuevos
+  cuando alguien con `EMBED_CONTENT_ADMIN_KEY` esté disponible — la búsqueda semántica
+  del asistente no los indexará hasta entonces, pero ya son visibles y buscables por
+  texto completo y por etapa
+
+**Fase 24 completa.** Las tres piezas pedidas (ventana de embarazo enriquecida,
+expediente médico opcional, export PDF extendido) verificadas de punta a punta contra
+datos reales en el emulador y en la base de datos real — no solo compiladas. Única
+salvedad honesta: el backfill de embeddings de los 10 artículos nuevos queda pendiente
+de un secreto que este entorno no tiene, mismo patrón ya aceptado en fases anteriores.
+
 ## Fase 23 — Rediseño visual de las 5 pestañas (Inicio, Calendario, Biblioteca, Cora, Perfil)
 
 El usuario pidió un rediseño de UX/UI de las 5 pantallas de pestañas usando la paleta ya aplicada

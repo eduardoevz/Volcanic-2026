@@ -6,10 +6,10 @@ import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 type OnboardingProgressProps = {
-  step: number; // 1..5
+  step: number; // 1..6
 };
 
 function buildStyles(colors: ColorScheme) {

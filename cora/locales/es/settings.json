@@ -13,6 +13,7 @@
   "aiShareOnDescription": "Cora puede usar agregados de tus registros (ciclo promedio, síntoma frecuente, ánimo) para responderte mejor. Nunca ve tus notas ni filas crudas.",
   "aiShareOffDescription": "Apagado: Cora solo conoce tu etapa de vida y rango de edad, nunca tus registros.",
   "medicalSummary": "Resumen médico",
+  "medicalRecordMenu": "Expediente médico",
   "reminders": "Recordatorios",
   "healthDirectory": "Directorio de salud",
   "familyCircle": "Círculo familiar",
@@ -28,5 +29,14 @@
   "themeSystem": "Sistema",
   "themeChanging": "Cambiando tema...",
   "signOut": "Cerrar sesión",
-  "changeLifeStagePrompt": "¿En qué etapa estás ahora?"
+  "changeLifeStagePrompt": "¿En qué etapa estás ahora?",
+  "medicalRecord": {
+    "title": "Expediente médico",
+    "subtitle": "Alergias, antecedentes y medicamentos actuales — se incluyen en tu resumen médico al exportarlo a PDF.",
+    "loading": "Cargando tu expediente...",
+    "loadError": "No pudimos cargar tu expediente médico.",
+    "saveError": "No pudimos guardar tus antecedentes. Probá de nuevo.",
+    "saved": "Guardado.",
+    "save": "Guardar"
+  }
 }

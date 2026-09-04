@@ -25,6 +25,7 @@ export default function OnboardingLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="life-stage" />
       <Stack.Screen name="avatar" />
+      <Stack.Screen name="medical-background" />
       <Stack.Screen name="mascot" />
       <Stack.Screen name="consent" />
     </Stack>

@@ -47,6 +47,20 @@ export function computeMoodSummary(logs: SummaryLogInput[]): { mood: Mood; label
   return { mood: topMood, label: MOOD_LABELS[topMood] };
 }
 
+export type SummaryMedicalBackground = {
+  allergies: string | null;
+  familyHistory: string | null;
+  chronicConditions: string | null;
+  currentMedications: string | null;
+  bloodType: string | null;
+};
+
+export type SummaryPregnancy = {
+  week: number;
+  trimester: 1 | 2 | 3;
+  dueDate: string;
+};
+
 export type SummaryPayload = {
   periodStart: string;
   periodEnd: string;
@@ -56,6 +70,12 @@ export type SummaryPayload = {
   topSymptoms: SymptomCount[];
   predominantMood: { mood: Mood; label: string } | null;
   notes: { date: string; text: string }[];
+  // Ambos opcionales y honestos: null cuando la usuaria nunca completó el
+  // expediente médico (saltable en el onboarding) o no tiene un embarazo
+  // activo — nunca se inventa un valor de relleno (§ mismo criterio que el
+  // resto del resumen: transcripción de datos reales, no interpretación).
+  medicalBackground: SummaryMedicalBackground | null;
+  pregnancy: SummaryPregnancy | null;
 };
 
 export function buildSummaryPayload(input: {
@@ -64,6 +84,8 @@ export function buildSummaryPayload(input: {
   logs: SummaryLogInput[];
   symptomCounts: SymptomCount[];
   cycles: CycleInput[];
+  medicalBackground?: SummaryMedicalBackground | null;
+  pregnancy?: SummaryPregnancy | null;
 }): SummaryPayload {
   const cyclesInRange = input.cycles.filter(
     (c) => c.start_date >= input.periodStart && c.start_date <= input.periodEnd
@@ -87,6 +109,8 @@ export function buildSummaryPayload(input: {
     notes: input.logs
       .filter((log): log is SummaryLogInput & { notes: string } => !!log.notes?.trim())
       .map((log) => ({ date: log.log_date, text: log.notes })),
+    medicalBackground: input.medicalBackground ?? null,
+    pregnancy: input.pregnancy ?? null,
   };
 }
 
@@ -128,6 +152,24 @@ export function buildSummaryText(payload: SummaryPayload): string {
       lines.push(`  · ${note.date}: ${note.text}`);
     }
   }
+  if (payload.pregnancy) {
+    lines.push('');
+    lines.push('Embarazo actual:');
+    lines.push(`  Semana ${payload.pregnancy.week} · Trimestre ${payload.pregnancy.trimester}`);
+    lines.push(`  Fecha probable de parto: ${payload.pregnancy.dueDate}`);
+  }
+
+  if (payload.medicalBackground) {
+    const mb = payload.medicalBackground;
+    lines.push('');
+    lines.push('Antecedentes médicos:');
+    lines.push(`  Alergias: ${mb.allergies ?? 'sin datos'}`);
+    lines.push(`  Antecedentes familiares: ${mb.familyHistory ?? 'sin datos'}`);
+    lines.push(`  Condiciones crónicas: ${mb.chronicConditions ?? 'sin datos'}`);
+    lines.push(`  Medicamentos actuales: ${mb.currentMedications ?? 'sin datos'}`);
+    lines.push(`  Tipo de sangre: ${mb.bloodType ?? 'sin datos'}`);
+  }
+
   lines.push('');
   lines.push(DISCLAIMER);
 

@@ -34,6 +34,23 @@ export function buildSummaryHtml(payload: SummaryPayload): string {
           .map((n) => `<li><strong>${n.date}:</strong> ${escapeHtml(n.text)}</li>`)
           .join('')}</ul>`;
 
+  const pregnancyHtml = payload.pregnancy
+    ? `<h2>Embarazo actual</h2>
+  <p>Semana ${payload.pregnancy.week} · Trimestre ${payload.pregnancy.trimester}</p>
+  <p>Fecha probable de parto: ${escapeHtml(payload.pregnancy.dueDate)}</p>`
+    : '';
+
+  const medicalBackgroundHtml = payload.medicalBackground
+    ? `<h2>Antecedentes médicos</h2>
+  <ul>
+    <li><strong>Alergias:</strong> ${escapeHtml(payload.medicalBackground.allergies ?? 'sin datos')}</li>
+    <li><strong>Antecedentes familiares:</strong> ${escapeHtml(payload.medicalBackground.familyHistory ?? 'sin datos')}</li>
+    <li><strong>Condiciones crónicas:</strong> ${escapeHtml(payload.medicalBackground.chronicConditions ?? 'sin datos')}</li>
+    <li><strong>Medicamentos actuales:</strong> ${escapeHtml(payload.medicalBackground.currentMedications ?? 'sin datos')}</li>
+    <li><strong>Tipo de sangre:</strong> ${escapeHtml(payload.medicalBackground.bloodType ?? 'sin datos')}</li>
+  </ul>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -69,6 +86,9 @@ export function buildSummaryHtml(payload: SummaryPayload): string {
 
   <h2>Notas de la usuaria</h2>
   ${notesHtml}
+
+  ${pregnancyHtml}
+  ${medicalBackgroundHtml}
 
   <div class="disclaimer">${DISCLAIMER}</div>
 </body>

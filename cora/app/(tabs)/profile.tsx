@@ -188,6 +188,7 @@ export default function Profile() {
         <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
           {[
             { emoji: '📋', label: t('medicalSummary'), href: '/summary' as const },
+            { emoji: '🩹', label: t('medicalRecordMenu'), href: '/medical-record' as const },
             { emoji: '⏰', label: t('reminders'), href: '/reminders' as const },
             { emoji: '🩺', label: t('healthDirectory'), href: '/directory' as const },
             { emoji: '👨‍👩‍👧', label: t('familyCircle'), href: '/family' as const },

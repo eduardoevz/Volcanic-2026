@@ -10,6 +10,8 @@ const basePayload: SummaryPayload = {
   topSymptoms: [{ label: 'Cólicos', count: 3 }],
   predominantMood: { mood: 'good', label: 'bien' },
   notes: [{ date: '2026-01-05', text: 'dolor de cabeza' }],
+  medicalBackground: null,
+  pregnancy: null,
 };
 
 describe('buildSummaryHtml', () => {
@@ -55,5 +57,38 @@ describe('buildSummaryHtml', () => {
     const longText = 'y'.repeat(3000);
     const html = buildSummaryHtml({ ...basePayload, notes: [{ date: '2026-01-05', text: longText }] });
     expect(html).toContain(longText);
+  });
+
+  it('no muestra la sección de embarazo ni de antecedentes médicos cuando son null', () => {
+    const html = buildSummaryHtml(basePayload);
+    expect(html).not.toContain('Embarazo actual');
+    expect(html).not.toContain('Antecedentes médicos');
+  });
+
+  it('muestra el embarazo actual cuando hay uno activo', () => {
+    const html = buildSummaryHtml({
+      ...basePayload,
+      pregnancy: { week: 24, trimester: 2, dueDate: '2026-06-01' },
+    });
+    expect(html).toContain('Embarazo actual');
+    expect(html).toContain('Semana 24');
+    expect(html).toContain('Trimestre 2');
+  });
+
+  it('muestra los antecedentes médicos cuando la usuaria los completó', () => {
+    const html = buildSummaryHtml({
+      ...basePayload,
+      medicalBackground: {
+        allergies: 'Penicilina',
+        familyHistory: null,
+        chronicConditions: null,
+        currentMedications: null,
+        bloodType: 'O+',
+      },
+    });
+    expect(html).toContain('Antecedentes médicos');
+    expect(html).toContain('Penicilina');
+    expect(html).toContain('O+');
+    expect(html).toContain('sin datos');
   });
 });

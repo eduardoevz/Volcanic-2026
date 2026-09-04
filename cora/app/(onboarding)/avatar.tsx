@@ -56,7 +56,7 @@ export default function AvatarScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const goNext = () => router.push('/(onboarding)/mascot');
+  const goNext = () => router.push('/(onboarding)/medical-background');
 
   const handleChoose = async () => {
     if (!selected) return;

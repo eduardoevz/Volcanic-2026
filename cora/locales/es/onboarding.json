@@ -29,6 +29,22 @@
     "habitat": "Hábitat: {{habitat}}",
     "conservationStatus": "Estado de conservación: {{status}}"
   },
+  "medicalBackground": {
+    "title": "Antecedentes médicos",
+    "subtitle": "Nos ayuda a acompañarte mejor. Es opcional — podés completarlo después desde tu perfil.",
+    "allergiesLabel": "Alergias",
+    "allergiesPlaceholder": "Ej. penicilina, mariscos, polen...",
+    "familyHistoryLabel": "Antecedentes familiares",
+    "familyHistoryPlaceholder": "Ej. diabetes, hipertensión en la familia...",
+    "chronicConditionsLabel": "Condiciones crónicas",
+    "chronicConditionsPlaceholder": "Ej. asma, hipotiroidismo...",
+    "currentMedicationsLabel": "Medicamentos actuales",
+    "currentMedicationsPlaceholder": "Ej. medicamentos que tomás hoy...",
+    "bloodTypeLabel": "Tipo de sangre",
+    "saveAndContinue": "Guardar y continuar",
+    "skipForNow": "Saltar por ahora",
+    "saveError": "No pudimos guardar tus antecedentes. Probá de nuevo."
+  },
   "mascotIntro": {
     "title": "Conocé a tu pitahaya",
     "body": "Crece con cada momento de cuidado que registrés — sin castigos ni rachas. Nunca baja de nivel.",
