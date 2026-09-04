@@ -16,13 +16,22 @@
     "revoked": "Utban"
   },
   "scopeLabels": {
-    "cycle_dates": "Kati laka yuu nani",
-    "reminders": "Lukanka nani",
     "mood_summary": "Aihwa laka sturi",
-    "appointments": "Dakta prautka nani"
+    "care_alert": "Aihwa laka lukanka",
+    "next_appointment": "Dakta prautka piaya"
   },
+  "scopeDescriptions": {
+    "mood_summary": "Man aihwa laka lain, yuu 30 nani baman. Man ulbanka apia sika ulban kum kaikras.",
+    "care_alert": "Man naiwa aihwa laka piaya ba marikisa — kati tala apia, aihwa laka apia sika sa marikras, yuu sin marikras.",
+    "next_appointment": "Man dakta prautka piaya yuu baman marikisa, dia ulban apia sika ulban ba apia kaikras."
+  },
+  "partnerRelationshipNote": "Man mairka wal kaka sturka wali sula sma. Man alki laka baman wali, taim bani utbaia sip sma.",
   "moodSummaryLine": "Aihwa laka lain: {{mood}} ({{days}} yuu)",
   "moodSummaryEmpty": "Sturka pyu apu sa naiwa.",
+  "careAlertActive": "Naiwa aihwa laka piaya lukanka pain kabia.",
+  "careAlertInactive": "Naiwa aihwa laka piaya lukanka apu sa.",
+  "nextAppointmentLine": "Dakta prautka piaya: {{date}}",
+  "nextAppointmentEmpty": "Dakta prautka piaya apu sa.",
   "inviteTitle": "Yang kupia kumi laka ra paibaia",
   "emailLabel": "Upla paiban wan correo",
   "emailPlaceholder": "nina@correo.com",

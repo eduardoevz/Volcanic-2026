@@ -115,3 +115,15 @@ export async function fetchFamilyMoodSummary(ownerId: string) {
   if (error) throw error;
   return data;
 }
+
+export async function fetchFamilyCareAlert(ownerId: string) {
+  const { data, error } = await supabase.rpc('get_family_care_alert', { p_owner_id: ownerId });
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchFamilyNextAppointment(ownerId: string) {
+  const { data, error } = await supabase.rpc('get_family_next_appointment', { p_owner_id: ownerId });
+  if (error) throw error;
+  return data;
+}

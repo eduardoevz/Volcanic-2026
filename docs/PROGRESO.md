@@ -2,6 +2,49 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 27 — Rediseño del Círculo familiar: de datos crudos a señales útiles
+
+Un experto cuestionó el módulo de Círculo familiar: ¿de qué le sirve al esposo o a la
+familia saber si la mujer tiene el periodo o si se tomó las pastillas? Investigación
+del código confirmó la crítica: de los 4 `share_scope` existentes
+(`cycle_dates`, `reminders`, `appointments`, `mood_summary`), solo `mood_summary`
+tenía pantalla real del lado de quien recibe — los otros 3 se podían activar pero no
+se veían en ningún lado, y exponían datos crudos (fechas exactas de ciclo,
+recordatorios completos, citas con notas clínicas libres) por RLS directo, sin un
+"para qué" claro y con riesgo real de sentirse como vigilancia hacia una pareja.
+
+- **Nuevo modelo de scopes** (migración `0026_family_scopes_redesign.sql`): se
+  elimina `cycle_dates`, `reminders` y `appointments` crudo; se agregan `care_alert`
+  (booleano "hoy podría necesitar más apoyo", calculado de `daily_logs` de **hoy** —
+  flujo, ánimo bajo/difícil o síntoma intenso — sin decir cuál de los tres fue ni
+  exponer fechas históricas ni ventana fértil) y `next_appointment` (solo la fecha de
+  la próxima cita, sin título/especialista/notas). `mood_summary` queda igual — ya
+  era el patrón correcto (agregado vía RPC, nunca lectura directa). Los 3 scopes
+  pasan ahora exclusivamente por RPC `security definer`, sin ningún RLS directo sobre
+  tablas crudas para el círculo familiar.
+- Recreado el enum `share_scope` (sin filas reales que migrar), recreada
+  `has_active_grant` sobre el tipo nuevo, y agregadas
+  `get_family_care_alert`/`get_family_next_appointment`.
+- `cora/app/family/index.tsx`: nuevas `CareAlertLine`/`NextAppointmentLine` del lado
+  de quien recibe; del lado de quien comparte, cada scope ahora muestra una
+  descripción corta de "para qué sirve" siempre visible (no oculta tras
+  interacción), y se agregó un aviso suave (`Banner`) cuando el texto libre de
+  relación sugiere pareja (esposo/pareja/novio/marido, sin bloquear la decisión).
+- Traducidas las claves nuevas en `family.json` (es/mis/myn), verificado 46 claves
+  exactas en los 3 idiomas.
+- **Verificado funcionalmente contra la base real** dentro de transacciones
+  `begin/rollback` (nunca comiteadas) simulando el viewer con
+  `set local request.jwt.claims`: grant exacto → señal correcta; scope cruzado → sin
+  acceso; tercero sin membership → sin acceso; revocación → corta el acceso al
+  instante. Sin datos de prueba remanentes. Detalle completo en
+  `docs/RLS_AUDIT.md` (sección Fase 26).
+- `cora/supabase/tests/database/rls_family_sharing.test.sql` actualizado a los
+  scopes nuevos (pgTAP no está instalado en el proyecto Supabase remoto, así que la
+  suite no corrió literalmente ahí — la verificación funcional de arriba cubre lo
+  mismo directamente).
+- Verificado con `npx tsc --noEmit` y `npx eslint` (sin errores; mismos warnings
+  preexistentes de `i18next/no-literal-string` que ya tenía `mood_summary`).
+
 ## Fase 26 — Traducciones miskito/mayagna completas + registro de periodo y relaciones sexuales en calendario
 
 El usuario preguntó si ya se podía cambiar el idioma de la app a miskito/mayagna, y

@@ -1154,12 +1154,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_family_care_alert: {
+        Args: { p_owner_id: string }
+        Returns: boolean
+      }
       get_family_mood_summary: {
         Args: { p_days?: number; p_owner_id: string }
         Returns: {
           day_count: number
           mood: Database["public"]["Enums"]["mood"]
         }[]
+      }
+      get_family_next_appointment: {
+        Args: { p_owner_id: string }
+        Returns: string
       }
       has_active_grant: {
         Args: {
@@ -1224,7 +1232,7 @@ export type Database = {
         | "perimenopausia"
         | "mayor"
       mood: "great" | "good" | "neutral" | "low" | "difficult"
-      share_scope: "cycle_dates" | "appointments" | "reminders" | "mood_summary"
+      share_scope: "mood_summary" | "care_alert" | "next_appointment"
       symptom_category:
         | "physical"
         | "emotional"
@@ -1375,7 +1383,7 @@ export const Constants = {
         "mayor",
       ],
       mood: ["great", "good", "neutral", "low", "difficult"],
-      share_scope: ["cycle_dates", "appointments", "reminders", "mood_summary"],
+      share_scope: ["mood_summary", "care_alert", "next_appointment"],
       symptom_category: [
         "physical",
         "emotional",

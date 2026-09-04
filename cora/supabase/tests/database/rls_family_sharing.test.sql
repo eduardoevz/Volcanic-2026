@@ -1,31 +1,39 @@
 -- Patrón C (docs/RLS_AUDIT.md): círculo familiar — has_active_grant(owner_id,
--- viewer_id, scope) es la ÚNICA vía de acceso cruzado entre usuarias. Se
--- verifica: sin grant no hay acceso, con grant el acceso queda limitado al
--- scope otorgado, la revocación es instantánea, y daily_logs (notas de
--- síntomas crudas) NUNCA se expone por esta vía sin importar el scope.
+-- viewer_id, scope) es la ÚNICA vía de acceso cruzado entre usuarias, y desde
+-- la Fase 26 los 3 scopes (mood_summary, care_alert, next_appointment) pasan
+-- exclusivamente por RPCs agregadas de security definer — ya no hay RLS
+-- directo sobre cycles/reminders/appointments. Se verifica: sin grant no hay
+-- acceso, con grant el acceso queda limitado al scope otorgado, la
+-- revocación es instantánea, y daily_logs (notas de síntomas crudas) NUNCA
+-- se expone por esta vía sin importar el scope.
 begin;
-select plan(8);
+select plan(7);
 
 select tests.create_supabase_user('rls_fam_owner');
 select tests.create_supabase_user('rls_fam_viewer');
 select tests.create_supabase_user('rls_fam_stranger');
 
--- Owner registra un ciclo y un daily_log
+-- Owner registra un daily_log de hoy con síntoma fuerte y una cita agendada
 select tests.authenticate_as('rls_fam_owner');
-insert into public.cycles (user_id, start_date, period_length)
-values (tests.get_supabase_uid('rls_fam_owner'), '2026-01-01', 4);
 insert into public.daily_logs (user_id, log_date, flow_level, notes)
-values (tests.get_supabase_uid('rls_fam_owner'), '2026-01-01', 'medium', 'nota privada de síntomas');
+values (tests.get_supabase_uid('rls_fam_owner'), current_date, 'medium', 'nota privada de síntomas');
+insert into public.appointments (user_id, title, scheduled_at, status)
+values (tests.get_supabase_uid('rls_fam_owner'), 'Control ginecológico', now() + interval '3 days', 'scheduled');
 
--- Sin membership/grant, el viewer no ve nada del owner
+-- Sin membership/grant, care_alert y next_appointment no devuelven nada
 select tests.authenticate_as('rls_fam_viewer');
 select is(
-  (select count(*)::int from public.cycles where user_id = tests.get_supabase_uid('rls_fam_owner')),
-  0,
-  'Sin grant, el viewer no ve los cycles del owner'
+  public.get_family_care_alert(tests.get_supabase_uid('rls_fam_owner')),
+  false,
+  'Sin grant, get_family_care_alert no expone señal del owner'
+);
+select is(
+  public.get_family_next_appointment(tests.get_supabase_uid('rls_fam_owner')),
+  null,
+  'Sin grant, get_family_next_appointment no expone fecha del owner'
 );
 
--- Owner invita al viewer y otorga scope cycle_dates únicamente
+-- Owner invita al viewer y otorga únicamente el scope care_alert
 select tests.authenticate_as('rls_fam_owner');
 insert into public.family_circle_members (owner_id, member_user_id, invite_email, owner_display_name, status, accepted_at)
 values (
@@ -39,60 +47,49 @@ values (
 returning id as membership_id \gset
 
 insert into public.family_share_grants (membership_id, scope)
-values (:'membership_id', 'cycle_dates');
+values (:'membership_id', 'care_alert');
 
--- Con grant de cycle_dates, el viewer sí ve los cycles del owner
+-- Con grant de care_alert, el viewer sí ve la señal de hoy
 select tests.authenticate_as('rls_fam_viewer');
-select isnt(
-  (select count(*)::int from public.cycles where user_id = tests.get_supabase_uid('rls_fam_owner')),
-  0,
-  'Con grant de cycle_dates, el viewer sí ve los cycles del owner'
-);
-
--- Pero el grant es solo de cycle_dates: el viewer NO ve appointments (scope distinto, sin grant propio)
 select is(
-  (select count(*)::int from public.appointments where user_id = tests.get_supabase_uid('rls_fam_owner')),
-  0,
-  'El grant de cycle_dates NO da acceso a appointments (scope exacto, no acceso total)'
+  public.get_family_care_alert(tests.get_supabase_uid('rls_fam_owner')),
+  true,
+  'Con grant de care_alert y síntoma fuerte hoy, get_family_care_alert devuelve true'
 );
 
--- daily_logs NUNCA se expone vía family sharing, sin importar el scope otorgado
+-- Pero el grant es solo de care_alert: next_appointment sigue sin datos (scope exacto, no acceso total)
+select is(
+  public.get_family_next_appointment(tests.get_supabase_uid('rls_fam_owner')),
+  null,
+  'El grant de care_alert NO da acceso a next_appointment (scope exacto, no acceso total)'
+);
+
+-- daily_logs NUNCA se expone directamente vía family sharing, sin importar el scope otorgado
 select is(
   (select count(*)::int from public.daily_logs where user_id = tests.get_supabase_uid('rls_fam_owner')),
   0,
-  'daily_logs (notas crudas de síntomas) nunca se expone vía family sharing, ni con grant activo'
+  'daily_logs (notas crudas de síntomas) nunca se expone por RLS directo vía family sharing'
 );
 
 -- Un tercero sin ninguna relación con el owner no ve nada
 select tests.authenticate_as('rls_fam_stranger');
 select is(
-  (select count(*)::int from public.cycles where user_id = tests.get_supabase_uid('rls_fam_owner')),
-  0,
-  'Un tercero sin membership no ve nada del owner aunque exista un grant activo para otra persona'
+  public.get_family_care_alert(tests.get_supabase_uid('rls_fam_owner')),
+  false,
+  'Un tercero sin membership no ve la señal del owner aunque exista un grant activo para otra persona'
 );
 
--- Owner revoca el grant
+-- Owner revoca el grant; la revocación es instantánea
 select tests.authenticate_as('rls_fam_owner');
 update public.family_share_grants
 set revoked_at = now()
-where membership_id = :'membership_id' and scope = 'cycle_dates';
+where membership_id = :'membership_id' and scope = 'care_alert';
 
--- La revocación es instantánea: el viewer deja de ver los cycles
 select tests.authenticate_as('rls_fam_viewer');
 select is(
-  (select count(*)::int from public.cycles where user_id = tests.get_supabase_uid('rls_fam_owner')),
-  0,
-  'Tras revocar el grant, el viewer deja de ver los cycles del owner inmediatamente'
-);
-
--- Bypass por RPC: sin un grant activo de mood_summary, get_family_mood_summary
--- no debe devolver datos del owner (revisar la firma real de la función —
--- se asume que devuelve NULL/vacío sin grant en vez de lanzar error; ajustar
--- este assert la primera vez que se corra la suite si la firma difiere).
-select is(
-  (select public.get_family_mood_summary(tests.get_supabase_uid('rls_fam_owner')) is null),
-  true,
-  'get_family_mood_summary no expone datos del owner sin un grant activo de mood_summary (revocado arriba)'
+  public.get_family_care_alert(tests.get_supabase_uid('rls_fam_owner')),
+  false,
+  'Tras revocar el grant, el viewer deja de ver la señal del owner inmediatamente'
 );
 
 select * from finish();

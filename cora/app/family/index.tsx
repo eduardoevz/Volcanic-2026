@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
@@ -6,7 +8,9 @@ import {
   fetchMyCircle,
   fetchSharedWithMe,
   SHARE_SCOPES,
+  useFamilyCareAlert,
   useFamilyMoodSummary,
+  useFamilyNextAppointment,
   useLeaveCircle,
   useMyCircle,
   useRevokeMembership,
@@ -16,6 +20,7 @@ import {
 import { MOOD_LABELS } from '@/features/summary';
 import type { Database } from '@/shared/types/database.types';
 import { Badge } from '@/ui/components/Badge';
+import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
 import { Chip } from '@/ui/components/Chip';
@@ -23,6 +28,21 @@ import { EmptyState } from '@/ui/components/EmptyState';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { spacing } from '@/ui/theme/tokens';
+
+// Palabras que sugieren una relación de pareja en el texto libre de
+// `relationship` — usadas solo para mostrar un aviso informativo adicional
+// antes de compartir señales, nunca para bloquear la decisión de la usuaria.
+const PARTNER_RELATIONSHIP_WORDS = ['esposo', 'esposa', 'pareja', 'novio', 'novia', 'marido'];
+
+function stripAccents(value: string) {
+  return value.normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function looksLikePartnerRelationship(relationship: string | null) {
+  if (!relationship) return false;
+  const normalized = stripAccents(relationship.toLowerCase());
+  return PARTNER_RELATIONSHIP_WORDS.some((word) => normalized.includes(word));
+}
 
 type Membership = Awaited<ReturnType<typeof fetchMyCircle>>[number];
 type SharedMembership = Awaited<ReturnType<typeof fetchSharedWithMe>>[number];
@@ -54,18 +74,30 @@ function MyCircleCard({ membership }: { membership: Membership }) {
       {membership.relationship ? <Text variant="bodyMuted">{membership.relationship}</Text> : null}
 
       {membership.status === 'accepted' ? (
-        <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs }}>
-          {SHARE_SCOPES.map((scope) => (
-            <Chip
-              key={scope}
-              label={t(`scopeLabels.${scope}`)}
-              selected={granted.has(scope)}
-              onPress={() =>
-                toggleGrant.mutate({ membershipId: membership.id, scope, enabled: !granted.has(scope) })
-              }
-            />
-          ))}
-        </View>
+        <>
+          {looksLikePartnerRelationship(membership.relationship) ? (
+            <Banner tone="info" message={t('partnerRelationshipNote')} />
+          ) : null}
+          <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', marginTop: spacing.xs }}>
+            {SHARE_SCOPES.map((scope) => (
+              <Chip
+                key={scope}
+                label={t(`scopeLabels.${scope}`)}
+                selected={granted.has(scope)}
+                onPress={() =>
+                  toggleGrant.mutate({ membershipId: membership.id, scope, enabled: !granted.has(scope) })
+                }
+              />
+            ))}
+          </View>
+          <View style={{ gap: 2 }}>
+            {SHARE_SCOPES.map((scope) => (
+              <Text key={scope} variant="caption" style={{ opacity: 0.8 }}>
+                {t(`scopeLabels.${scope}`)}: {t(`scopeDescriptions.${scope}`)}
+              </Text>
+            ))}
+          </View>
+        </>
       ) : null}
 
       <Button
@@ -93,6 +125,28 @@ function MoodSummaryLine({ ownerId }: { ownerId: string }) {
   );
 }
 
+function CareAlertLine({ ownerId }: { ownerId: string }) {
+  const { t } = useTranslation('family');
+  const { data, isLoading } = useFamilyCareAlert(ownerId);
+
+  if (isLoading) return <Text variant="caption">{t('loading')}</Text>;
+  return <Text variant="caption">{data ? t('careAlertActive') : t('careAlertInactive')}</Text>;
+}
+
+function NextAppointmentLine({ ownerId }: { ownerId: string }) {
+  const { t } = useTranslation('family');
+  const { data, isLoading } = useFamilyNextAppointment(ownerId);
+
+  if (isLoading) return <Text variant="caption">{t('loading')}</Text>;
+  if (!data) return <Text variant="caption">{t('nextAppointmentEmpty')}</Text>;
+
+  return (
+    <Text variant="caption">
+      {t('nextAppointmentLine', { date: format(new Date(data), "d 'de' MMMM", { locale: es }) })}
+    </Text>
+  );
+}
+
 function SharedWithMeCard({ membership }: { membership: SharedMembership }) {
   const { t } = useTranslation('family');
   const leaveCircle = useLeaveCircle();
@@ -110,6 +164,9 @@ function SharedWithMeCard({ membership }: { membership: SharedMembership }) {
           <Badge key={scope} label={t(`scopeLabels.${scope}`)} tone="neutral" />
         ))}
       </View>
+
+      {granted.has('care_alert') ? <CareAlertLine ownerId={membership.owner_id} /> : null}
+      {granted.has('next_appointment') ? <NextAppointmentLine ownerId={membership.owner_id} /> : null}
 
       {granted.has('mood_summary') ? <MoodSummaryLine ownerId={membership.owner_id} /> : null}
 

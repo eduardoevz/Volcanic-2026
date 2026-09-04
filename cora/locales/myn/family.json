@@ -16,13 +16,22 @@
     "revoked": "Utwa"
   },
   "scopeLabels": {
-    "cycle_dates": "Waiku lani yuu balna",
-    "reminders": "Dukia balna",
     "mood_summary": "Aihwa lani sturi",
-    "appointments": "Dakta prautka balna"
+    "care_alert": "Aihwa lani dukia",
+    "next_appointment": "Dakta prautka piaya"
   },
+  "scopeDescriptions": {
+    "mood_summary": "Man aihwa lani lain, yuu 30 balna baman. Man ulna apia dukia as ulwa kaikras.",
+    "care_alert": "Man naiwa aihwa lani piaya ba marikisna — waiku â apia, aihwa lani apia dukia as sa marikras, yuu sin marikras.",
+    "next_appointment": "Man dakta prautka piaya yuu baman marikisna, dukia ulwa apia dukia as ulwa ba apia kaikras."
+  },
+  "partnerRelationshipNote": "Man yal walna kaka sturka wali sula man. Man alki lani baman wali, taim balna utwaia sip man.",
   "moodSummaryLine": "Aihwa lani lain: {{mood}} ({{days}} yuu)",
   "moodSummaryEmpty": "Sturka pyu apu sa naiwa.",
+  "careAlertActive": "Naiwa aihwa lani piaya dukia yamni kabia.",
+  "careAlertInactive": "Naiwa aihwa lani piaya dukia apu sa.",
+  "nextAppointmentLine": "Dakta prautka piaya: {{date}}",
+  "nextAppointmentEmpty": "Dakta prautka piaya apu sa.",
   "inviteTitle": "Yang kupia kumi lani ra paiwa",
   "emailLabel": "Upla paiwna wan correo",
   "emailPlaceholder": "ninam@correo.com",

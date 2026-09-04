@@ -9,3 +9,5 @@ export { useRevokeMembership } from './hooks/useRevokeMembership';
 export { useLeaveCircle } from './hooks/useLeaveCircle';
 export { useAcceptInvite } from './hooks/useAcceptInvite';
 export { useFamilyMoodSummary } from './hooks/useFamilyMoodSummary';
+export { useFamilyCareAlert } from './hooks/useFamilyCareAlert';
+export { useFamilyNextAppointment } from './hooks/useFamilyNextAppointment';

@@ -16,13 +16,22 @@
     "revoked": "Revocado"
   },
   "scopeLabels": {
-    "cycle_dates": "Fechas de ciclo",
-    "reminders": "Recordatorios",
     "mood_summary": "Resumen de ánimo",
-    "appointments": "Citas médicas"
+    "care_alert": "Alerta de acompañamiento",
+    "next_appointment": "Próxima cita"
   },
+  "scopeDescriptions": {
+    "mood_summary": "Un resumen de tu ánimo predominante en los últimos 30 días. Nunca tus notas ni registros individuales.",
+    "care_alert": "Le avisa si hoy podrías necesitar más apoyo — nunca dice si es por el periodo, el ánimo u otra cosa, ni expone fechas.",
+    "next_appointment": "Solo la fecha de tu próxima cita médica agendada, sin el motivo ni las notas."
+  },
+  "partnerRelationshipNote": "Estás por compartir señales de salud con tu pareja. Activá solo lo que te haga sentir cómoda — podés desactivarlo en cualquier momento.",
   "moodSummaryLine": "Ánimo predominante: {{mood}} ({{days}} días)",
   "moodSummaryEmpty": "Sin datos suficientes todavía.",
+  "careAlertActive": "Hoy podría necesitar más apoyo.",
+  "careAlertInactive": "Sin señales de acompañamiento hoy.",
+  "nextAppointmentLine": "Próxima cita: {{date}}",
+  "nextAppointmentEmpty": "Sin citas próximas.",
   "inviteTitle": "Invitar a mi círculo",
   "emailLabel": "Correo de la persona invitada",
   "emailPlaceholder": "nombre@correo.com",

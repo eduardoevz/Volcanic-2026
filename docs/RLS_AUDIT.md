@@ -258,6 +258,49 @@ El resto de RPCs que tocan gamificación (`complete_onboarding`,
 default), así que además dependen redundantemente del RLS de las tablas que
 tocan. Ninguna acepta un `user_id` de parámetro.
 
+## Actualización — Fase 26 (rediseño de scopes del círculo familiar)
+
+Un experto cuestionó el valor de compartir fechas exactas de periodo o notas
+clínicas de citas con la familia (especialmente una pareja) — sin un "para
+qué" claro, se siente como vigilancia en vez de acompañamiento. Se
+rediseñaron los 3 scopes que daban RLS directo sobre tablas crudas:
+
+- **Eliminadas** las políticas aditivas `family_shared_select` sobre
+  `cycles`, `reminders` y `appointments` documentadas en las secciones Fase
+  15/16 de arriba — ya no existen. El scope `cycle_dates` (fechas exactas de
+  ciclo), `reminders` (recordatorios completos) y el antiguo `appointments`
+  (con notas clínicas libres) desaparecieron del enum `share_scope`.
+- El enum `share_scope` ahora es `('mood_summary', 'care_alert',
+  'next_appointment')` — los 3 pasan **exclusivamente** por RPC
+  `security definer` (mismo patrón que `mood_summary` desde el inicio),
+  nunca por lectura directa de una tabla. `get_family_care_alert(owner_id)`
+  devuelve un solo booleano ("hoy podría necesitar más apoyo", calculado de
+  `daily_logs` de **hoy** — flujo, ánimo bajo/difícil o síntoma intenso —
+  sin decir cuál de los tres fue ni exponer fechas históricas).
+  `get_family_next_appointment(owner_id)` devuelve solo la fecha de la
+  próxima cita agendada, sin título, especialista, lugar ni notas.
+- Migración `0026_family_scopes_redesign.sql`, aplicada sin migración de
+  datos (`family_circle_members`/`family_share_grants` en 0 filas reales en
+  ese momento). `has_active_grant` se recreó idéntica, solo apuntando al
+  tipo `share_scope` nuevo.
+- **Verificación funcional real** (2026-09-04): sin cuentas de prueba nuevas
+  esta vez — se usaron IDs de `profiles` reales dentro de una transacción
+  con `begin ... rollback` (nunca comiteada, confirmado con conteos antes y
+  después: 0 filas remanentes), simulando el viewer con
+  `set local role authenticated; set local request.jwt.claims`. Confirmado:
+  con grant de `care_alert` y un síntoma intenso hoy → `true`; ese mismo
+  grant NO da acceso a `next_appointment` (scope exacto, `null`); con grant
+  correcto de `next_appointment` → fecha real de la cita; un tercero sin
+  membership → `false`/`null`; revocar el grant → vuelve a `false`
+  inmediatamente. `get_advisors(security)` sin hallazgos nuevos más allá del
+  mismo riesgo ya aceptado (RPCs `security definer` autoprotegidas por
+  `auth.uid()`, sin parámetro de identidad del llamante).
+- `cora/supabase/tests/database/rls_family_sharing.test.sql` actualizado
+  para reflejar los scopes nuevos (no se pudo ejecutar la suite pgTAP contra
+  el proyecto remoto porque la extensión `pgtap` no está instalada ahí —
+  ver `list_extensions`; la verificación funcional de arriba cubre el mismo
+  terreno directamente contra la base real).
+
 ## Riesgo aceptado conscientemente — `mascot_state`
 
 `mascot_state` tiene, además de la RPC `award_mascot_points`, un grant
