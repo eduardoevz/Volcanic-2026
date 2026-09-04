@@ -2,6 +2,47 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 29 — APK de instalación directa (release standalone, sin Metro)
+
+El usuario pidió un APK listo para copiar a su celular e instalar directamente, sin
+cable ni depender de Metro/computadora corriendo.
+
+- Build de release Android estándar: `cd cora/android && ./gradlew assembleRelease`
+  (firmado con el keystore de debug del proyecto — `signingConfigs.release` en
+  `android/app/build.gradle` apunta a `debug.keystore`, suficiente para instalación
+  directa fuera de Play Store, no para publicación en tienda).
+- Primer intento (`assembleRelease` sin flags) generó un APK universal de ~116 MB
+  (`arm64-v8a` + `armeabi-v7a` + `x86` + `x86_64` embebidos) — demasiado grande para
+  un blob normal de Git (límite de GitHub: 100 MB). Se probó reducirlo filtrando a
+  `arm64-v8a` únicamente (`-PreactNativeArchitectures=arm64-v8a`, propiedad ya
+  soportada por el template de Expo/RN en `gradle.properties`), bajando a ~59 MB —
+  pero ese build no pudo verificarse en el emulador de esta sesión (`Pixel_10_Pro`,
+  imagen `x86_64`): el `am start` no producía ningún proceso ni entrada de logcat,
+  consistente con que la imagen del emulador no trae traducción ARM funcional pese a
+  listar `arm64-v8a` en `ro.product.cpu.abilist`. Se descartó ese build por no poder
+  confirmarlo funcionando y se usó el **universal**, que sí se verificó
+  end-to-end en el emulador (instala limpio, arranca sin Metro corriendo, pantalla de
+  bienvenida se ve correctamente, sin errores fatales en logcat).
+- Por el límite de 100 MB de GitHub, el APK **no se commiteó al árbol de Git**
+  (mismo criterio ya usado implícitamente antes: `releases/*.apk` nunca estuvo
+  trackeado en commits previos). Se publicó como **asset de un GitHub Release**
+  en su lugar:
+  [`android-2026-09-04`](https://github.com/eduardoevz/Volcanic-2026/releases/tag/android-2026-09-04)
+  — descarga directa:
+  https://github.com/eduardoevz/Volcanic-2026/releases/download/android-2026-09-04/Cora-release-2026-09-04.apk
+- Copia local también guardada en `releases/Cora-release-2026-09-04.apk` (no
+  versionada, mismo patrón que los `.apk` anteriores en esa carpeta).
+- **Instalación en el celular:** descargar el `.apk` desde el link del Release
+  directamente en el navegador del teléfono (o copiarlo por cualquier medio), abrirlo,
+  aceptar el permiso de "instalar apps desconocidas" la primera vez, confirmar
+  instalación. No requiere Play Store, cable USB ni Metro corriendo — el bundle de JS
+  va embebido en el APK.
+- Incluye todos los cambios hasta el commit `12ffb9b` (Fase 28).
+- Pendiente para quien retome esto: si se necesita repartir por Play Store o firmar
+  con una clave propia (no la de debug), generar un keystore real y configurar
+  `signingConfigs.release` — fuera de alcance de este pedido (solo instalación
+  directa/side-load).
+
 ## Fase 28 — Fix de cambio de etapa/embarazo + calendario con predicción/periodo/ovulación
 
 El usuario probó la app en el emulador y reportó: no podía cambiar de etapa (se
