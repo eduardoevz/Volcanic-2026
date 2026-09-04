@@ -7,7 +7,14 @@ import { ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { CalendarGrid } from '@/features/tracking/components/CalendarGrid';
-import { fertileWindowStatus, useDailyLogsRange, usePrediction } from '@/features/tracking';
+import {
+  confirmedPeriodDates,
+  fertileWindowStatus,
+  ovulationDay,
+  useDailyLogsRange,
+  usePrediction,
+  type Cycle,
+} from '@/features/tracking';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
@@ -45,16 +52,13 @@ export default function CalendarScreen() {
   const { prediction, cycles, fertileWindow, hasEnoughData, isLoading, isError: predictionError } =
     usePrediction();
 
-  const bleedingDates = useMemo(
-    () =>
-      new Set(
-        (monthLogs ?? [])
-          .filter((l) => l.flow_level && l.flow_level !== 'none')
-          .map((l) => l.log_date)
-      ),
+  const bleedingDates = useMemo(() => confirmedPeriodDates(monthLogs ?? []), [monthLogs]);
+  const loggedDates = useMemo(() => new Set((monthLogs ?? []).map((l) => l.log_date)), [monthLogs]);
+  const sexualActivityDates = useMemo(
+    () => new Set((monthLogs ?? []).filter((l) => l.sexual_activity).map((l) => l.log_date)),
     [monthLogs]
   );
-  const loggedDates = useMemo(() => new Set((monthLogs ?? []).map((l) => l.log_date)), [monthLogs]);
+  const ovulationDate = useMemo(() => ovulationDay(cycles as Cycle[]), [cycles]);
 
   const predictedRange = prediction
     ? {
@@ -109,7 +113,7 @@ export default function CalendarScreen() {
           <Banner message={t('calendar.loadError')} tone="danger" />
         ) : null}
 
-        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: spacing.xs, columnGap: spacing.sm }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
             <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.pitahaya }} />
             <Text variant="caption">{t('calendar.legendPeriod')}</Text>
@@ -130,6 +134,14 @@ export default function CalendarScreen() {
             <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.stemLight }} />
             <Text variant="caption">{t('calendar.legendFertile')}</Text>
           </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <Text style={{ fontSize: 11 }}>❤️</Text>
+            <Text variant="caption">{t('calendar.legendSexualActivity')}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <Text style={{ fontSize: 11 }}>🥚</Text>
+            <Text variant="caption">{t('calendar.legendOvulation')}</Text>
+          </View>
         </View>
 
         <CalendarGrid
@@ -139,6 +151,8 @@ export default function CalendarScreen() {
           loggedDates={loggedDates}
           predictedRange={predictedRange}
           fertileRange={fertileWindow}
+          sexualActivityDates={sexualActivityDates}
+          ovulationDate={ovulationDate}
           onDayPress={(dateISO) => router.push(`/log/${dateISO}`)}
         />
 

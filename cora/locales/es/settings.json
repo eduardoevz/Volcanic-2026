@@ -30,6 +30,7 @@
   "themeChanging": "Cambiando tema...",
   "signOut": "Cerrar sesión",
   "changeLifeStagePrompt": "¿En qué etapa estás ahora?",
+  "changeStageError": "No pudimos cambiar tu etapa. Revisá tu conexión e intentá de nuevo.",
   "medicalRecord": {
     "title": "Expediente médico",
     "subtitle": "Alergias, antecedentes y medicamentos actuales — se incluyen en tu resumen médico al exportarlo a PDF.",

@@ -18,6 +18,7 @@ import {
 } from '@/features/pregnancy';
 import { useDailyLogsRange } from '@/features/tracking';
 import { MOOD_EMOJI } from '@/shared/constants/mood';
+import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants/lifeStages';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
@@ -29,6 +30,8 @@ import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing } from '@/ui/theme/tokens';
 import type { Mood } from '@/features/tracking/cycleEngine';
+
+const NEXT_STAGE_OPTIONS = LIFE_STAGES.filter((stage) => stage !== 'embarazo');
 
 const MOOD_ROW: Mood[] = ['great', 'good', 'neutral', 'low', 'difficult'];
 const RING_SIZE = 84;
@@ -56,6 +59,7 @@ export default function Pregnancy() {
   const [lmpDate, setLmpDate] = useState(toISODate(new Date()));
   const [notes, setNotes] = useState('');
   const [confirmingEnd, setConfirmingEnd] = useState(false);
+  const [nextStage, setNextStage] = useState<LifeStage>('adultez');
 
   const today = toISODate(new Date());
   const { data: recentLogs } = useDailyLogsRange(pregnancy?.lmp_date ?? today, today);
@@ -287,12 +291,45 @@ export default function Pregnancy() {
         <View style={{ gap: spacing.md }}>
           <Text variant="heading">{t('endConfirmTitle')}</Text>
           <Text variant="bodyMuted">{t('endConfirmDescription')}</Text>
+
+          {endPregnancy.isError ? <Banner tone="danger" message={t('endConfirmError')} /> : null}
+
+          <Text variant="caption" style={{ fontWeight: '700' }}>
+            {t('endStagePrompt')}
+          </Text>
+          <View style={{ gap: spacing.xs }}>
+            {NEXT_STAGE_OPTIONS.map((stage) => (
+              <Pressable
+                key={stage}
+                onPress={() => setNextStage(stage)}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: spacing.sm,
+                  paddingVertical: spacing.xs,
+                  opacity: nextStage === stage ? 1 : 0.55,
+                }}
+              >
+                <Text style={{ fontSize: 22 }}>{LIFE_STAGE_META[stage].emoji}</Text>
+                <Text variant="body">{LIFE_STAGE_META[stage].label}</Text>
+              </Pressable>
+            ))}
+          </View>
+
           <Button
             label={t('endConfirmSubmit')}
             loading={endPregnancy.isPending}
             onPress={async () => {
-              await endPregnancy.mutateAsync({ id: pregnancy.id, status: 'completed' });
-              setConfirmingEnd(false);
+              try {
+                await endPregnancy.mutateAsync({
+                  id: pregnancy.id,
+                  status: 'completed',
+                  nextLifeStage: nextStage,
+                });
+                setConfirmingEnd(false);
+              } catch {
+                // El Banner de arriba (endPregnancy.isError) ya informa el fallo.
+              }
             }}
           />
           <Button label={t('endConfirmCancel')} variant="ghost" onPress={() => setConfirmingEnd(false)} />

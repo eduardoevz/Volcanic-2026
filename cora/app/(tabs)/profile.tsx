@@ -50,6 +50,7 @@ export default function Profile() {
   const [savingShareContext, setSavingShareContext] = useState(false);
   const [changingLanguage, setChangingLanguage] = useState(false);
   const [changingTheme, setChangingTheme] = useState(false);
+  const [stageError, setStageError] = useState(false);
 
   const handleChangeTheme = async (nextMode: ThemeMode) => {
     setChangingTheme(true);
@@ -89,12 +90,15 @@ export default function Profile() {
 
   const handleChangeStage = async (stage: LifeStage) => {
     setSavingStage(stage);
+    setStageError(false);
     try {
       await setLifeStage(stage);
       // El Home lee useProfile() con la misma key — invalidar acá alcanza
       // para que se recomponga sin reiniciar la app.
       await queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });
       setChangingStage(false);
+    } catch {
+      setStageError(true);
     } finally {
       setSavingStage(null);
     }
@@ -212,6 +216,7 @@ export default function Profile() {
       <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>
         <View style={{ gap: spacing.sm }}>
           <Text variant="heading">{t('changeLifeStagePrompt')}</Text>
+          {stageError ? <Banner tone="danger" message={t('changeStageError')} /> : null}
           {LIFE_STAGES.map((stage) => (
             <Pressable
               key={stage}

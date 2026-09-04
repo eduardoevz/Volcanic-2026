@@ -30,6 +30,7 @@
   "themeChanging": "Kulkanka lakisna...",
   "signOut": "Sesionka utwa",
   "changeLifeStagePrompt": "¿Naiwa nan piaya ra man?",
+  "changeStageError": "Man piaya lakwa sip apia kan. Konekshanka kaikma, kli talwa.",
   "medicalRecord": {
     "title": "Siknis sturka ulna",
     "subtitle": "Dukia sauhkira, mahka siknis balna bara saika naiwa piakma — man siknis sturi ulna PDF ra ulwi taim ba pura kabia.",

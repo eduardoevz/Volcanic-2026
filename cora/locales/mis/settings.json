@@ -30,6 +30,7 @@
   "themeChanging": "Kulkanka lakisa...",
   "signOut": "Sesionka utbaia",
   "changeLifeStagePrompt": "¿Naiwa nan piaya ra sma?",
+  "changeStageError": "Man piaya lakaia sip apia kan. Konekshanka kaikas, kli pruwa kaiks.",
   "medicalRecord": {
     "title": "Siknis sturka ulbanka",
     "subtitle": "Diara sauhkira, mahka siknis nani bara saika naiwa piakisma — man siknis sturi ulbanka PDF ra ulbi taim ba pura kabia.",

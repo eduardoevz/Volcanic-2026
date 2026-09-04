@@ -23,5 +23,7 @@
   "endConfirmTitle": "¿Naha lupia brira kaikanka ba utbaia gustara?",
   "endConfirmDescription": "Piaya ra lupia brira raya ulbaia sip sma, sika iwbia.",
   "endConfirmSubmit": "Au, utbaia",
-  "endConfirmCancel": "Swiaia"
+  "endConfirmCancel": "Swiaia",
+  "endStagePrompt": "¿Naiwa piaya ra ba iwaia gustara?",
+  "endConfirmError": "Kaikanka utbaia sip apia kan. Kli pruwa kaiks."
 }

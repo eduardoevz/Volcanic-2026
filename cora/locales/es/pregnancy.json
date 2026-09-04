@@ -23,5 +23,7 @@
   "endConfirmTitle": "¿Finalizar el seguimiento de este embarazo?",
   "endConfirmDescription": "Podés registrar un nuevo embarazo más adelante si hace falta.",
   "endConfirmSubmit": "Sí, finalizar",
-  "endConfirmCancel": "Cancelar"
+  "endConfirmCancel": "Cancelar",
+  "endStagePrompt": "¿En qué etapa vas a estar ahora?",
+  "endConfirmError": "No pudimos finalizar el seguimiento. Intentá de nuevo."
 }

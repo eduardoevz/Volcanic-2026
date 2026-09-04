@@ -12,6 +12,7 @@ export function useCreatePregnancy() {
     mutationFn: createPregnancy,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pregnancy', 'active', userId] });
+      queryClient.invalidateQueries({ queryKey: ['profile', userId] });
     },
   });
 }

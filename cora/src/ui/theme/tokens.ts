@@ -77,6 +77,14 @@ export const darkColors = {
 // asignable al mismo tipo.
 export type ColorScheme = Record<keyof typeof lightColors, string>;
 
+// Relleno translúcido para "predicción" en el calendario (sombreado leve,
+// a diferencia del relleno sólido de periodo confirmado) — se deriva del
+// mismo `pitahaya` de cada tema en vez de un token fijo, para que cambie
+// junto con la paleta clara/oscura.
+export function predictedFill(colors: ColorScheme): string {
+  return `${colors.pitahaya}26`; // ~15% de opacidad (hex alpha)
+}
+
 export function buildTypography(colors: ColorScheme) {
   return {
     title: { fontSize: 28, fontWeight: '700' as const, color: colors.charcoal },

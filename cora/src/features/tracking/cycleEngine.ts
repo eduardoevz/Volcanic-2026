@@ -163,6 +163,49 @@ export function fertileWindow(cycles: Cycle[]): FertileWindow | null {
   };
 }
 
+/**
+ * Día estimado de ovulación: punto medio de la ventana fértil (día 14 sobre
+ * el último ciclo registrado). Es una convención del método del calendario,
+ * no una medición — misma advertencia que `fertileWindow`.
+ */
+export function ovulationDay(cycles: Cycle[]): string | null {
+  if (fertileWindow(cycles) === null) return null;
+
+  const lastStart = cycles[cycles.length - 1].start_date;
+  return addDaysISO(lastStart, 14);
+}
+
+export type PeriodMarkerLog = {
+  log_date: string;
+  flow_level: FlowLevel | null;
+  period_start?: boolean | null;
+  period_end?: boolean | null;
+};
+
+/**
+ * Días de periodo confirmado dentro de `logs`: desde cada 'period_start'
+ * hasta el siguiente 'period_end' (inclusive). Los registros que no tienen
+ * marca de inicio/fin explícita (datos previos a esas columnas) siguen
+ * contando por su flow_level, para no perder historial ya cargado.
+ */
+export function confirmedPeriodDates(logs: PeriodMarkerLog[]): Set<string> {
+  const sorted = [...logs].sort((a, b) => a.log_date.localeCompare(b.log_date));
+  const dates = new Set<string>();
+
+  let openStart: string | null = null;
+  for (const log of sorted) {
+    if (log.period_start) openStart = log.log_date;
+    if (openStart) dates.add(log.log_date);
+    if (log.period_end) openStart = null;
+  }
+
+  for (const log of sorted) {
+    if (isBleedingDay(log.flow_level)) dates.add(log.log_date);
+  }
+
+  return dates;
+}
+
 export type FertileWindowStatus = {
   state: 'before' | 'during' | 'after';
   progress: number; // 0..1 — posición de asOfDate dentro de la ventana

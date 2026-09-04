@@ -14,6 +14,8 @@ function renderGrid(overrides: Partial<React.ComponentProps<typeof CalendarGrid>
     loggedDates: new Set(['2026-01-05', '2026-01-06']),
     predictedRange: null,
     fertileRange: null,
+    sexualActivityDates: new Set(),
+    ovulationDate: null,
     onDayPress,
     ...overrides,
   };

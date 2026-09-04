@@ -23,5 +23,7 @@
   "endConfirmTitle": "¿Naha tula brira kaikanka ba utwaia gustara?",
   "endConfirmDescription": "Piaya ra tula brira raya ulwaia sip man, sika iwbia.",
   "endConfirmSubmit": "Au, utwa",
-  "endConfirmCancel": "Swi"
+  "endConfirmCancel": "Swi",
+  "endStagePrompt": "¿Naiwa piaya ra ba iwaia man?",
+  "endConfirmError": "Kaikanka utwaia sip apia kan. Kli talwa."
 }

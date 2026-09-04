@@ -2,6 +2,61 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 28 — Fix de cambio de etapa/embarazo + calendario con predicción/periodo/ovulación
+
+El usuario probó la app en el emulador y reportó: no podía cambiar de etapa (se
+quedaba atascada en "embarazo" y por eso no veía el registro de periodo), el
+calendario no distinguía predicción de periodo confirmado ni marcaba relaciones
+sexuales u ovulación, y sospechaba una regresión en las traducciones miskito/mayagna
+y en una pantalla de "colores y diseños" de Claude Design.
+
+- **Causa raíz del bug de etapa:** `profiles.life_stage` y la tabla `pregnancies`
+  eran dos máquinas de estado independientes — terminar el seguimiento de embarazo
+  (`useEndPregnancy`) nunca tocaba `life_stage`, así que quedaba en `'embarazo'` para
+  siempre y `app/log/[date].tsx` (`STAGES_WITHOUT_FLOW`) seguía ocultando el registro
+  de periodo indefinidamente.
+- `cora/src/features/pregnancy/api.ts`: `createPregnancy` ahora fija
+  `life_stage='embarazo'` vía el RPC `set_life_stage`; `endPregnancy` recibe la etapa
+  siguiente y la aplica. `app/pregnancy/index.tsx`: "Terminar seguimiento" ahora
+  pregunta a qué etapa vuelve la usuaria (sheet reutilizando `LIFE_STAGE_META`) en vez
+  de asumir una por defecto. `useCreatePregnancy`/`useEndPregnancy` invalidan también
+  `['profile', userId]`. `app/(tabs)/profile.tsx`: `handleChangeStage` ahora captura
+  errores del RPC y muestra un `Banner`, en vez de fallar en silencio.
+- **Calendario** (`cora/src/features/tracking/cycleEngine.ts`): nuevas funciones puras
+  `ovulationDay` (convención día 14, punto medio de `fertileWindow`) y
+  `confirmedPeriodDates` (rango `period_start`→`period_end` en vez de depender solo de
+  `flow_level`, con fallback a `flow_level` para registros antiguos sin esas
+  columnas). `CalendarGrid.tsx`: relleno translúcido nuevo para predicción (antes solo
+  borde punteado, se pidió explícitamente un "sombreado leve" visible), corazón ❤️ en
+  días con `sexual_activity`, huevo 🥚 en el día de ovulación estimado. Token nuevo
+  `predictedFill()` en `ui/theme/tokens.ts`.
+- Traducidas las claves nuevas de leyenda/sheet en `es`/`mis`/`myn`
+  (`tracking.json`, `pregnancy.json`, `settings.json`), verificada paridad exacta de
+  claves en los 3 idiomas.
+- **Diagnóstico de idiomas:** no se encontró ninguna regresión de código (i18next,
+  switcher y JSON de `mis`/`myn` sin cambios sospechosos, JSON válido y con las mismas
+  claves que `es`). Verificado en vivo tras `expo start --clear`: el switch a Miskitu
+  tradujo la pantalla completa correctamente — el síntoma era caché de Metro
+  desactualizada, no un bug.
+- **"Pantalla de colores y diseños":** confirmado que nunca existió como ruta dentro
+  de la app — corresponde a canvases externos de Claude Design (mockups, nunca
+  commiteados al repo) referenciados en fases anteriores de este mismo documento.
+  Queda pendiente que el usuario aclare si quiere una pantalla nueva o señale una
+  pantalla existente que no coincide con un mockup aprobado.
+- **Verificado en emulador real** (`Pixel_10_Pro`, dev-client reinstalado tras
+  detectar que el emulador tenía la APK de release embebida sin conexión a Metro) y
+  contra la base real de Supabase con la cuenta demo: cambio de etapa
+  embarazo→adolescencia→embarazo (chip y layout de Inicio se actualizan al instante,
+  registro de periodo reaparece), un registro real de periodo/relación sexual vía la
+  UI + dos días adicionales vía SQL para probar el rango, confirmando visualmente
+  sombreado sólido en el rango correcto, corazón, ventana fértil y huevo de ovulación
+  en el día calculado. Datos de prueba y etapa de la cuenta demo restaurados al
+  finalizar.
+- Verificado con `npx tsc --noEmit` (0 errores), `npx eslint` (0 errores nuevos,
+  mismos warnings preexistentes), `npx jest cycleEngine` (34/34 OK;
+  `CalendarGrid.test.tsx` no corre en este entorno por un módulo de test-renderer
+  faltante preexistente, confirmado no relacionado con estos cambios).
+
 ## Fase 27 — Rediseño del Círculo familiar: de datos crudos a señales útiles
 
 Un experto cuestionó el módulo de Círculo familiar: ¿de qué le sirve al esposo o a la

@@ -21,6 +21,8 @@
     "legendPeriod": "Período",
     "legendPredicted": "Predicción",
     "legendFertile": "Fértil",
+    "legendSexualActivity": "Relación sexual",
+    "legendOvulation": "Ovulación estimada",
     "last30DaysTitle": "Últimos 30 días",
     "emptyTitle": "Sin registros todavía",
     "emptyDescription": "Tocá un día del calendario para empezar a registrar.",

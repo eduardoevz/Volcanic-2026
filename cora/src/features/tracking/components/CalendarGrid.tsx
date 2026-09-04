@@ -16,7 +16,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
-import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
+import { predictedFill, radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
 // Días de la semana vía date-fns + locale (nunca hardcodeados) — §19 del plan.
 const WEEKDAY_ANCHORS = eachDayOfInterval({
@@ -31,6 +31,8 @@ type CalendarGridProps = {
   loggedDates: Set<string>;
   predictedRange: { start: string; end: string } | null;
   fertileRange: { start: string; end: string } | null;
+  sexualActivityDates: Set<string>;
+  ovulationDate: string | null;
   onDayPress: (dateISO: string) => void;
 };
 
@@ -49,6 +51,8 @@ export function CalendarGrid({
   loggedDates,
   predictedRange,
   fertileRange,
+  sexualActivityDates,
+  ovulationDate,
   onDayPress,
 }: CalendarGridProps) {
   const { colors } = useTheme();
@@ -75,6 +79,8 @@ export function CalendarGrid({
           const isLogged = loggedDates.has(dateISO);
           const isPredicted = inRange(dateISO, predictedRange);
           const isFertile = inRange(dateISO, fertileRange);
+          const isSexualActivity = sexualActivityDates.has(dateISO);
+          const isOvulation = ovulationDate === dateISO;
 
           return (
             <Pressable
@@ -98,6 +104,10 @@ export function CalendarGrid({
               >
                 {format(day, 'd')}
               </Text>
+              <View style={styles.badgeRow}>
+                {isSexualActivity ? <Text style={styles.badge}>❤️</Text> : null}
+                {isOvulation ? <Text style={styles.badge}>🥚</Text> : null}
+              </View>
               {isLogged ? <View style={styles.dot} /> : null}
             </Pressable>
           );
@@ -132,6 +142,7 @@ function buildStyles(colors: ColorScheme) {
       backgroundColor: colors.pitahayaLight,
     },
     dayPredicted: {
+      backgroundColor: predictedFill(colors),
       borderWidth: 1,
       borderColor: colors.pitahaya,
       borderStyle: 'dashed',
@@ -143,12 +154,21 @@ function buildStyles(colors: ColorScheme) {
       borderWidth: 2,
       borderColor: colors.pitahaya,
     },
+    badgeRow: {
+      flexDirection: 'row',
+      gap: 1,
+      height: 13,
+    },
+    badge: {
+      fontSize: 11,
+      lineHeight: 13,
+    },
     dot: {
       width: 4,
       height: 4,
       borderRadius: 2,
       backgroundColor: colors.stem,
-      marginTop: 2,
+      marginTop: 1,
     },
   });
 }

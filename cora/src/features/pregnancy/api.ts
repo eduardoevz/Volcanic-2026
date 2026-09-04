@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase';
+import { setLifeStage } from '@/features/onboarding/api';
+import type { LifeStage } from '@/shared/constants/lifeStages';
 
 export async function fetchActivePregnancy(userId: string) {
   const { data, error } = await supabase
@@ -26,6 +28,7 @@ export async function createPregnancy(input: {
     .single();
 
   if (error) throw error;
+  await setLifeStage('embarazo');
   return data;
 }
 
@@ -34,10 +37,15 @@ export async function updatePregnancyNotes(id: string, notes: string) {
   if (error) throw error;
 }
 
-export async function endPregnancy(id: string, status: 'completed' | 'ended') {
+export async function endPregnancy(
+  id: string,
+  status: 'completed' | 'ended',
+  nextLifeStage: LifeStage
+) {
   const { error } = await supabase
     .from('pregnancies')
     .update({ status, ended_at: new Date().toISOString() })
     .eq('id', id);
   if (error) throw error;
+  await setLifeStage(nextLifeStage);
 }
