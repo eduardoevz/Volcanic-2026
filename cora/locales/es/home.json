@@ -7,7 +7,12 @@
     "needMoreData": "Registrá al menos 2 ciclos para ver una predicción estimada acá.",
     "prediction": "Tu próximo período podría llegar entre el {{start}} y el {{end}}.",
     "confidenceGood": "Confianza buena · no es un diagnóstico",
-    "confidenceInitial": "Estimación inicial · no es un diagnóstico"
+    "confidenceInitial": "Estimación inicial · no es un diagnóstico",
+    "dayLabel": "día",
+    "phaseMenstrual": "Fase menstrual",
+    "phaseFollicular": "Fase folicular",
+    "phaseFertile": "Ventana fértil",
+    "phaseLuteal": "Fase lútea"
   },
   "dailyCheckIn": {
     "loggedTitle": "Ya registraste hoy",

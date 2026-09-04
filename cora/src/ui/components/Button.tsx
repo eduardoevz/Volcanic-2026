@@ -5,7 +5,7 @@ import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'outline';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
 
 type ButtonProps = {
   label: string;
@@ -23,6 +23,7 @@ function buildVariantStyles(colors: ColorScheme): Record<Variant, ViewStyle> {
     secondary: { backgroundColor: colors.stemLight },
     ghost: { backgroundColor: 'transparent' },
     outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.charcoal },
+    danger: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.danger },
   };
 }
 
@@ -55,14 +56,25 @@ export function Button({
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.onBrand : colors.pitahaya} />
+        <ActivityIndicator
+          color={
+            variant === 'primary' ? colors.onBrand : variant === 'danger' ? colors.danger : colors.pitahaya
+          }
+        />
       ) : (
         <Text
           variant="button"
           style={
             variant === 'primary'
               ? undefined
-              : { color: variant === 'outline' ? colors.charcoal : colors.pitahaya }
+              : {
+                  color:
+                    variant === 'outline'
+                      ? colors.charcoal
+                      : variant === 'danger'
+                        ? colors.danger
+                        : colors.pitahaya,
+                }
           }
         >
           {label}

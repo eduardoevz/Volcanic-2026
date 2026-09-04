@@ -5,10 +5,12 @@ import { Pressable, View } from 'react-native';
 import { useRecommendedArticles } from '@/features/content';
 import { Card } from '@/ui/components/Card';
 import { Text } from '@/ui/components/Text';
-import { spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing } from '@/ui/theme/tokens';
 
 export function RecommendedArticleModule() {
   const { t } = useTranslation('home');
+  const { colors } = useTheme();
   const { data: articles, isLoading } = useRecommendedArticles(3);
   const top = articles?.[0];
 
@@ -31,8 +33,19 @@ export function RecommendedArticleModule() {
 
   return (
     <Pressable onPress={() => router.push(`/article/${top.slug}`)}>
-      <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-        <Text variant="heading">{top.cover_emoji}</Text>
+      <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'center' }}>
+        <View
+          style={{
+            width: 52,
+            height: 52,
+            borderRadius: radii.md,
+            backgroundColor: colors.stemLight,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ fontSize: 24 }}>{top.cover_emoji}</Text>
+        </View>
         <View style={{ flex: 1 }}>
           <Text variant="heading">{t('recommendedArticle.title')}</Text>
           <Text variant="body" style={{ fontWeight: '600' }}>

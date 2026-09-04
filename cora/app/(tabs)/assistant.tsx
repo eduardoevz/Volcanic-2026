@@ -1,19 +1,21 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 
 import { MessageBubble, ReferralCard, SourceChips, SUGGESTED_QUESTIONS, useChat } from '@/features/assistant';
 import { useProfile } from '@/features/profile';
 import { Banner } from '@/ui/components/Banner';
-import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
 import { Input } from '@/ui/components/Input';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { spacing } from '@/ui/theme/tokens';
+import { SendTabIcon } from '@/ui/components/icons/TabIcons';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing } from '@/ui/theme/tokens';
 
 export default function Assistant() {
   const { t } = useTranslation('assistant');
+  const { colors } = useTheme();
   const { data: profile } = useProfile();
   const { messages, send, isSending, errorMessage, isOnline } = useChat();
   const [input, setInput] = useState('');
@@ -88,12 +90,27 @@ export default function Assistant() {
               multiline
             />
           </View>
-          <Button
-            label={t('send')}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('send')}
             onPress={() => handleSend(input)}
             disabled={!isOnline || isSending || input.trim().length === 0}
-            loading={isSending}
-          />
+            style={({ pressed }) => ({
+              width: 44,
+              height: 44,
+              borderRadius: radii.full,
+              backgroundColor: colors.pitahaya,
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: !isOnline || isSending || input.trim().length === 0 ? 0.5 : pressed ? 0.85 : 1,
+            })}
+          >
+            {isSending ? (
+              <ActivityIndicator color={colors.onBrand} />
+            ) : (
+              <SendTabIcon color={colors.onBrand} />
+            )}
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </Screen>

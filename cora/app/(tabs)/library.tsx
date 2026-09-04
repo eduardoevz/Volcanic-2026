@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useArticles, useCategories, useSearchArticles } from '@/features/content';
 import { Badge } from '@/ui/components/Badge';
@@ -12,10 +13,12 @@ import { EmptyState } from '@/ui/components/EmptyState';
 import { Input } from '@/ui/components/Input';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { spacing } from '@/ui/theme/tokens';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing } from '@/ui/theme/tokens';
 
 export default function Library() {
   const { t } = useTranslation('library');
+  const { colors } = useTheme();
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
@@ -92,27 +95,71 @@ export default function Library() {
             />
           )
         }
-        renderItem={({ item: article }) => (
-          <Pressable onPress={() => router.push(`/article/${article.slug}`)}>
-            <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
-              <Text variant="heading">{article.cover_emoji}</Text>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text variant="body" style={{ fontWeight: '700' }}>
-                  {article.title}
-                </Text>
-                <Text variant="bodyMuted" numberOfLines={2}>
-                  {article.summary}
-                </Text>
-                <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 2, alignItems: 'center' }}>
-                  <Text variant="caption">{t('readingMinutes', { minutes: article.reading_minutes })}</Text>
-                  {!article.reviewed_by_name ? (
-                    <Badge label={t('pendingReview')} tone="warning" />
-                  ) : null}
+        renderItem={({ item: article, index }) => {
+          if (!isSearching && index === 0) {
+            return (
+              <Pressable onPress={() => router.push(`/article/${article.slug}`)}>
+                <Card style={{ padding: 0, overflow: 'hidden' }}>
+                  <LinearGradient
+                    colors={[colors.pitahayaLight, colors.pitahaya]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ height: 120, alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Text style={{ fontSize: 44 }}>{article.cover_emoji}</Text>
+                  </LinearGradient>
+                  <View style={{ padding: spacing.md, gap: 2 }}>
+                    {!article.reviewed_by_name ? (
+                      <Badge label={t('pendingReview')} tone="warning" />
+                    ) : null}
+                    <Text variant="body" style={{ fontWeight: '700', marginTop: 4 }}>
+                      {article.title}
+                    </Text>
+                    <Text variant="bodyMuted" numberOfLines={2}>
+                      {article.summary}
+                    </Text>
+                    <Text variant="caption" style={{ marginTop: 4 }}>
+                      {t('readingMinutes', { minutes: article.reading_minutes })}
+                    </Text>
+                  </View>
+                </Card>
+              </Pressable>
+            );
+          }
+
+          return (
+            <Pressable onPress={() => router.push(`/article/${article.slug}`)}>
+              <Card style={{ flexDirection: 'row', gap: spacing.sm, alignItems: 'flex-start' }}>
+                <View
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: radii.md,
+                    backgroundColor: colors.stemLight,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={{ fontSize: 20 }}>{article.cover_emoji}</Text>
                 </View>
-              </View>
-            </Card>
-          </Pressable>
-        )}
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="body" style={{ fontWeight: '700' }}>
+                    {article.title}
+                  </Text>
+                  <Text variant="bodyMuted" numberOfLines={2}>
+                    {article.summary}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: spacing.xs, marginTop: 2, alignItems: 'center' }}>
+                    <Text variant="caption">{t('readingMinutes', { minutes: article.reading_minutes })}</Text>
+                    {!article.reviewed_by_name ? (
+                      <Badge label={t('pendingReview')} tone="warning" />
+                    ) : null}
+                  </View>
+                </View>
+              </Card>
+            </Pressable>
+          );
+        }}
       />
     </Screen>
   );

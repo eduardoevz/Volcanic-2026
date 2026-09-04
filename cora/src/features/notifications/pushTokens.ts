@@ -3,11 +3,32 @@
 // LOCALES, programadas en el dispositivo, sin servidor de por medio).
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import { supabase } from '@/lib/supabase';
 import { requestNotificationPermission } from '@/features/reminders';
+
+type NotificationsModule = typeof import('expo-notifications');
+
+let notificationsModule: NotificationsModule | null | undefined;
+
+/**
+ * `expo-notifications` lanza una excepción al importarse (no solo al
+ * usarse) cuando corre en Expo Go en Android — las push remotas se
+ * removieron de Expo Go desde el SDK 53. Por eso el import es perezoso y
+ * protegido acá, en vez de un `import` estático arriba: un import estático
+ * que lanza tumba toda la app al arrancar (rompe app/_layout.tsx entero),
+ * en vez de solo desactivar el registro de push.
+ */
+function getNotificationsModule(): NotificationsModule | null {
+  if (notificationsModule !== undefined) return notificationsModule;
+  try {
+    notificationsModule = require('expo-notifications') as NotificationsModule;
+  } catch {
+    notificationsModule = null;
+  }
+  return notificationsModule;
+}
 
 /**
  * Pide permiso y obtiene el token de Expo, luego lo guarda (upsert) en
@@ -21,20 +42,26 @@ export async function registerForPushNotifications(userId: string): Promise<void
   try {
     if (Platform.OS !== 'android') return;
 
+    const notifications = getNotificationsModule();
+    if (!notifications) return;
+
     const granted = await requestNotificationPermission();
     if (!granted) return;
 
-    await fetchAndStoreExpoPushToken(userId);
+    await fetchAndStoreExpoPushToken(userId, notifications);
   } catch {
     // silencioso a propósito — ver nota arriba
   }
 }
 
-async function fetchAndStoreExpoPushToken(userId: string): Promise<void> {
+async function fetchAndStoreExpoPushToken(
+  userId: string,
+  notifications: NotificationsModule
+): Promise<void> {
   const projectId = Constants.expoConfig?.extra?.eas?.projectId;
   if (!projectId) return;
 
-  const { data } = await Notifications.getExpoPushTokenAsync({ projectId });
+  const { data } = await notifications.getExpoPushTokenAsync({ projectId });
   await upsertPushToken(userId, data);
 }
 
@@ -57,8 +84,11 @@ async function upsertPushToken(userId: string, expoPushToken: string): Promise<v
  * usarse como señal para volver a pedirle el token de Expo al SDK.
  */
 export function subscribeToPushTokenRotation(userId: string): () => void {
-  const subscription = Notifications.addPushTokenListener(() => {
-    fetchAndStoreExpoPushToken(userId).catch(() => {
+  const notifications = getNotificationsModule();
+  if (!notifications) return () => {};
+
+  const subscription = notifications.addPushTokenListener(() => {
+    fetchAndStoreExpoPushToken(userId, notifications).catch(() => {
       // silencioso a propósito
     });
   });

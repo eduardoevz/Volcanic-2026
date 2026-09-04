@@ -15,6 +15,8 @@ export function useCreateReminder() {
       if (!granted) throw new Error('Sin permiso de notificaciones.');
 
       const identifier = await scheduleDaily(title, hour, minute);
+      if (!identifier) throw new Error('Sin permiso de notificaciones.');
+
       return createReminder({ userId, title, hour, minute, notificationIdentifier: identifier });
     },
     onSuccess: () => {

@@ -3,6 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { useProfile } from '@/features/profile';
 import { useSession } from '@/shared/hooks/useSession';
+import {
+  AssistantTabIcon,
+  CalendarTabIcon,
+  HomeTabIcon,
+  LibraryTabIcon,
+  ProfileTabIcon,
+} from '@/ui/components/icons/TabIcons';
 import { useTheme } from '@/ui/theme/ThemeContext';
 
 export default function TabsLayout() {
@@ -34,11 +41,38 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.white, borderTopColor: colors.border },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: t('nav.home') }} />
-      <Tabs.Screen name="calendar" options={{ title: t('nav.calendar') }} />
-      <Tabs.Screen name="library" options={{ title: t('nav.library') }} />
-      <Tabs.Screen name="assistant" options={{ title: t('nav.assistant') }} />
-      <Tabs.Screen name="profile" options={{ title: t('nav.profile') }} />
+      <Tabs.Screen
+        name="home"
+        options={{ title: t('nav.home'), tabBarIcon: ({ color }) => <HomeTabIcon color={color as string} /> }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: t('nav.calendar'),
+          tabBarIcon: ({ color }) => <CalendarTabIcon color={color as string} />,
+        }}
+      />
+      <Tabs.Screen
+        name="library"
+        options={{
+          title: t('nav.library'),
+          tabBarIcon: ({ color }) => <LibraryTabIcon color={color as string} />,
+        }}
+      />
+      <Tabs.Screen
+        name="assistant"
+        options={{
+          title: t('nav.assistant'),
+          tabBarIcon: ({ color }) => <AssistantTabIcon color={color as string} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t('nav.profile'),
+          tabBarIcon: ({ color }) => <ProfileTabIcon color={color as string} />,
+        }}
+      />
     </Tabs>
   );
 }

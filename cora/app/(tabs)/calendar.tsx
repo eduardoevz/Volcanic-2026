@@ -4,6 +4,7 @@ import { addMonths, endOfMonth, format, startOfMonth, subMonths } from 'date-fns
 import { es } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { CalendarGrid } from '@/features/tracking/components/CalendarGrid';
 import { useDailyLogsRange, usePrediction } from '@/features/tracking';
@@ -13,18 +14,13 @@ import { Card } from '@/ui/components/Card';
 import { EmptyState } from '@/ui/components/EmptyState';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
-import { spacing } from '@/ui/theme/tokens';
-
-const MOOD_EMOJI: Record<string, string> = {
-  great: '😄',
-  good: '🙂',
-  neutral: '😐',
-  low: '😔',
-  difficult: '😣',
-};
+import { MOOD_EMOJI } from '@/shared/constants/mood';
+import { useTheme } from '@/ui/theme/ThemeContext';
+import { radii, spacing } from '@/ui/theme/tokens';
 
 export default function CalendarScreen() {
   const { t } = useTranslation('tracking');
+  const { colors } = useTheme();
   const [cursor, setCursor] = useState(() => new Date());
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
@@ -86,6 +82,29 @@ export default function CalendarScreen() {
           <Banner message={t('calendar.loadError')} tone="danger" />
         ) : null}
 
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.pitahaya }} />
+            <Text variant="caption">{t('calendar.legendPeriod')}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View
+              style={{
+                width: 9,
+                height: 9,
+                borderRadius: 5,
+                borderWidth: 1,
+                borderColor: colors.pitahaya,
+              }}
+            />
+            <Text variant="caption">{t('calendar.legendPredicted')}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: colors.stemLight }} />
+            <Text variant="caption">{t('calendar.legendFertile')}</Text>
+          </View>
+        </View>
+
         <CalendarGrid
           year={year}
           month={month}
@@ -104,9 +123,16 @@ export default function CalendarScreen() {
         ) : null}
 
         {prediction ? (
-          <Card>
-            <Text variant="heading">{t('calendar.nextPeriodTitle')}</Text>
-            <Text variant="body">
+          <LinearGradient
+            colors={[colors.pitahaya, colors.pitahayaDark]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: radii.lg, padding: spacing.md }}
+          >
+            <Text variant="heading" style={{ color: colors.onBrand }}>
+              {t('calendar.nextPeriodTitle')}
+            </Text>
+            <Text variant="body" style={{ color: colors.onBrand }}>
               {t('calendar.nextPeriodRange', {
                 start: format(new Date(prediction.nextStart), 'd'),
                 end: format(
@@ -120,7 +146,7 @@ export default function CalendarScreen() {
                     : t('calendar.confidenceInitial'),
               })}
             </Text>
-          </Card>
+          </LinearGradient>
         ) : null}
 
         {fertileWindow ? <Banner message={t('calendar.fertileWindowWarning')} tone="warning" /> : null}

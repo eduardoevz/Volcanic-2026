@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
@@ -17,7 +18,6 @@ function buildStyles(colors: ColorScheme) {
       backgroundColor: colors.border,
     },
     fallback: {
-      backgroundColor: colors.pitahaya,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -34,10 +34,15 @@ export function Avatar({ uri, initials = '?', size = 48 }: AvatarProps) {
   }
 
   return (
-    <View style={[styles.fallback, dimensionStyle]}>
+    <LinearGradient
+      colors={[colors.pitahaya, colors.pitahayaLight]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.fallback, dimensionStyle]}
+    >
       <Text style={{ color: colors.onBrand, fontWeight: '700', fontSize: size * 0.4 }}>
         {initials}
       </Text>
-    </View>
+    </LinearGradient>
   );
 }

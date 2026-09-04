@@ -85,6 +85,7 @@ export function CalendarGrid({
                 isFertile && styles.dayFertile,
                 isPredicted && styles.dayPredicted,
                 isBleeding && styles.dayBleeding,
+                isToday(day) && styles.dayToday,
               ]}
             >
               <Text
@@ -125,7 +126,7 @@ function buildStyles(colors: ColorScheme) {
       aspectRatio: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: radii.sm,
+      borderRadius: radii.md,
     },
     dayBleeding: {
       backgroundColor: colors.pitahayaLight,
@@ -137,6 +138,10 @@ function buildStyles(colors: ColorScheme) {
     },
     dayFertile: {
       backgroundColor: colors.stemLight,
+    },
+    dayToday: {
+      borderWidth: 2,
+      borderColor: colors.pitahaya,
     },
     dot: {
       width: 4,

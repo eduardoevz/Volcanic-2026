@@ -14,6 +14,7 @@ import { LIFE_STAGES, LIFE_STAGE_META, type LifeStage } from '@/shared/constants
 import { Avatar } from '@/ui/components/Avatar';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
+import { Card } from '@/ui/components/Card';
 import { Chip } from '@/ui/components/Chip';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
@@ -114,29 +115,23 @@ export default function Profile() {
         ) : isError ? (
           <Banner message={t('loadError')} tone="danger" />
         ) : (
-          <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-              <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
-              <View>
-                <Text variant="body">{profile?.display_name ?? t('noNameYet')}</Text>
-                <Text variant="bodyMuted">{profile?.avatars?.name_es ?? t('noAvatarChosen')}</Text>
-              </View>
-            </View>
-
-            <View>
-              <Text variant="caption">{t('lifeStageLabel')}</Text>
-              <Text variant="body">
-                {profile?.life_stage
-                  ? LIFE_STAGE_META[profile.life_stage].label
-                  : t('lifeStageUndefined')}
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg }}>
+            <Avatar initials={AVATAR_EMOJI[profile?.avatars?.code ?? ''] ?? '?'} size={64} />
+            <View style={{ flex: 1, gap: spacing.xs }}>
+              <Text variant="body" style={{ fontWeight: '700' }}>
+                {profile?.display_name ?? t('noNameYet')}
               </Text>
-              <Button
-                label={t('changeLifeStage')}
-                variant="ghost"
-                onPress={() => setChangingStage(true)}
+              <Text variant="bodyMuted">{profile?.avatars?.name_es ?? t('noAvatarChosen')}</Text>
+              <Chip
+                label={
+                  profile?.life_stage
+                    ? LIFE_STAGE_META[profile.life_stage].label
+                    : t('lifeStageUndefined')
+                }
               />
             </View>
-          </View>
+            <Button label={t('changeLifeStage')} variant="ghost" onPress={() => setChangingStage(true)} />
+          </Card>
         )}
 
         <View style={{ gap: spacing.xs, marginBottom: spacing.lg }}>
@@ -191,34 +186,26 @@ export default function Profile() {
         </View>
 
         <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
-          <Button
-            label={t('medicalSummary')}
-            variant="secondary"
-            onPress={() => router.push('/summary')}
-          />
-          <Button
-            label={t('reminders')}
-            variant="secondary"
-            onPress={() => router.push('/reminders')}
-          />
-          <Button
-            label={t('healthDirectory')}
-            variant="secondary"
-            onPress={() => router.push('/directory')}
-          />
-          <Button
-            label={t('familyCircle')}
-            variant="secondary"
-            onPress={() => router.push('/family')}
-          />
-          <Button
-            label={t('appointmentsAgenda')}
-            variant="secondary"
-            onPress={() => router.push('/appointments')}
-          />
+          {[
+            { emoji: '📋', label: t('medicalSummary'), href: '/summary' as const },
+            { emoji: '⏰', label: t('reminders'), href: '/reminders' as const },
+            { emoji: '🩺', label: t('healthDirectory'), href: '/directory' as const },
+            { emoji: '👨‍👩‍👧', label: t('familyCircle'), href: '/family' as const },
+            { emoji: '📅', label: t('appointmentsAgenda'), href: '/appointments' as const },
+          ].map((item) => (
+            <Pressable key={item.href} onPress={() => router.push(item.href)}>
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+                <Text style={{ fontSize: 18 }}>{item.emoji}</Text>
+                <Text variant="body" style={{ flex: 1 }}>
+                  {item.label}
+                </Text>
+                <Text variant="bodyMuted">›</Text>
+              </Card>
+            </Pressable>
+          ))}
         </View>
 
-        <Button label={t('signOut')} variant="secondary" onPress={handleSignOut} />
+        <Button label={t('signOut')} variant="danger" onPress={handleSignOut} />
       </ScrollView>
 
       <Sheet visible={changingStage} onClose={() => setChangingStage(false)}>

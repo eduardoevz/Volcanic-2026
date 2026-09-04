@@ -1,6 +1,106 @@
 # Progreso — Cora
 
-> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-08-31.
+> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
+
+## Fase 23 — Rediseño visual de las 5 pestañas (Inicio, Calendario, Biblioteca, Cora, Perfil)
+
+El usuario pidió un rediseño de UX/UI de las 5 pantallas de pestañas usando la paleta ya aplicada
+en modo claro por la Fase previa (`feat(theme): aplicar nueva paleta de colores en modo claro`),
+sin tocar login ni la pantalla de bienvenida. El trabajo se hizo en dos pasos explícitos: primero
+un canvas de diseño (mockups estáticos, sin código) para que el usuario aprobara la dirección
+visual, y solo después la implementación real en la app.
+
+- [x] **Mockups primero, aprobados antes de tocar código:** 5 artboards (`.dc.html`) en un canvas
+  de Claude Design — Inicio, Calendario, Biblioteca, Asistente, Perfil — usando los valores exactos
+  de `src/ui/theme/tokens.ts` (`pitahaya #B05B6F`, `stemLight #C0DACE`, `cream #FAF3EA`, etc.), sin
+  inventar paleta nueva. El usuario los revisó y dio luz verde antes de pedir la implementación.
+- [x] **Íconos de pestañas nuevos** (`src/ui/components/icons/TabIcons.tsx`): la barra de tabs no
+  tenía ningún ícono, solo texto — se agregaron 6 íconos SVG (`react-native-svg`, ya instalado, sin
+  dependencia nueva) siguiendo el mismo patrón que `EyeIcon.tsx`, cableados en
+  `app/(tabs)/_layout.tsx` vía `tabBarIcon`.
+- [x] **`expo-linear-gradient` instalado** (`npx expo install`, resuelto con `--legacy-peer-deps`
+  por un conflicto preexistente de peer-deps `react`/`react-dom` en el árbol de `expo-router`, sin
+  relación con este cambio) para los degradados del mockup: avatar (`Avatar.tsx`, único cambio —
+  se propaga solo a Inicio y Perfil sin duplicar código), tarjeta de mascota (`MascotModule.tsx`),
+  tarjeta de "próximo período" (`calendar.tsx`) y artículo destacado (`library.tsx`).
+- [x] **Inicio:** `CycleStatusModule.tsx` gana un anillo de progreso circular (`react-native-svg`)
+  con el día del ciclo y la fase (menstrual/folicular/fértil/lútea) — **derivados de datos reales
+  ya expuestos por `usePrediction()`/`useCycles()`** (`cycleEngine.ts`), no inventados ni
+  hardcodeados. `DailyCheckInModule.tsx` pasa de botón+texto a una fila de 5 emojis de ánimo (el
+  diccionario `MOOD_EMOJI`, antes duplicado a mano en `calendar.tsx`, se centralizó en
+  `src/shared/constants/mood.ts` nuevo); cada emoji conserva el mismo comportamiento de antes
+  (navegar a `/log/:fecha`), sin guardado inline nuevo. `PlaceholderModule.tsx` (usado por
+  Hidratación y Recordatorios, ambos sin fuente de datos real todavía) gana un tile de ícono con
+  fondo salvia — **se mantuvo el copy honesto de "sin datos aún" en vez de inventar un progreso
+  falso**, mismo criterio que ya aplicaba antes de esta fase.
+- [x] **Calendario:** fila de leyenda de colores nueva, aro en el día de hoy en `CalendarGrid.tsx`,
+  tarjeta "próximo período" con degradado — mismo dato ya calculado por `calendar.tsx`, sin lógica
+  nueva.
+- [x] **Biblioteca:** el primer artículo de la lista se renderiza como tarjeta destacada con
+  degradado; el resto sigue el `renderItem` de siempre con tiles de ícono — mismo `FlatList`, mismo
+  estado de carga/error.
+- [x] **Cora (Asistente):** `MessageBubble.tsx` con esquina "cola" (radios asimétricos por rol);
+  botón de enviar circular con ícono de avión de papel en vez de texto, mismo `onPress`/`disabled`.
+- [x] **Perfil:** tarjeta de identidad con el avatar en degradado y la etapa de vida en un `Chip`;
+  los 5 botones de navegación pasan de columna de `Button` a filas tipo menú (ícono + label +
+  chevron); variante `'danger'` nueva en `Button.tsx` para "Cerrar sesión" (antes usaba
+  `secondary`, mismo color que cualquier otro botón).
+- [x] **Bug real encontrado y corregido durante la verificación en el emulador, no maquillado:**
+  la tarjeta de mascota truncaba el texto (`"Tu pitahaya · Cactus florecido · Niv"`) porque el
+  `View` que envuelve el texto no tenía `flex: 1` dentro de la fila — agregado y reverificado con
+  captura de pantalla mostrando `"Nivel 4"` completo.
+- [x] **Bug preexistente, sin relación con este rediseño, encontrado y corregido para poder
+  verificar en Expo Go:** `expo-notifications` lanza una excepción **al importarse** (no solo al
+  usarse) en Expo Go/Android desde el SDK 53 (las push remotas se removieron de Expo Go) —
+  `src/features/notifications/pushTokens.ts` y `src/features/reminders/notifications.ts` lo
+  importaban con `import * as Notifications` estático, tumbando toda la app al arrancar
+  (`app/_layout.tsx` entero, sin importar qué pantalla se estuviera por mostrar). Ambos archivos
+  pasaron a un import perezoso (`require('expo-notifications')`) envuelto en `try/catch`, cacheado
+  una sola vez — el registro de push y los recordatorios locales simplemente no hacen nada si el
+  módulo no está disponible (Expo Go), sin afectar builds nativos reales donde sí está. Efecto
+  secundario menor y correcto: `scheduleDaily`/`scheduleOnce` devuelven `string | null` en vez de
+  `string`; `useCreateReminder.ts` ajustado para lanzar el mismo error de permiso que ya lanzaba
+  antes si el identificador vuelve `null`.
+
+### Log de tareas — Fase 23 (2026-09-04)
+
+- El diseño se armó con la skill de Claude Design (canvas de artboards `.dc.html`), publicado como
+  Artifact, con luz verde explícita del usuario antes de escribir una sola línea de código de la
+  app — ver la conversación para el link del canvas.
+- **Verificación real en Expo Go falló primero por el bug de `expo-notifications` de arriba** — se
+  diagnosticó leyendo los logs de Metro (el stack trace apuntaba directo a la línea del `import`),
+  no por prueba y error.
+- **Con el bug corregido, Expo Go seguía sin poder registrar una cuenta de prueba** — diagnóstico
+  en vivo confirmó que no era un bug de la app ni del proyecto de Supabase (una llamada `fetch`
+  directa desde Node en esta máquina a `.../auth/v1/signup` con las mismas credenciales del
+  `.env.local` devolvió `200` y una sesión válida de inmediato), sino que **el emulador Android
+  (`Pixel_10_Pro`) tenía la resolución DNS rota** tras dos días encendido (`ping` fallaba incluso
+  para `google.com`, aunque el ping por IP cruda a `8.8.8.8` sí funcionaba). Reiniciar el emulador
+  con `-dns-server 8.8.8.8,8.8.4.4` lo resolvió — limitación del entorno de esta sesión, no de la
+  app ni de este cambio.
+- **Verificación final hecha con un dev build nativo (`expo run:android`), no Expo Go** — se probó
+  con la cuenta demo (`demo-adulta@cora.test`, sesión ya persistida en el emulador) alternando modo
+  claro/oscuro desde Perfil, recorriendo las 5 pestañas una por una y comparando cada pantalla
+  contra su mockup correspondiente antes de dar la fase por cerrada.
+
+## Fase 23 — Definition of Done (verificación final)
+
+- [x] 5 pestañas rediseñadas verificadas en un emulador Android real, en modo claro, contra sus
+  mockups aprobados — no solo compiladas
+- [x] `app/(auth)/*`, `app/welcome.tsx` y `app/(onboarding)/welcome.tsx` sin diffs (fuera de
+  alcance explícito pedido por el usuario) — confirmado con `git status` antes de cerrar la fase
+- [x] Ningún dato inventado: el anillo del ciclo y la fase se derivan de `usePrediction()`/
+  `useCycles()` reales; los módulos sin fuente de datos real (Hidratación, Recordatorios) siguen
+  mostrando su copy honesto de placeholder, solo con mejor tratamiento visual
+- [x] Dos bugs reales encontrados y corregidos durante la verificación, no descubiertos después:
+  texto truncado en la tarjeta de mascota, y el crash de `expo-notifications` en Expo Go (este
+  último preexistente, no introducido por esta fase, pero bloqueaba poder verificar en Expo Go)
+- [x] `npx tsc --noEmit` limpio; `npx eslint .` sin errores nuevos (mismas advertencias
+  preexistentes de siempre)
+
+**Fase 23 completa.** Verificación visual real de punta a punta en emulador, con dos bugs reales
+corregidos en el camino (uno propio del rediseño, otro preexistente que bloqueaba la verificación).
+Modo oscuro no se tocó a propósito, tal como pidió el usuario para el rediseño de paleta original.
 
 ## Fase 22 — Diagnóstico: "iniciar sesión con Google" y "recuperar contraseña" no funcionan
 

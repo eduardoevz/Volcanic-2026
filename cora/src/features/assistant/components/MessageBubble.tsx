@@ -11,7 +11,13 @@ export function MessageBubble({ message }: { message: ChatMessage }) {
 
   return (
     <View style={{ alignSelf: isUser ? 'flex-end' : 'flex-start', maxWidth: '85%' }}>
-      <Card style={{ backgroundColor: isUser ? colors.pitahaya : colors.white }}>
+      <Card
+        style={{
+          backgroundColor: isUser ? colors.pitahaya : colors.white,
+          borderBottomRightRadius: isUser ? 4 : undefined,
+          borderBottomLeftRadius: isUser ? undefined : 4,
+        }}
+      >
         <Text style={{ color: isUser ? colors.onBrand : colors.charcoal }}>
           {message.content || (message.pending ? '…' : '')}
         </Text>
