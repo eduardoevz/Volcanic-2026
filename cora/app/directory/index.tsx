@@ -82,19 +82,30 @@ function SpecialistCard({ specialist }: { specialist: Specialist }) {
         </Text>
         {!specialist.is_verified ? <Badge label={t('unverified')} tone="warning" /> : null}
       </View>
+      {specialist.title ? <Text variant="bodyMuted">{specialist.title}</Text> : null}
       <Badge label={specialist.specialty} tone="neutral" />
       {specialist.health_centers ? (
         <Text variant="bodyMuted">{specialist.health_centers.name}</Text>
       ) : (
         <Text variant="caption">{t('noHealthCenter')}</Text>
       )}
-      {specialist.phone ? (
-        <Button
-          label={t('call')}
-          variant="secondary"
-          onPress={() => Linking.openURL(`tel:${specialist.phone}`)}
-        />
-      ) : null}
+      {specialist.email ? <Text variant="caption">✉️ {specialist.email}</Text> : null}
+      <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs, flexWrap: 'wrap' }}>
+        {specialist.phone ? (
+          <Button
+            label={t('call')}
+            variant="secondary"
+            onPress={() => Linking.openURL(`tel:${specialist.phone}`)}
+          />
+        ) : null}
+        {specialist.email ? (
+          <Button
+            label={t('sendEmail')}
+            variant="ghost"
+            onPress={() => Linking.openURL(`mailto:${specialist.email}`)}
+          />
+        ) : null}
+      </View>
     </Card>
   );
 }

@@ -7,6 +7,7 @@ export { Chip } from './Chip';
 export { EmptyState } from './EmptyState';
 export { Input } from './Input';
 export { PasswordInput } from './PasswordInput';
+export { ProgressRing } from './ProgressRing';
 export { Screen } from './Screen';
 export { Sheet } from './Sheet';
 export { Skeleton } from './Skeleton';

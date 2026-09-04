@@ -1,22 +1,31 @@
 import { useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { addMonths, endOfMonth, format, startOfMonth, subMonths } from 'date-fns';
+import { addMonths, differenceInCalendarDays, endOfMonth, format, parseISO, startOfMonth, subMonths } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { CalendarGrid } from '@/features/tracking/components/CalendarGrid';
-import { useDailyLogsRange, usePrediction } from '@/features/tracking';
+import { fertileWindowStatus, useDailyLogsRange, usePrediction } from '@/features/tracking';
 import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
+import { Chip } from '@/ui/components/Chip';
 import { EmptyState } from '@/ui/components/EmptyState';
+import { ProgressRing } from '@/ui/components/ProgressRing';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { MOOD_EMOJI } from '@/shared/constants/mood';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing } from '@/ui/theme/tokens';
+
+const CARD_RING_SIZE = 84;
+const CARD_RING_STROKE = 9;
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
 
 export default function CalendarScreen() {
   const { t } = useTranslation('tracking');
@@ -33,7 +42,7 @@ export default function CalendarScreen() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const { data: recentLogs, isError: recentLogsError } = useDailyLogsRange(thirtyDaysAgo, today);
 
-  const { prediction, fertileWindow, hasEnoughData, isLoading, isError: predictionError } =
+  const { prediction, cycles, fertileWindow, hasEnoughData, isLoading, isError: predictionError } =
     usePrediction();
 
   const bleedingDates = useMemo(
@@ -56,6 +65,24 @@ export default function CalendarScreen() {
         ),
       }
     : null;
+
+  // Mismo cálculo que CycleStatusModule (día del ciclo / duración total
+  // estimada) — los dos anillos muestran el mismo número para el mismo día.
+  const nextPeriodRing =
+    prediction && cycles.length > 0
+      ? (() => {
+          const lastCycle = cycles[cycles.length - 1];
+          const cycleDay = differenceInCalendarDays(new Date(), parseISO(lastCycle.start_date)) + 1;
+          const totalLen = differenceInCalendarDays(parseISO(prediction.nextStart), parseISO(lastCycle.start_date));
+          const daysUntil = differenceInCalendarDays(parseISO(prediction.nextStart), new Date());
+          return {
+            progress: totalLen > 0 ? clamp(cycleDay / totalLen, 0, 1) : 0,
+            daysUntil: Math.max(daysUntil, 0),
+          };
+        })()
+      : null;
+
+  const fertileStatus = fertileWindow ? fertileWindowStatus(fertileWindow, today) : null;
 
   return (
     <Screen>
@@ -122,34 +149,86 @@ export default function CalendarScreen() {
           />
         ) : null}
 
-        {prediction ? (
+        {prediction && nextPeriodRing ? (
           <LinearGradient
             colors={[colors.pitahaya, colors.pitahayaDark]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={{ borderRadius: radii.lg, padding: spacing.md }}
+            style={{ borderRadius: radii.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.md }}
           >
-            <Text variant="heading" style={{ color: colors.onBrand }}>
-              {t('calendar.nextPeriodTitle')}
-            </Text>
-            <Text variant="body" style={{ color: colors.onBrand }}>
-              {t('calendar.nextPeriodRange', {
-                start: format(new Date(prediction.nextStart), 'd'),
-                end: format(
-                  new Date(new Date(prediction.nextStart).getTime() + prediction.windowDays * 86400000),
-                  'd MMM',
-                  { locale: es }
-                ),
-                confidence:
-                  prediction.confidence === 'buena'
-                    ? t('calendar.confidenceGood')
-                    : t('calendar.confidenceInitial'),
-              })}
-            </Text>
+            <ProgressRing
+              size={CARD_RING_SIZE}
+              strokeWidth={CARD_RING_STROKE}
+              progress={nextPeriodRing.progress}
+              color={colors.onBrand}
+              trackColor="rgba(255,255,255,0.28)"
+            >
+              <Text style={{ fontSize: 24, fontWeight: '700', color: colors.onBrand }}>
+                {nextPeriodRing.daysUntil}
+              </Text>
+              <Text style={{ fontSize: 11, color: colors.onBrand, opacity: 0.85 }}>
+                {t('calendar.daysUnit')}
+              </Text>
+            </ProgressRing>
+            <View style={{ flex: 1 }}>
+              <Text variant="heading" style={{ color: colors.onBrand }}>
+                {t('calendar.nextPeriodTitle')}
+              </Text>
+              <Text variant="body" style={{ color: colors.onBrand, marginTop: 2 }}>
+                {t('calendar.nextPeriodRange', {
+                  start: format(new Date(prediction.nextStart), 'd'),
+                  end: format(
+                    new Date(new Date(prediction.nextStart).getTime() + prediction.windowDays * 86400000),
+                    'd MMM',
+                    { locale: es }
+                  ),
+                })}
+              </Text>
+              <View style={{ marginTop: spacing.xs, alignSelf: 'flex-start' }}>
+                <Chip
+                  label={
+                    prediction.confidence === 'buena'
+                      ? t('calendar.confidenceGood')
+                      : t('calendar.confidenceInitial')
+                  }
+                />
+              </View>
+            </View>
           </LinearGradient>
         ) : null}
 
-        {fertileWindow ? <Banner message={t('calendar.fertileWindowWarning')} tone="warning" /> : null}
+        {fertileWindow && fertileStatus ? (
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <ProgressRing
+              size={CARD_RING_SIZE}
+              strokeWidth={CARD_RING_STROKE}
+              progress={fertileStatus.progress}
+              color={colors.stem}
+              trackColor={colors.stemLight}
+            >
+              <Text style={{ fontSize: 22 }}>🌸</Text>
+              <Text style={{ fontSize: 11, color: colors.charcoalMuted }}>
+                {fertileStatus.state === 'during'
+                  ? t('calendar.fertileInProgress')
+                  : fertileStatus.state === 'before'
+                    ? t('calendar.fertileDaysToGo', { count: fertileStatus.daysUntilStart })
+                    : t('calendar.fertilePast')}
+              </Text>
+            </ProgressRing>
+            <View style={{ flex: 1 }}>
+              <Text variant="heading">{t('calendar.fertileWindowTitle')}</Text>
+              <Text variant="bodyMuted" style={{ marginTop: 2 }}>
+                {t('calendar.fertileWindowRange', {
+                  start: format(parseISO(fertileWindow.start), 'd MMM', { locale: es }),
+                  end: format(parseISO(fertileWindow.end), 'd MMM', { locale: es }),
+                })}
+              </Text>
+              <Text variant="caption" style={{ marginTop: spacing.xs }}>
+                {t('calendar.fertileWindowWarning')}
+              </Text>
+            </View>
+          </Card>
+        ) : null}
 
         <Button label={t('calendar.viewStats')} variant="secondary" onPress={() => router.push('/stats')} />
 

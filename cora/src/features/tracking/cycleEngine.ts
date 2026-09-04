@@ -163,6 +163,44 @@ export function fertileWindow(cycles: Cycle[]): FertileWindow | null {
   };
 }
 
+export type FertileWindowStatus = {
+  state: 'before' | 'during' | 'after';
+  progress: number; // 0..1 — posición de asOfDate dentro de la ventana
+  daysUntilStart: number; // solo tiene sentido cuando state === 'before'
+  daysRemaining: number; // solo tiene sentido cuando state === 'during'
+  daysSinceEnd: number; // solo tiene sentido cuando state === 'after'
+};
+
+/**
+ * Dónde cae `asOfDate` respecto a la ventana fértil — usado para el anillo de
+ * progreso del Calendario. Pura función de posición, no repite el cálculo de
+ * `fertileWindow` (recibe su resultado ya calculado).
+ */
+export function fertileWindowStatus(window: FertileWindow, asOfDate: string): FertileWindowStatus {
+  const totalDays = Math.max(daysBetween(window.start, window.end), 1);
+  const elapsed = daysBetween(window.start, asOfDate);
+
+  if (elapsed < 0) {
+    return { state: 'before', progress: 0, daysUntilStart: -elapsed, daysRemaining: 0, daysSinceEnd: 0 };
+  }
+  if (elapsed > totalDays) {
+    return {
+      state: 'after',
+      progress: 1,
+      daysUntilStart: 0,
+      daysRemaining: 0,
+      daysSinceEnd: elapsed - totalDays,
+    };
+  }
+  return {
+    state: 'during',
+    progress: clamp(elapsed / totalDays, 0, 1),
+    daysUntilStart: 0,
+    daysRemaining: totalDays - elapsed,
+    daysSinceEnd: 0,
+  };
+}
+
 /**
  * Estadísticas descriptivas sobre los ciclos ya registrados (§14: "Tu ciclo
  * promedio es de 29 días en los últimos 5 ciclos" / "Tus ciclos han variado

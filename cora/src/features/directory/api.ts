@@ -7,7 +7,7 @@ const HEALTH_CENTER_LIST_FIELDS =
   'id, name, type, department, municipality, address, phone, latitude, longitude, is_verified';
 
 const SPECIALIST_LIST_FIELDS =
-  'id, full_name, specialty, health_center_id, phone, email, is_verified, health_centers(name, department, municipality)';
+  'id, full_name, specialty, title, health_center_id, phone, email, is_verified, health_centers(name, department, municipality)';
 
 export async function fetchHealthCenters({
   department,

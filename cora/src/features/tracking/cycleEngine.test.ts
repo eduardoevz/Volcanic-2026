@@ -3,6 +3,7 @@ import {
   detectCycles,
   detectReferralSignals,
   fertileWindow,
+  fertileWindowStatus,
   mad,
   median,
   predictNext,
@@ -134,6 +135,39 @@ describe('fertileWindow', () => {
       { start_date: '2026-01-29', end_date: '2026-02-01', period_length: 4, cycle_length: null, is_predicted: false },
     ];
     expect(fertileWindow(cycles)).toEqual({ start: '2026-02-08', end: '2026-02-15' });
+  });
+});
+
+describe('fertileWindowStatus', () => {
+  const window = { start: '2026-02-08', end: '2026-02-15' };
+
+  it('antes de que empiece: state "before", progress 0, cuenta los días que faltan', () => {
+    const status = fertileWindowStatus(window, '2026-02-05');
+    expect(status).toEqual({ state: 'before', progress: 0, daysUntilStart: 3, daysRemaining: 0, daysSinceEnd: 0 });
+  });
+
+  it('el primer día de la ventana: state "during", progress 0', () => {
+    const status = fertileWindowStatus(window, '2026-02-08');
+    expect(status.state).toBe('during');
+    expect(status.progress).toBe(0);
+    expect(status.daysRemaining).toBe(7);
+  });
+
+  it('a mitad de la ventana: progress a mitad de camino', () => {
+    const status = fertileWindowStatus(window, '2026-02-11');
+    expect(status.state).toBe('during');
+    expect(status.progress).toBeCloseTo(3 / 7);
+  });
+
+  it('el último día de la ventana: progress 1, sigue "during"', () => {
+    const status = fertileWindowStatus(window, '2026-02-15');
+    expect(status.state).toBe('during');
+    expect(status.progress).toBe(1);
+  });
+
+  it('después de que termina: state "after", cuenta los días desde que pasó', () => {
+    const status = fertileWindowStatus(window, '2026-02-20');
+    expect(status).toEqual({ state: 'after', progress: 1, daysUntilStart: 0, daysRemaining: 0, daysSinceEnd: 5 });
   });
 });
 

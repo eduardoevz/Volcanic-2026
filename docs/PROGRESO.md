@@ -2,6 +2,110 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
 
+## Fase 25 — Anillos interactivos en Calendario + directorio de salud con datos reales (ficticios)
+
+El usuario pidió dos cosas independientes: (1) las tarjetas de "Próximo período
+estimado" y "Ventana fértil estimada" en Calendario eran texto plano con color, sin
+nada interactivo — rediseñarlas con gráficos redondos que llamen la atención; (2) los
+especialistas del directorio de salud tenían nombres placeholder deliberados
+(`Dra. Ejemplo Martínez`, `Lic. Ejemplo Ramírez`, etc., de `0014_seed_health_directory.sql`)
+sin correo ni cargo — reemplazarlos por nombres nicaragüenses realistas pero
+explícitamente ficticios, con correo/cargo/contacto visibles, y al menos 2
+especialistas por cada uno de los 10 centros ya sembrados.
+
+- [x] **`src/ui/components/ProgressRing.tsx` (nuevo):** anillo SVG reusable
+  (`Circle`/`Svg`, `strokeDasharray`/`strokeDashoffset`, rotado -90°) extraído del
+  código que antes vivía inline en `CycleStatusModule.tsx`, para no triplicar la
+  matemática al agregar dos anillos más en Calendario. `CycleStatusModule.tsx` se
+  actualizó para usar el componente en vez del SVG duplicado.
+- [x] **`cycleEngine.ts` — `fertileWindowStatus()` (función pura nueva):** calcula
+  estado (`before`/`during`/`after`), progreso 0-1 y días restantes/transcurridos de la
+  ventana fértil respecto a una fecha dada, siguiendo el patrón ya establecido de
+  motores puros separados de React/Supabase. 5 tests nuevos en `cycleEngine.test.ts`
+  (antes de empezar, inicio/medio/fin de la ventana, después de terminar) — 34/34 en
+  ese archivo.
+- [x] **`app/(tabs)/calendar.tsx` rediseñado:** la tarjeta "Próximo período" (antes un
+  degradado plano) ahora muestra un `ProgressRing` con los días restantes en el centro,
+  progreso = posición del ciclo actual respecto a la duración estimada; la tarjeta
+  "Ventana fértil" (antes un `Banner` de una línea) pasó a `Card` con su propio
+  `ProgressRing` (🌸 al centro, estado "En curso"/"En N días"/"Ya pasó") y el rango de
+  fechas de la ventana, dato que ya existía pero nunca se mostraba. Ambas reusan datos
+  ya cargados por `usePrediction()` — sin fetches nuevos. Aviso "no es un método
+  anticonceptivo" preservado.
+- [x] **`supabase/migrations/0024_health_directory_specialists.sql` (nueva, aplicada al
+  proyecto real `qrrnhigitxqfjrmncwxu` vía MCP):** columna nueva `specialists.title`
+  (el cargo/puesto, distinto de `specialty`); 6 especialistas ya sembrados actualizados
+  con nombre, cargo, teléfono (`+505 8XXX XXXX`) y correo ficticios; 15 especialistas
+  nuevos insertados para que los 10 centros de salud tengan **exactamente 2 cada uno**
+  (21 en total, incluida una psicóloga independiente sin centro fijo). Dominio de
+  correo deliberadamente no resoluble (`@centro-slug.ejemplo.ni`) — nunca
+  `@minsa.gob.ni` ni un dominio real, para no insinuar una cuenta de gobierno
+  verdadera ni publicar datos de una persona real (respeta la restricción de
+  `consent_to_publish` ya documentada en `docs/RLS_AUDIT.md`). Verificado con
+  `execute_sql`: los 10 centros muestran `count = 2` y ningún nombre coincide con el
+  patrón placeholder anterior (`ejemplo|muestra|referencia|ilustrativa|modelo`).
+- [x] `src/shared/types/database.types.ts` regenerado (agrega `title` a `specialists`).
+  **Mismo bug del generador de tipos ya documentado en Fases 19/24** (marca argumentos
+  de `upsert_daily_log` como no-nullable) — esta vez se evitó reintroducirlo usando un
+  `Edit` dirigido en vez de sobrescribir el archivo completo.
+- [x] **UI del directorio (`app/directory/index.tsx`, `app/directory/specialists.tsx`,
+  `src/features/directory/api.ts`):** las tarjetas de especialista ahora muestran
+  `title` (cargo) debajo del nombre y el correo con ícono ✉️, más un botón "Enviar
+  correo" (`mailto:`) junto al "Llamar" que ya existía. Clave i18n nueva
+  `directory.sendEmail`.
+- [x] `npx tsc --noEmit`, `npx eslint .`, `npx jest` en verde durante toda la fase, sin
+  errores nuevos ni advertencias adicionales a las ya preexistentes.
+- [x] **Verificación real en el emulador Android** (bundle JS recargado sobre el APK ya
+  instalado, sin recompilar nativo — esta fase tampoco agregó dependencias nativas):
+  Calendario mostrando los dos anillos nuevos con datos reales de la cuenta demo
+  (incluido el caso límite honesto de que el ciclo de esa cuenta está desactualizado,
+  por lo que "Próximo período" mostró "0 días" y "Ventana fértil" mostró "Ya pasó" —
+  comportamiento correcto de los estados `after`, no un error); Directorio de salud →
+  pestaña "Especialistas" mostrando nombres nicaragüenses ficticios, cargo,
+  especialidad, centro, correo y ambos botones de contacto para múltiples
+  especialistas de distintos centros. Sin excepciones fatales (`adb logcat` revisado).
+
+### Log de tareas — Fase 25 (2026-09-04)
+
+- Se diseñaron los dos anillos de Calendario para depender 100% de datos ya cargados
+  por `usePrediction()` (sin fetch nuevo), y se extrajo `ProgressRing` como componente
+  compartido antes de tocar `calendar.tsx`, evitando triplicar el cálculo SVG que ya
+  existía en `CycleStatusModule.tsx` — riesgo señalado explícitamente durante la
+  investigación previa al plan.
+- Para los nombres del directorio se evitaron dos patrones a propósito: (a) reusar
+  datos de personas reales (ninguna fuente real de contacto se usó, respetando el
+  requisito de consentimiento verificable ya documentado para `specialists`), y (b)
+  repetir el patrón de placeholder anterior ("Ejemplo/Muestra/Referencia/Ilustrativa/
+  Modelo") — en su lugar, nombres nicaragüenses inventados + dominio de correo
+  `.ejemplo.ni` que nunca resuelve a nada real ni se confunde con un dominio de
+  gobierno.
+- Confirmado por SQL directo (no solo visualmente) que los 10 centros terminaron con
+  exactamente 2 especialistas cada uno, antes de pasar a la regeneración de tipos y al
+  trabajo de UI.
+- El caso límite de la cuenta demo (ciclo desactualizado → "0 días"/"Ya pasó") no
+  estaba planeado pero validó correctamente el `Math.max(daysUntil, 0)` y la rama
+  `after` de `fertileWindowStatus` con datos reales, no solo con los tests unitarios.
+
+## Fase 25 — Definition of Done (verificación final)
+
+- [x] Migración `0024` aplicada al proyecto real; los 10 centros de salud tienen
+  exactamente 2 especialistas cada uno, verificado con `execute_sql`
+- [x] Ningún especialista quedó con el patrón de nombre placeholder anterior
+  (`Ejemplo/Muestra/Referencia/Ilustrativa/Modelo`), verificado con `execute_sql`
+- [x] Tarjetas de Calendario rediseñadas con `ProgressRing` interactivo, verificadas
+  contra datos reales de la cuenta demo, incluido el caso límite de ciclo vencido
+- [x] Tarjetas de especialista muestran nombre, cargo, especialidad, centro, correo y
+  botón de contacto por correo — verificado visualmente en el emulador para
+  especialistas de varios centros distintos
+- [x] `npx tsc --noEmit`, `npx eslint .`, `npx jest` en verde
+- [x] Sin dependencias nativas nuevas esta fase — verificación hecha recargando el
+  bundle JS sobre el APK ya instalado
+
+**Fase 25 completa.** Las dos piezas pedidas (anillos interactivos en Calendario,
+directorio de salud con especialistas ficticios pero completos) verificadas de punta a
+punta contra datos reales en el emulador y en la base de datos real, no solo
+compiladas.
+
 ## Fase 24 — Ventana de embarazo enriquecida, expediente médico en onboarding, export PDF
 
 El usuario pidió tres cosas relacionadas, todas alrededor de la etapa `embarazo` y del

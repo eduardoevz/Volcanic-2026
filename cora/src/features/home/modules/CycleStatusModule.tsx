@@ -1,19 +1,17 @@
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { Circle, Svg } from 'react-native-svg';
 
 import { usePrediction } from '@/features/tracking';
 import { Card } from '@/ui/components/Card';
 import { Chip } from '@/ui/components/Chip';
+import { ProgressRing } from '@/ui/components/ProgressRing';
 import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { spacing } from '@/ui/theme/tokens';
 
 const RING_SIZE = 76;
 const RING_STROKE = 8;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -58,31 +56,10 @@ export function CycleStatusModule() {
 
   return (
     <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-      <Svg width={RING_SIZE} height={RING_SIZE} style={{ transform: [{ rotate: '-90deg' }] }}>
-        <Circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
-          stroke={colors.border}
-          strokeWidth={RING_STROKE}
-          fill="none"
-        />
-        <Circle
-          cx={RING_SIZE / 2}
-          cy={RING_SIZE / 2}
-          r={RING_RADIUS}
-          stroke={colors.pitahaya}
-          strokeWidth={RING_STROKE}
-          strokeLinecap="round"
-          strokeDasharray={RING_CIRCUMFERENCE}
-          strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
-          fill="none"
-        />
-      </Svg>
-      <View style={{ position: 'absolute', left: spacing.md, width: RING_SIZE, alignItems: 'center' }}>
+      <ProgressRing size={RING_SIZE} strokeWidth={RING_STROKE} progress={progress} color={colors.pitahaya} trackColor={colors.border}>
         <Text style={{ fontSize: 20, fontWeight: '700', color: colors.charcoal }}>{cycleDay}</Text>
         <Text variant="caption">{t('cycleStatus.dayLabel')}</Text>
-      </View>
+      </ProgressRing>
       <View style={{ flex: 1 }}>
         <Text variant="heading">{phaseLabel}</Text>
         <Text variant="bodyMuted" style={{ marginTop: 2 }}>
