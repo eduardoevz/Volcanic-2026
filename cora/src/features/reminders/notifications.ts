@@ -73,6 +73,10 @@ export async function cancelScheduled(identifier: string): Promise<void> {
 export async function scheduleOnce(title: string, date: Date): Promise<string | null> {
   const notifications = getNotificationsModule();
   if (!notifications) return null;
+  // Una fecha ya pasada dispara la notificación casi de inmediato en vez de
+  // en el momento correcto (confuso para citas armadas con "Hoy" a una hora
+  // que ya pasó) — se omite el recordatorio, la cita se guarda igual.
+  if (date.getTime() <= Date.now()) return null;
 
   return notifications.scheduleNotificationAsync({
     content: { title: 'Cora', body: title, sound: true },

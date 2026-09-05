@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { router } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Switch, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 
 import { checkMascotEvolution } from '@/features/mascot';
 import { completeOnboarding, OnboardingProgress } from '@/features/onboarding';
@@ -41,46 +41,48 @@ export default function ConsentScreen() {
   return (
     <Screen>
       <OnboardingProgress step={7} />
-      <Text variant="title" style={{ marginBottom: spacing.md }}>
-        {t('consent.title')}
-      </Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xl }}>
+        <Text variant="title" style={{ marginBottom: spacing.md }}>
+          {t('consent.title')}
+        </Text>
 
-      {error ? <Banner message={error} tone="danger" /> : null}
+        {error ? <Banner message={error} tone="danger" /> : null}
 
-      <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Switch
-            value={notificationsEnabled}
-            onValueChange={setNotificationsEnabled}
-            trackColor={{ true: colors.pitahaya }}
-          />
-          <View style={{ flex: 1 }}>
-            <Text variant="body">{t('consent.notificationsLabel')}</Text>
-            <Text variant="caption">{t('consent.notificationsDescription')}</Text>
+        <View style={{ gap: spacing.md, marginBottom: spacing.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+              trackColor={{ true: colors.pitahaya }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text variant="body">{t('consent.notificationsLabel')}</Text>
+              <Text variant="caption">{t('consent.notificationsDescription')}</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
+            <Switch
+              value={aiShareHealthContext}
+              onValueChange={setAiShareHealthContext}
+              trackColor={{ true: colors.pitahaya }}
+            />
+            <View style={{ flex: 1 }}>
+              <Text variant="body">{t('consent.aiShareLabel')}</Text>
+              <Text variant="caption">{t('consent.aiShareDescription')}</Text>
+            </View>
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Switch
-            value={aiShareHealthContext}
-            onValueChange={setAiShareHealthContext}
-            trackColor={{ true: colors.pitahaya }}
-          />
-          <View style={{ flex: 1 }}>
-            <Text variant="body">{t('consent.aiShareLabel')}</Text>
-            <Text variant="caption">{t('consent.aiShareDescription')}</Text>
-          </View>
-        </View>
-      </View>
+        <Banner message={t('consent.disclaimer')} tone="info" />
 
-      <Banner message={t('consent.disclaimer')} tone="info" />
-
-      <Button
-        label={t('consent.accept')}
-        onPress={handleAccept}
-        loading={saving}
-        style={{ marginTop: spacing.lg }}
-      />
+        <Button
+          label={t('consent.accept')}
+          onPress={handleAccept}
+          loading={saving}
+          style={{ marginTop: spacing.lg }}
+        />
+      </ScrollView>
     </Screen>
   );
 }

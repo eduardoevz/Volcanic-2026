@@ -1,15 +1,13 @@
 import { useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Dimensions, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
 import { Text } from '@/ui/components/Text';
 import { useTheme } from '@/ui/theme/ThemeContext';
 import { radii, spacing, type ColorScheme } from '@/ui/theme/tokens';
-
-const { width } = Dimensions.get('window');
 
 const SLIDE_EMOJI = ['🌱', '🔒', '🐉'];
 const SLIDE_KEYS = ['grow', 'privacy', 'mascot'] as const;
@@ -57,6 +55,7 @@ function buildStyles(colors: ColorScheme) {
 export default function Welcome() {
   const { t } = useTranslation('onboarding');
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
   const styles = useMemo(() => buildStyles(colors), [colors]);
   const scrollRef = useRef<ScrollView>(null);
   const [slideIndex, setSlideIndex] = useState(0);

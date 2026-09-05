@@ -2,6 +2,56 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 33 — Auditoría de errores/responsividad y fix de 4 hallazgos
+
+Se hizo una auditoría de la app completa buscando (1) errores que puedan afectar a usuarias
+reales del APK instalado (no problemas propios de probar en Expo Go) y (2) pantallas con
+problemas de responsividad similares al bug de "Iniciemos" ya arreglado en la Fase 31. De los
+hallazgos, se corrigieron los 4 más concretos y verificables:
+
+**1. Login roto en pantallas chicas** (`src/features/auth/components/LoginForm.tsx` +
+`app/(auth)/login.tsx`): el bloque `band` que contiene los botones "Iniciar sesión", "Crear
+cuenta", "Continuar con Google" y la mascota tenía una imagen (`landscape-login.png`) puesta en
+`position: 'absolute'` cubriendo todo el bloque, y `login.tsx` no envolvía el contenido en
+`ScrollView` — mismo patrón que ya causó el bug de "Iniciemos". Se quitó la imagen (borrada del
+repo, no se usaba en ningún otro lado) y se agregó `ScrollView`. Verificado en emulador con
+pantalla chica simulada (720×1184, densidad 320, la misma que reprodujo el bug original): ahora
+los 3 botones y la mascota se ven limpios, sin ninguna imagen tapándolos, alcanzables con scroll.
+
+**2. Notificación de cita con fecha ya pasada** (`src/features/reminders/notifications.ts`):
+`scheduleOnce(title, date)` ahora devuelve `null` sin programar nada si `date.getTime() <=
+Date.now()` — evita que una cita armada con "Hoy" a una hora que ya pasó dispare una notificación
+casi inmediata en vez de en el momento correcto. Nota de verificación: `expo-notifications` no
+funciona en absoluto dentro de Expo Go (limitación conocida de SDK 53+, ver Fase 31), así que la
+guarda en sí no se pudo ejercitar en vivo en este entorno — se confirmó que crear una cita con
+fecha/hora pasada ("Hoy" a las 09:00 siendo ya las 10:38) no rompe el flujo y la cita se guarda
+igual como "Programada"; la supresión real de la notificación solo es verificable con un build de
+desarrollo o el APK final.
+
+**3. Slides de onboarding con ancho fijo** (`app/(onboarding)/welcome.tsx`): `Dimensions.get('window')`
+calculado una sola vez al cargar el módulo se reemplazó por `useWindowDimensions()` dentro del
+componente. Verificado en emulador recorriendo las 3 slides completas (paginado y botón
+"Siguiente"/"Comenzar" funcionando igual que antes).
+
+**4. Registro y consentimiento sin scroll** (`app/(auth)/register.tsx`,
+`app/(onboarding)/consent.tsx`): se envolvió el contenido de ambas pantallas en `ScrollView`
+(mismo patrón ya usado en `medical-background.tsx`), para que en pantallas chicas con teclado
+abierto no quede ningún botón inalcanzable. Verificado en emulador completando el registro y
+llegando hasta "Paso 7 de 7" (consentimiento) sin cortes.
+
+**Hallazgos documentados pero no corregidos en esta tarea** (menor severidad o requieren
+confirmación externa, no cambios de código):
+- Nunca se confirmó si el correo de "recuperar contraseña" llega realmente a una casilla real
+  (Supabase responde éxito aunque no llegue, por diseño anti-enumeración — ver Fase 22).
+- Varios `catch` silenciosos en registro de notificaciones push y sincronización de ciclos en
+  segundo plano (`useSaveDailyLog`) — por diseño no bloquean a la usuaria, pero significan que si
+  esas funciones fallan, nadie se entera.
+
+**Verificación:** `npx tsc --noEmit` y `npx eslint` sin errores nuevos en todos los archivos
+tocados (un warning de `require()` en `notifications.ts` es preexistente, no introducido acá);
+`npx jest` sin regresiones (140 tests pasan; los mismos 6 suites que ya fallaban por
+`Cannot find module 'test-renderer'`, problema de entorno preexistente, siguen fallando igual).
+
 ## Fase 32 — Rediseño de bienvenida, historial de ciclos en onboarding, y fix de falso "sin conexión"
 
 El usuario pidió cuatro cosas relacionadas con la primera apertura de la app y la

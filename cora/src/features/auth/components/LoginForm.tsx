@@ -36,13 +36,6 @@ function buildStyles(colors: ColorScheme) {
       paddingHorizontal: spacing.lg,
       gap: spacing.sm,
     },
-    landscape: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-    },
     pillButton: {
       borderRadius: radii.full,
     },
@@ -140,12 +133,6 @@ export function LoginForm() {
       </View>
 
       <View style={styles.band}>
-        <Image
-          source={require('../../../../assets/images/welcome/landscape-login.png')}
-          style={styles.landscape}
-          resizeMode="cover"
-        />
-
         <Button
           label={t('login.submit')}
           loading={isSubmitting}

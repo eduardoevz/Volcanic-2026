@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 
 import { LoginForm } from '@/features/auth';
 import { Screen } from '@/ui/components/Screen';
@@ -48,13 +48,15 @@ export default function Login() {
         style={styles.leaves}
         resizeMode="cover"
       />
-      <View style={styles.header}>
-        <Text variant="title">{t('login.title')}</Text>
-        <Text variant="bodyMuted" style={styles.subtitle}>
-          {t('login.subtitle')}
-        </Text>
-      </View>
-      <LoginForm />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.header}>
+          <Text variant="title">{t('login.title')}</Text>
+          <Text variant="bodyMuted" style={styles.subtitle}>
+            {t('login.subtitle')}
+          </Text>
+        </View>
+        <LoginForm />
+      </ScrollView>
     </Screen>
   );
 }

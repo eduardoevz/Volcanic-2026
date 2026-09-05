@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { ScrollView } from 'react-native';
 
 import { RegisterForm } from '@/features/auth';
 import { Screen } from '@/ui/components/Screen';
@@ -10,10 +11,12 @@ export default function Register() {
 
   return (
     <Screen>
-      <Text variant="title" style={{ marginBottom: spacing.lg }}>
-        {t('register.title')}
-      </Text>
-      <RegisterForm />
+      <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: spacing.xl }}>
+        <Text variant="title" style={{ marginBottom: spacing.xs }}>
+          {t('register.title')}
+        </Text>
+        <RegisterForm />
+      </ScrollView>
     </Screen>
   );
 }
