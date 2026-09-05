@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/ui/components/Button';
 import { Screen } from '@/ui/components/Screen';
@@ -18,10 +18,13 @@ function buildStyles(colors: ColorScheme) {
       right: 0,
       height: 90,
     },
-    content: {
+    scroll: {
       flex: 1,
+    },
+    content: {
+      flexGrow: 1,
       alignItems: 'center',
-      paddingTop: 96,
+      paddingTop: spacing.xl,
       paddingHorizontal: spacing.lg,
     },
     logo: {
@@ -103,7 +106,11 @@ export default function Welcome() {
         resizeMode="cover"
       />
 
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <Image
           source={require('../assets/images/welcome/logo.png')}
           style={styles.logo}
@@ -138,7 +145,7 @@ export default function Welcome() {
           onPress={() => router.push('/(auth)/login')}
           style={styles.cta}
         />
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Image

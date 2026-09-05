@@ -2,6 +2,42 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 31 — Fix: botón "Iniciemos" invisible en pantallas de poca altura
+
+El usuario reportó que en algunos teléfonos, al abrir la app por primera vez, no
+aparecía el botón "Iniciemos" de la pantalla de bienvenida (`app/welcome.tsx`).
+
+**Causa raíz:** el layout no era responsivo. El contenido (logo, título, tagline,
+divisor, heading, subtítulo, botón) vivía en un `View` con `flex: 1` y
+`paddingTop: 96` fijo — sin `ScrollView`. Debajo, un `footer` decorativo con altura
+fija de 280px (imagen de fondo + mascota) le restaba espacio disponible. En
+pantallas de poca altura, la suma del contenido superaba el espacio flex restante y,
+al no haber scroll, el botón quedaba empujado fuera del área visible sin forma de
+alcanzarlo.
+
+**Fix:** se envolvió el contenido en un `ScrollView` (`contentContainerStyle` con
+`flexGrow: 1`), y se redujo el `paddingTop` fijo (96 → `spacing.xl`) para dar más
+margen antes de necesitar scroll. El `footer` decorativo se dejó con su altura fija
+de 280 tal cual estaba — un primer intento de encogerlo dinámicamente con
+`useWindowDimensions` introdujo un bug nuevo (la mascota, posicionada con `bottom`
+fijo relativo al footer, se desbordaba hacia arriba y tapaba el botón en pantallas
+chicas), así que se descartó esa parte; la garantía de alcanzabilidad la da
+únicamente el scroll.
+
+**Verificación:** probado en el emulador Android real (`emulator-5554`) en dos
+tamaños — resolución nativa del Pixel 10 Pro y una simulada de pantalla pequeña
+(`adb shell wm size 720x1184` + `wm density 320`, que reprodujo el bug original
+antes del fix). En ambos casos el botón es visible/alcanzable y navega
+correctamente a `/(auth)/login`. Se restauró la resolución del emulador al finalizar
+(`wm size reset` / `wm density reset`).
+
+**Hallazgo relacionado (no corregido, fuera de alcance de esta tarea):** la pantalla
+de login (`app/(auth)/login.tsx` o similar) parece reutilizar un patrón de footer
+decorativo con imagen de fondo similar, y en la pantalla pequeña simulada mostró un
+solapamiento visual parecido (hojas del footer sangrando sobre el botón
+"Registrar"). Vale la pena revisarlo en una próxima tarea si el usuario lo confirma
+en dispositivos reales.
+
 ## Fase 30 — Ícono real de la app (reemplaza el genérico de Expo)
 
 El usuario agregó `Icono_app.png` (2000×2000, el logo circular de Cora — la mujer de
