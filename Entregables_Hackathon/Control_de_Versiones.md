@@ -8,9 +8,10 @@
 
 ## Resumen
 
-- **66 commits** en la rama `main` al momento de este entregable.
-- **2 personas** con commits en el historial (`git shortlog`): Cora Bot (60 commits, pair-programming
+- **72 commits** en la rama `main` al momento de este entregable.
+- **2 personas** con commits en el historial (`git shortlog`): Cora Bot (66 commits, pair-programming
   con IA) y Eduardo Velasquez (6 commits).
+- **3 Pull Requests fusionados** a `main` vía GitHub (no solo commits directos) — ver detalle abajo.
 - **6 ramas locales/remotas** además de `main`: `develop`, `docs/readme-rewrite`,
   `fix/auth-google-password-reset`, `test/qa-suite`, y ramas remotas por colaborador
   (`origin/EduardoDEV`, `origin/JostinDEV`).
@@ -20,6 +21,12 @@
 ## Historial de commits recientes (`git log`)
 
 ```
+7e4d23c 2026-09-05 fix(docs): corregir el estudio de BD contra el esquema real en Supabase
+6287317 2026-09-05 fix(hackathon): corregir columnas y relación faltante en el Diagrama ER
+6233929 2026-09-05 fix(hackathon): quitar header/footer de impresión de los 6 PDFs y ajustar diagrama ER
+d94de41 2026-09-05 docs(hackathon): agregar entregable "Ejecución de la solución"
+d0451b4 2026-09-05 docs(hackathon): agregar entregable "Seguridad y Buenas Prácticas" con modelo de 3 roles
+cb11a09 2026-09-05 docs(hackathon): agregar entregable "Control de versiones" con evidencia real de Git/GitHub
 af405c5 2026-09-05 docs(hackathon): agregar entregable "Interfaz y Desarrollo" con evidencia real de navegación
 49e7bd5 2026-09-05 docs(hackathon): agregar diagrama ER y el estudio de normalización de BD
 03f5635 2026-09-05 docs(hackathon): agregar carpeta de entregables oficiales del hackathon
@@ -34,13 +41,21 @@ d12b911 2026-09-05 fix(welcome): botón "Iniciemos" invisible en pantallas de po
 6af2075 2026-09-04 feat(icon): reemplazar ícono placeholder por el logo real de Cora
 244b1bd 2026-09-04 docs(release): publicar APK de instalación directa como GitHub Release
 12ffb9b 2026-09-04 fix(pregnancy,calendar): sincronizar etapa de vida con embarazo + predicción/periodo/relaciones/ovulación en calendario
-42656de 2026-09-04 feat(family): rediseñar scopes del círculo familiar hacia señales útiles
-4dab1e7 2026-09-04 feat(i18n,tracking): completar traducciones miskito/mayagna + registrar periodo y relaciones sexuales
-07a77bc 2026-09-04 docs(agents): no incluir el link de sesion de Claude en commits/PRs
-005ea80 2026-09-03 feat(calendar,directory): anillos interactivos en calendario y datos reales de especialistas
-d518e3e 2026-09-03 feat(pregnancy): ventana de embarazo enriquecida + expediente médico en onboarding
-ae0c3e3 2026-09-03 feat(ui): rediseñar las 5 pestañas con la paleta de modo claro
 ```
+
+## Pull Requests fusionados (`gh pr list --state all`)
+
+No todo el trabajo llega a `main` por commit directo: hay 3 Pull Requests reales, cada uno desde
+su propia rama de feature, revisados y fusionados vía GitHub:
+
+| # | Título | Rama → base | Archivos | Cambios |
+| --- | --- | --- | --- | --- |
+| [#1](https://github.com/eduardoevz/Volcanic-2026/pull/1) | test: suite de pruebas QA (unit, widget, integracion, IA, RLS, E2E) + CI | `test/qa-suite` → `main` | 39 | +2575 / −211 |
+| [#2](https://github.com/eduardoevz/Volcanic-2026/pull/2) | fix(auth): diagnostico de Google sign-in y recuperacion de clave | `fix/auth-google-password-reset` → `main` | 3 | +93 / −0 |
+| [#3](https://github.com/eduardoevz/Volcanic-2026/pull/3) | docs: reescribir README con informacion real del proyecto | `docs/readme-rewrite` → `main` | 1 | +124 / −67 |
+
+Las 3 ramas de feature mencionadas en la sección anterior no son ramas abandonadas: son el origen
+real de estos 3 PRs, ya fusionados.
 
 ## Ramas del proyecto (`git branch -a`)
 
@@ -99,9 +114,13 @@ Already up to date.
 
 ## Otras prácticas de control de versiones usadas en el proyecto
 
-- **Git LFS** para los binarios de release (`releases/*.apk`), en vez de versionar binarios grandes
-  directo en el historial de Git (ver `docs/PROGRESO.md`, Fase 30).
-- **GitHub Actions** corriendo lint, typecheck y cobertura de pruebas en cada cambio, como puerta
-  de calidad antes de integrar a `main`.
-- **AGENTS.md** con convenciones de commit acordadas para todo el equipo (incluida la IA que
-  colabora en el proyecto), documentado en `docs/PROGRESO.md`.
+- **Git LFS** para los binarios de release (`releases/*.apk`, declarado en `.gitattributes`), en
+  vez de versionar binarios grandes directo en el historial de Git (ver `docs/PROGRESO.md`,
+  Fase 30).
+- **2 GitHub Releases** publicados (`android-2026-09-04`, `android-2026-09-05`) con el APK
+  descargable directamente, sin pasar por el repositorio de código.
+- **GitHub Actions**: dos workflows activos en `.github/workflows/` — `ci.yml` (lint, typecheck y
+  pruebas con cobertura en cada push/PR a `main`) y `rls-tests.yml` (suite pgTAP de Row Level
+  Security) — como puerta de calidad antes de integrar a `main`.
+- **`cora/AGENTS.md`** con convenciones de commit acordadas para todo el equipo, incluida la IA
+  que colabora en el proyecto.
