@@ -12,6 +12,17 @@
     "start": "Comenzar",
     "skip": "Saltar"
   },
+  "cycleHistory": {
+    "title": "Tus últimos períodos",
+    "subtitle": "Con las fechas de tus últimas 2 reglas, Cora ya puede mostrarte predicciones desde el primer día. Podés saltarlo si no las recordás.",
+    "lastPeriodLabel": "Inicio de tu última regla",
+    "previousPeriodLabel": "Inicio de la regla anterior a esa",
+    "periodLengthLabel": "¿Cuántos días suele durar tu período?",
+    "saveAndContinue": "Guardar y continuar",
+    "skipForNow": "No lo recuerdo por ahora",
+    "saveError": "No pudimos guardar tus fechas. Probá de nuevo.",
+    "dateOrderError": "La regla anterior a esa debe ser una fecha más antigua que la última."
+  },
   "lifeStage": {
     "title": "¿En qué etapa estás?",
     "subtitle": "Esto define cómo se adapta Cora para vos. Podés cambiarlo cuando quieras desde tu perfil.",

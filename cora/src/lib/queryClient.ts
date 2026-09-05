@@ -9,7 +9,7 @@ export const queryClient = new QueryClient({
     queries: {
       networkMode: 'offlineFirst',
       staleTime: 5 * 60 * 1000,
-      retry: 1,
+      retry: 2,
     },
     mutations: {
       networkMode: 'offlineFirst',
@@ -34,7 +34,11 @@ export function configureOnlineManager() {
 
   onlineManager.setEventListener((setOnline) => {
     return NetInfo.addEventListener((state) => {
-      setOnline(!!state.isConnected);
+      // isInternetReachable empieza en null hasta que NetInfo confirma
+      // alcance real; si se usara isConnected solo, un parpadeo justo al
+      // volver del background puede marcar "sin red" por error y disparar el
+      // banner de conexión en app/index.tsx aunque la red esté bien.
+      setOnline(state.isInternetReachable ?? state.isConnected ?? false);
     });
   });
 

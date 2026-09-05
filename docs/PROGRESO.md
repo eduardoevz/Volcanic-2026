@@ -2,6 +2,74 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 32 — Rediseño de bienvenida, historial de ciclos en onboarding, y fix de falso "sin conexión"
+
+El usuario pidió cuatro cosas relacionadas con la primera apertura de la app y la
+sincronización de datos de ciclo:
+
+**1. Rediseño de la pantalla "Iniciemos"** (`app/welcome.tsx`): se quitó el footer
+decorativo de 280px con las 3 imágenes superpuestas (`landscape-welcome.png`,
+`mascot-drum.png`, `mascot-welcome.png` — borradas del repo, no se usaban en ningún
+otro lado). La imagen de paisaje original (ver `Prototipos de diseño/Inicio_images/img_6.png`)
+era un fondo de pantalla completa pensado para verse entero, no recortado en una caja
+chica — de ahí que "no se renderizara bien". Ahora la pantalla usa el mismo patrón
+plano `colors.cream` + una sola imagen decorativa chica arriba (`leaves-top-welcome.png`)
+que ya usan `login.tsx` y el onboarding de introducción.
+
+**2. Nuevo paso de onboarding — historial de ciclos** (`app/(onboarding)/cycle-history.tsx`,
+paso 3 de 7, insertado entre `life-stage` y `avatar`, saltado automáticamente si la
+etapa elegida es `embarazo`): pide la fecha de inicio de los últimos 2 períodos con un
+selector de calendario propio construido sin dependencias nativas nuevas
+(`src/features/tracking/components/MiniDatePicker.tsx`, reutiliza la lógica de grilla
+mensual de `CalendarGrid.tsx`), más una duración de período (default 5 días). Al
+guardar, `seedHistoricalCycles` (`src/features/tracking/api.ts`) siembra los
+`daily_logs` correspondientes a esos días y llama a `syncCycles` una vez —
+mismo camino que un registro manual, sin tabla ni RPC nuevos. Con esto, el Calendario
+(`app/(tabs)/calendar.tsx`, que ya tenía el sombreado de período y las tarjetas de
+predicción/ovulación completamente implementados) las muestra desde el primer uso,
+en vez de requerir que la usuaria registre manualmente 2 ciclos completos a lo largo
+de semanas. Se puede saltar ("No lo recuerdo por ahora") como el resto de pasos
+opcionales del onboarding. `OnboardingProgress.TOTAL_STEPS` pasó de 6 a 7 y se
+renumeraron los pasos siguientes (avatar 3→4, antecedentes médicos 4→5, mascota 5→6,
+consentimiento 6→7). Traducciones nuevas solo en `locales/es/onboarding.json` — no se
+tradujeron a miskito/mayagna por no tener confianza en producir esos idiomas
+correctamente; el `fallbackLng: 'es'` de i18next hace que esos usuarios vean el texto
+en español en esta pantalla puntual hasta que alguien con dominio del idioma las
+traduzca.
+
+**3. Verificado (sin cambios de código): el onboarding solo se pide una vez.**
+`app/index.tsx` y `app/(onboarding)/_layout.tsx` ya gatean correctamente en
+`profiles.onboarding_completed_at` (columna de Supabase, no AsyncStorage) — sobrevive
+cierre/reapertura. Confirmado en emulador con un reinicio completo (force-stop +
+relanzamiento) tras completar el registro: fue directo a Home.
+
+**4. Fix del falso "no se puede conectar" al reabrir la app:**
+`configureOnlineManager` (`src/lib/queryClient.ts`) usaba solo `state.isConnected` de
+NetInfo, ignorando `state.isInternetReachable` — un parpadeo de ese flag justo al
+volver de segundo plano podía marcar "sin red" por error. Se cambió a
+`state.isInternetReachable ?? state.isConnected ?? false`. También se subió el
+`retry` global de 1 a 2, y `useProfile` (la query que decide a dónde redirige
+`app/index.tsx` al abrir la app) ahora tiene su propio `retry: 3` con backoff
+exponencial (hasta 8s) para darle tiempo a la red real de reestablecerse. El banner
+de error en `app/index.tsx` ahora distingue el mensaje según `onlineManager.isOnline()`
+(`index.offlineError` vs `index.sessionCheckError`). No se tocó
+`src/lib/supabase.ts` (el manejo de `AppState`/`startAutoRefresh` ya estaba bien).
+Verificado en emulador: varios reinicios en frío no mostraron el banner.
+
+**Verificación end-to-end en emulador** (`emulator-5554`, Expo Go): registro de cuenta
+nueva → onboarding completo (incluyendo el nuevo paso de ciclos con fechas reales
+seleccionadas en el `MiniDatePicker`) → Home mostrando "Fase menstrual" con predicción
+desde el primer uso → Calendario mostrando sombreado de período, ventana fértil,
+ovulación estimada y ambas tarjetas de predicción. `npx tsc --noEmit` y `npx eslint`
+sin errores en todos los archivos tocados; suite de tests sin regresiones (140 tests
+pasaron; los 6 suites que fallan por `Cannot find module 'test-renderer'` son un
+problema de entorno preexistente, no relacionado con estos cambios).
+
+**Hallazgo relacionado (no corregido, fuera de alcance):** la pantalla de login
+(`app/(auth)/login.tsx`) mostró un solapamiento visual entre su footer decorativo y
+los botones en la pantalla pequeña simulada durante pruebas de la Fase 31 — mismo tipo
+de problema que "Iniciemos" tenía. Vale la pena revisarla en una próxima tarea.
+
 ## Fase 31 — Fix: botón "Iniciemos" invisible en pantallas de poca altura
 
 El usuario reportó que en algunos teléfonos, al abrir la app por primera vez, no

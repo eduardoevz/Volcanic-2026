@@ -1,3 +1,5 @@
+import { addDays, format, parseISO } from 'date-fns';
+
 import { supabase } from '@/lib/supabase';
 
 import { detectCycles, type DailyLogInput } from './cycleEngine';
@@ -142,4 +144,37 @@ export async function syncCycles(userId: string) {
 
   if (insertError) throw insertError;
   return data;
+}
+
+export type HistoricalPeriodInput = {
+  startDate: string; // 'YYYY-MM-DD'
+  lengthDays: number;
+};
+
+/**
+ * Onboarding (Fase 31): siembra los últimos períodos que la usuaria recuerda
+ * como daily_logs reales (mismo camino que un registro manual — sin tabla ni
+ * RPC nuevos), para que detectCycles ya tenga ≥2 ciclos desde el primer uso y
+ * el Calendario muestre sombreado/predicciones sin esperar semanas.
+ */
+export async function seedHistoricalCycles(userId: string, periods: HistoricalPeriodInput[]) {
+  for (const period of periods) {
+    for (let offset = 0; offset < period.lengthDays; offset++) {
+      const logDate = format(addDays(parseISO(period.startDate), offset), 'yyyy-MM-dd');
+      await saveDailyLog({
+        logDate,
+        flowLevel: 'medium',
+        mood: null,
+        energyLevel: null,
+        sleepHours: null,
+        notes: null,
+        symptoms: [],
+        sexualActivity: null,
+        periodStart: offset === 0,
+        periodEnd: offset === period.lengthDays - 1,
+      });
+    }
+  }
+
+  await syncCycles(userId);
 }

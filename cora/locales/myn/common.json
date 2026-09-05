@@ -30,7 +30,8 @@
     "appointments": "Dakta prautka"
   },
   "index": {
-    "sessionCheckError": "Sesionka sip kaiki sakras. Kli talwa."
+    "sessionCheckError": "Sesionka sip kaiki sakras. Kli talwa.",
+    "offlineError": "Sesionka sip kaiki sakras. Kli talwa."
   },
   "home": {
     "greeting": {

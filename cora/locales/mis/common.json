@@ -30,7 +30,8 @@
     "appointments": "Dakta prautka"
   },
   "index": {
-    "sessionCheckError": "Sesionka sip kaiki sakras. Kli pura kaiks."
+    "sessionCheckError": "Sesionka sip kaiki sakras. Kli pura kaiks.",
+    "offlineError": "Sesionka sip kaiki sakras. Kli pura kaiks."
   },
   "home": {
     "greeting": {

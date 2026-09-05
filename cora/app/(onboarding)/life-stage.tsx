@@ -46,7 +46,11 @@ export default function LifeStageScreen() {
     setSaving(stage);
     try {
       await setLifeStage(stage);
-      router.push('/(onboarding)/avatar');
+      // El embarazo tiene su propio seguimiento (ventana de embarazo) — no
+      // tiene sentido pedir fechas de período en esa etapa.
+      router.push(
+        stage === 'embarazo' ? '/(onboarding)/avatar' : '/(onboarding)/cycle-history'
+      );
     } catch {
       setError(t('lifeStage.saveError'));
       setSaving(null);

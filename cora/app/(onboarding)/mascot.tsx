@@ -27,7 +27,7 @@ export default function MascotScreen() {
 
   return (
     <Screen style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <OnboardingProgress step={5} />
+      <OnboardingProgress step={6} />
       <Animated.Text style={[{ fontSize: 96, marginVertical: spacing.lg }, animatedStyle]}>
         🐉
       </Animated.Text>

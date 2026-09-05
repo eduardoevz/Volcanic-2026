@@ -74,7 +74,7 @@ export default function AvatarScreen() {
 
   return (
     <Screen>
-      <OnboardingProgress step={3} />
+      <OnboardingProgress step={4} />
       <Text variant="title" style={{ marginBottom: spacing.xs }}>
         {t('avatar.title')}
       </Text>

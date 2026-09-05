@@ -1,4 +1,5 @@
 import { Redirect } from 'expo-router';
+import { onlineManager } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator } from 'react-native';
 
@@ -30,11 +31,19 @@ export default function Index() {
 
   // Sin perfil en caché ni de red no podemos saber si ya completó el
   // onboarding — mandarla a onboarding de nuevo la haría repetirlo sin
-  // necesidad. Se muestra un reintento en vez de asumir.
+  // necesidad. Se muestra un reintento en vez de asumir. useProfile ya
+  // reintenta varias veces con backoff antes de llegar a este estado (ver
+  // useProfile.ts), así que si igual llegamos acá es un error real, no un
+  // parpadeo de red al volver de segundo plano.
   if (profileError && !profile) {
     return (
       <Screen style={{ alignItems: 'center', justifyContent: 'center', gap: spacing.md }}>
-        <Banner tone="danger" message={t('index.sessionCheckError')} />
+        <Banner
+          tone="danger"
+          message={
+            onlineManager.isOnline() ? t('index.sessionCheckError') : t('index.offlineError')
+          }
+        />
         <Button label={t('common.retry')} onPress={() => refetch()} />
       </Screen>
     );

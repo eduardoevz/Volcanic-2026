@@ -30,7 +30,8 @@
     "appointments": "Agenda de citas"
   },
   "index": {
-    "sessionCheckError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."
+    "sessionCheckError": "No pudimos verificar tu sesión. Intentá de nuevo.",
+    "offlineError": "No pudimos verificar tu sesión. Revisá tu conexión e intentá de nuevo."
   },
   "home": {
     "greeting": {

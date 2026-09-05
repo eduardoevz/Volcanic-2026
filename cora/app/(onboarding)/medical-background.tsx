@@ -30,7 +30,7 @@ export default function MedicalBackgroundScreen() {
 
   return (
     <Screen>
-      <OnboardingProgress step={4} />
+      <OnboardingProgress step={5} />
       <ScrollView contentContainerStyle={{ gap: spacing.md, paddingBottom: spacing.xl }}>
         <Text variant="title" style={{ marginBottom: spacing.xs }}>
           {t('medicalBackground.title')}

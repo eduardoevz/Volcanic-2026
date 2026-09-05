@@ -67,29 +67,6 @@ function buildStyles(colors: ColorScheme) {
       borderRadius: radii.full,
       paddingVertical: spacing.md,
     },
-    footer: {
-      height: 280,
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-    },
-    landscape: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      top: 0,
-    },
-    drum: {
-      width: 90,
-      height: 154,
-      marginBottom: spacing.lg,
-    },
-    mascot: {
-      position: 'absolute',
-      width: 150,
-      height: 126,
-      bottom: spacing.xl + 60,
-    },
   });
 }
 
@@ -146,24 +123,6 @@ export default function Welcome() {
           style={styles.cta}
         />
       </ScrollView>
-
-      <View style={styles.footer}>
-        <Image
-          source={require('../assets/images/welcome/landscape-welcome.png')}
-          style={styles.landscape}
-          resizeMode="cover"
-        />
-        <Image
-          source={require('../assets/images/welcome/mascot-drum.png')}
-          style={styles.drum}
-          resizeMode="contain"
-        />
-        <Image
-          source={require('../assets/images/welcome/mascot-welcome.png')}
-          style={styles.mascot}
-          resizeMode="contain"
-        />
-      </View>
     </Screen>
   );
 }

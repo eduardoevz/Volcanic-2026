@@ -40,7 +40,7 @@ export default function ConsentScreen() {
 
   return (
     <Screen>
-      <OnboardingProgress step={6} />
+      <OnboardingProgress step={7} />
       <Text variant="title" style={{ marginBottom: spacing.md }}>
         {t('consent.title')}
       </Text>

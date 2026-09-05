@@ -24,6 +24,7 @@ export default function OnboardingLayout() {
     <Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
       <Stack.Screen name="welcome" />
       <Stack.Screen name="life-stage" />
+      <Stack.Screen name="cycle-history" />
       <Stack.Screen name="avatar" />
       <Stack.Screen name="medical-background" />
       <Stack.Screen name="mascot" />
