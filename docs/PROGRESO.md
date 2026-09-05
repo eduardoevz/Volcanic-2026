@@ -52,6 +52,27 @@ Expo por defecto.
   actualizadas para avisar del cambio de ícono y la posibilidad de que el launcher
   del celular del usuario también tenga que refrescar su caché (quitar y volver a
   agregar el ícono, o reiniciar el teléfono, si no se actualiza visualmente solo).
+- El usuario reportó que el release no le aparecía navegando el repo por su cuenta
+  (solo entrando al link directo) — el release en sí está bien (público, no es
+  draft ni prerelease, confirmado vía `gh release view`); es la sección "Releases"
+  del sidebar del repo, fácil de pasar por alto, o hay que entrar directo a
+  `/releases`. Para evitar depender de encontrar esa sección, pidió además tener el
+  APK visible en la propia carpeta `releases/` del repo.
+- El APK (116 MB) supera el límite de 100 MB de un blob normal de Git, así que se
+  agregó **Git LFS**: `git lfs track "releases/*.apk"` (nuevo `.gitattributes`), se
+  sacó la regla `releases/*.apk` que se había agregado al `.gitignore` en la Fase 29
+  (ya no aplica, ahora sí se trackea, vía LFS) y se subió
+  `releases/Cora-release-2026-09-04.apk` (el mismo build con el ícono nuevo) como
+  commit normal — `git lfs push` lo sube a 122 MB de almacenamiento LFS del repo,
+  dentro de la cuota gratuita de GitHub (1 GB). Ahora aparece listado directo en
+  `github.com/eduardoevz/Volcanic-2026/tree/main/releases`, con el botón nativo de
+  "Download" de GitHub para LFS.
+- Nota: `releases/Cora-release-2026-08-26.apk`, commiteado en una sesión anterior
+  como blob normal (61 MB, antes de configurar LFS), quedó sin migrar a LFS a
+  propósito — no era parte de este pedido. Git lo marca como "modificado" en el
+  working tree en cuanto existe `.gitattributes` con esa regla (por el filtro LFS),
+  aunque el archivo en sí no cambió; se puede migrar más adelante con
+  `git lfs migrate import --include="releases/*.apk"` si se quiere unificar.
 
 ## Fase 29 — APK de instalación directa (release standalone, sin Metro)
 
