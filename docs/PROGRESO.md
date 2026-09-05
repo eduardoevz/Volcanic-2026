@@ -2,6 +2,26 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 34 — Nuevo APK de instalación directa con los fixes de la Fase 33
+
+El usuario pidió compilar un APK actualizado con todos los cambios hasta la Fase 33 (rediseño de
+bienvenida/login, historial de ciclos en onboarding, fix de conexión, y los 4 fixes de
+responsividad/notificaciones) y publicarlo tanto en la carpeta `releases/` del repo como en la
+sección de GitHub Releases.
+
+- Build de release estándar (`cd cora/android && ./gradlew assembleRelease`), esta vez rápido
+  (~2m40s) gracias al caché de Gradle de builds anteriores — solo se recompiló lo que cambió
+  desde la Fase 30 (JS bundle nuevo con 3058 módulos, CMake nativo reusado de caché).
+- **Verificado en el emulador real** instalando el APK standalone (`adb install -r`, sin Metro
+  corriendo): arranca limpio, la pantalla "Iniciemos" y la de login se ven con los fixes de la
+  Fase 33 aplicados (sin las imágenes de fondo rotas), sin errores fatales en logcat. No se repitió
+  todo el recorrido de onboarding/calendario ya verificado a fondo en la Fase 32/33 vía Expo Go —
+  alcanza con confirmar que el build de producción arranca y refleja el código actual.
+- Publicado en `releases/Cora-release-2026-09-05.apk` (vía Git LFS, mismo patrón desde la Fase 30)
+  y como asset nuevo del [GitHub Release](https://github.com/eduardoevz/Volcanic-2026/releases)
+  (`gh release create`, tag `android-2026-09-05`).
+- Incluye todos los cambios hasta el commit de la Fase 33 (fix de login/citas/onboarding/forms).
+
 ## Fase 33 — Auditoría de errores/responsividad y fix de 4 hallazgos
 
 Se hizo una auditoría de la app completa buscando (1) errores que puedan afectar a usuarias
