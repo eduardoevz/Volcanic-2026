@@ -11,11 +11,13 @@
 
 ## 1. Buenas prácticas de seguridad implementadas
 
-- **Row Level Security (RLS) en las 26 tablas** de la base de datos (Supabase/Postgres). Cada
-  política aplica `auth.uid() = user_id` a nivel de fila: sin una sesión válida y dueña del dato,
-  la consulta simplemente no devuelve nada — el aislamiento ocurre en la base de datos, no
-  depende de que el cliente "se porte bien". Auditado formalmente y mantenido al día en
-  [`docs/RLS_AUDIT.md`](../docs/RLS_AUDIT.md).
+- **Row Level Security (RLS) en las 26 tablas** de la base de datos (Supabase/Postgres), verificado
+  directamente contra el proyecto real (`pg_tables`, `pg_policies`): las 26 tienen RLS activo y al
+  menos una política propia. Cada política aplica `auth.uid() = user_id` a nivel de fila: sin una
+  sesión válida y dueña del dato, la consulta simplemente no devuelve nada — el aislamiento ocurre
+  en la base de datos, no depende de que el cliente "se porte bien". Auditoría detallada tabla por
+  tabla en [`docs/RLS_AUDIT.md`](../docs/RLS_AUDIT.md) (cobertura de la Fase 9; las tablas
+  agregadas después siguen el mismo patrón `own_*` verificado aquí).
 - **Cero secretos hardcodeados en el cliente.** La `service_role` key de Supabase y la API key de
   Gemini viven exclusivamente en Edge Functions server-side; el bundle de la app que corre en el
   teléfono de la usuaria nunca las contiene, así que no hay forma de extraerlas descompilando el
@@ -47,6 +49,9 @@
   separado, y convenciones de commit y de marca documentadas en
   [`docs/CONVENCIONES.md`](../docs/CONVENCIONES.md) para que cualquier persona del equipo — o
   cualquier jurado — pueda entender el historial sin arqueología.
+- **RLS verificado automáticamente, no solo a mano**: el workflow `rls-tests.yml` de GitHub Actions
+  corre una suite pgTAP contra la base de datos en cada cambio, comprobando en código —no solo en
+  documentación— que una usuaria no puede leer ni escribir filas ajenas.
 
 ## 2. Modelo de 3 roles y permisos: Admin, Usuario y Auditor
 
