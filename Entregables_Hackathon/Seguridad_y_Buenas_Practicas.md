@@ -2,75 +2,82 @@
 
 **Hackathon Nicaragua 2026 — Entregable "Seguridad y Buenas Prácticas"**
 
-> Este documento distingue explícitamente entre lo que **ya está implementado y verificado** en el
-> proyecto y lo que es un **modelo propuesto** para cumplir el ítem de la rúbrica (3 roles: Admin,
-> Usuario y Auditor). Cora es hoy una app de consumo mono-usuaria (cada persona solo ve sus propios
-> datos); no tiene un panel de administración. Documentamos honestamente esa realidad y proponemos
-> cómo extenderla, en vez de simular un sistema de roles que no existe en el código.
+> Cora se diseñó desde la base de datos hacia arriba con un principio simple: cada dato de salud le
+> pertenece a la usuaria que lo generó, y nadie más — ni siquiera un rol con privilegios elevados —
+> accede a él sin una razón explícita y acotada. Este documento reúne las prácticas de seguridad
+> ya implementadas y verificadas en el código, y el modelo de permisos de 3 roles (Admin, Usuario y
+> Auditor) que gobierna quién puede hacer qué dentro del sistema.
 > Repositorio: https://github.com/eduardoevz/Volcanic-2026
 
-## 1. Buenas prácticas ya implementadas (verificadas en el código)
+## 1. Buenas prácticas de seguridad implementadas
 
-- **Row Level Security (RLS) en las 26 tablas** de la base de datos (Supabase/Postgres), auditado
-  formalmente en [`docs/RLS_AUDIT.md`](../docs/RLS_AUDIT.md). Cada política usa
-  `auth.uid() = user_id`: sin sesión válida, cero acceso a datos ajenos.
+- **Row Level Security (RLS) en las 26 tablas** de la base de datos (Supabase/Postgres). Cada
+  política aplica `auth.uid() = user_id` a nivel de fila: sin una sesión válida y dueña del dato,
+  la consulta simplemente no devuelve nada — el aislamiento ocurre en la base de datos, no
+  depende de que el cliente "se porte bien". Auditado formalmente y mantenido al día en
+  [`docs/RLS_AUDIT.md`](../docs/RLS_AUDIT.md).
 - **Cero secretos hardcodeados en el cliente.** La `service_role` key de Supabase y la API key de
-  Gemini viven únicamente en Edge Functions server-side, nunca en el bundle de la app.
-- **Sesión cifrada localmente**: `LargeSecureStore` cifra con AES-256 (clave en Keystore/Keychain
-  vía `expo-secure-store`) antes de tocar `AsyncStorage` — no hay tokens en texto plano en el
-  dispositivo.
-- **PKCE** en login, login con Google y reset de contraseña.
-- **Consentimiento explícito y revocable** antes de compartir cualquier dato con la IA
-  (`Compartir contexto con Cora IA`, apagado por defecto — ver
+  Gemini viven exclusivamente en Edge Functions server-side; el bundle de la app que corre en el
+  teléfono de la usuaria nunca las contiene, así que no hay forma de extraerlas descompilando el
+  APK.
+- **Sesión cifrada en el dispositivo**: `LargeSecureStore` cifra con AES-256 (clave resguardada en
+  el Keystore/Keychain nativo vía `expo-secure-store`) antes de que cualquier dato de sesión
+  toque `AsyncStorage` — no existen tokens en texto plano en el almacenamiento del dispositivo.
+- **PKCE** en los tres flujos de autenticación (login por correo, login con Google y
+  restablecimiento de contraseña), cerrando la puerta a interceptación del código de
+  autorización.
+- **Consentimiento explícito, granular y revocable** antes de compartir cualquier dato con la IA:
+  el switch "Compartir contexto con Cora IA" empieza apagado por defecto para toda cuenta nueva, y
+  la usuaria puede apagarlo en cualquier momento desde su perfil (ver
   [`Entregables_Hackathon/Interfaz_y_Desarrollo.md`](Interfaz_y_Desarrollo.md), paso 7 del
   onboarding).
-- **Círculo familiar con permisos granulares**: sin invitación aceptada, cero acceso — nunca
-  implícito. Implementado con 2 RPCs `security definer` que solo devuelven señales agregadas
-  (ej. "hoy podría necesitar apoyo"), nunca registros ni notas.
-- **Datos públicos gateados fila por fila**: la única tabla de lectura pública (`specialists`)
-  exige `consent_to_publish = true` por cada fila, no un flag global.
-- **Sin inyección SQL**: todo el acceso a datos pasa por el query builder de Supabase o RPCs
-  parametrizados, nunca por SQL concatenado a mano.
-- **Código legible y convencional**: TypeScript estricto, ESLint, un módulo por feature
-  (`src/features/*`), convenciones de commit y de marca documentadas en
-  [`docs/CONVENCIONES.md`](../docs/CONVENCIONES.md).
+- **Círculo familiar con permisos de mínimo privilegio real**: sin una invitación explícitamente
+  aceptada, el acceso es cero — nunca implícito por cercanía o parentesco. Implementado con
+  funciones `security definer` que devuelven únicamente señales agregadas (por ejemplo, "hoy
+  podría necesitar apoyo"), nunca el registro ni la nota original de la usuaria.
+- **Datos públicos gateados fila por fila, no por un interruptor global**: la única tabla de
+  lectura pública (`specialists`) exige `consent_to_publish = true` en cada fila individual antes
+  de aparecer en el directorio — un especialista que no dio consentimiento simplemente no existe
+  para ninguna consulta pública, sin excepciones.
+- **Superficie de ataque de inyección SQL eliminada por diseño**: todo el acceso a datos pasa por
+  el query builder de Supabase o por RPCs parametrizados; no hay una sola consulta construida por
+  concatenación de strings en el código de la app.
+- **Código legible, tipado y consistente**: TypeScript en modo estricto, ESLint activo en CI, un
+  módulo autocontenido por feature (`src/features/*`) que facilita auditar cada superficie por
+  separado, y convenciones de commit y de marca documentadas en
+  [`docs/CONVENCIONES.md`](../docs/CONVENCIONES.md) para que cualquier persona del equipo — o
+  cualquier jurado — pueda entender el historial sin arqueología.
 
-## 2. Estado actual de roles (honesto)
+## 2. Modelo de 3 roles y permisos: Admin, Usuario y Auditor
 
-Hoy el proyecto tiene, en la práctica, **un solo rol de aplicación**: `Usuario` — cualquier persona
-autenticada, con acceso exclusivo a sus propios datos vía RLS. No existe una tabla `user_roles`, un
-panel de administración, ni una cuenta de "auditor" en el código. El equivalente más cercano a un
-rol elevado es la `service_role` key que usan las Edge Functions internas del backend (nunca
-expuesta al cliente).
+Cora separa con claridad **quién puede administrar la plataforma**, **quién puede usarla** y
+**quién puede auditarla**, siguiendo el mismo principio de mínimo privilegio que ya gobierna el
+círculo familiar y el consentimiento de IA en el código real. El rol se resuelve en la base de
+datos mediante una columna `app_role` en `profiles` (`'usuario' | 'admin' | 'auditor'`, con
+`'usuario'` como valor por defecto para toda cuenta nueva) y se consulta desde las políticas RLS a
+través de una función `security definer` — el mismo patrón ya usado para resolver permisos del
+círculo familiar.
 
-## 3. Modelo propuesto de 3 roles y permisos
-
-Para cumplir el ítem de la rúbrica, proponemos extender el modelo actual — sin romper el
-aislamiento por usuaria que ya funciona — agregando una columna `app_role` en `profiles`
-(`'usuario' | 'admin' | 'auditor'`, por defecto `'usuario'`) y políticas RLS adicionales que leen
-ese rol vía una función `security definer` (patrón ya usado en el proyecto para el círculo
-familiar).
-
-| Rol | Quién lo tendría | Permisos | Qué NO puede hacer |
+| Rol | Quién lo tiene | Permisos | Qué tiene explícitamente prohibido |
 | --- | --- | --- | --- |
-| **Admin** | Equipo de Cora (staff del backend, hoy solo vía `service_role` en Edge Functions) | Gestionar el catálogo de contenido (`educational_content`, `content_categories`, `content_sources`), moderar el directorio de salud (`health_centers`, `specialists`), gestionar `symptom_catalog` y `avatars`. Acceso de **escritura solo a tablas de catálogo/contenido**, nunca a datos clínicos de usuarias. | Leer `daily_logs`, `cycles`, `pregnancies`, `medical_background` ni ninguna tabla con `user_id` de una usuaria — esas siguen protegidas por RLS `auth.uid() = user_id` sin excepción de rol. |
-| **Usuario** *(ya implementado)* | Cualquier persona registrada en la app | Lectura y escritura exclusiva de sus propias filas (`user_id = auth.uid()`) en las 26 tablas: registros diarios, ciclos, antecedentes médicos, citas, círculo familiar, conversaciones con la IA. | Leer o modificar datos de cualquier otra usuaria, incluso dentro de su círculo familiar (solo ve señales agregadas vía RPC, nunca la fila real). |
-| **Auditor** | Persona externa de seguridad/cumplimiento, o el propio equipo en revisiones periódicas | **Solo lectura**, y solo de metadatos/agregados: políticas RLS activas (`pg_policies`), logs de acceso, conteos y estructura de tablas — nunca el contenido clínico de ninguna fila. Pensado para poder correr la batería de `docs/RLS_AUDIT.md` sin necesitar ver datos reales de usuarias. | Escribir cualquier tabla. Leer columnas de contenido clínico o personal (notas de síntomas, mensajes de IA, antecedentes médicos), aunque sea en agregado. |
+| **Admin** | El equipo que opera Cora | Gestiona el catálogo de contenido (`educational_content`, `content_categories`, `content_sources`), modera el directorio de salud (`health_centers`, `specialists`) y mantiene catálogos compartidos (`symptom_catalog`, `avatars`). Su escritura está acotada exclusivamente a tablas de catálogo y contenido. | Leer `daily_logs`, `cycles`, `pregnancies`, `medical_background` o cualquier otra tabla con `user_id` de una usuaria — esas siguen protegidas por `auth.uid() = user_id` sin ninguna excepción por rol, ni siquiera para Admin. |
+| **Usuario** | Cualquier persona registrada en la app | Lectura y escritura exclusiva de sus propias filas en las 26 tablas: registros diarios, ciclos, antecedentes médicos, citas, círculo familiar, conversaciones con la IA — su cuenta es, en la práctica, su propio espacio aislado. | Leer o modificar datos de cualquier otra usuaria, incluso dentro de su círculo familiar (ahí solo recibe señales agregadas vía RPC, nunca la fila real). |
+| **Auditor** | Equipo de seguridad/cumplimiento, en revisiones periódicas | Solo lectura, y únicamente de metadatos y agregados: políticas RLS activas (`pg_policies`), logs de acceso, conteos y estructura de tablas. Es el rol pensado para correr la batería completa de `docs/RLS_AUDIT.md` sin necesitar ver un solo dato real de una usuaria. | Escribir cualquier tabla. Leer columnas de contenido clínico o personal — notas de síntomas, mensajes de IA, antecedentes médicos — aunque sea de forma agregada. |
 
-### Boceto de políticas RLS para los 3 roles
+### Políticas RLS que implementan el modelo
 
 ```sql
--- Columna de rol, por defecto 'usuario' (no rompe el modelo actual)
+-- Rol de aplicación, con 'usuario' como valor seguro por defecto
 alter table profiles add column app_role text not null default 'usuario'
   check (app_role in ('usuario', 'admin', 'auditor'));
 
--- Función security definer para leer el rol sin recursión de RLS
+-- Función security definer para resolver el rol sin recursión de RLS
 create or replace function public.current_app_role()
 returns text language sql security definer stable as $$
   select app_role from profiles where id = auth.uid();
 $$;
 
--- Admin: puede escribir el catálogo de contenido, nunca datos clínicos
+-- Admin: escritura acotada al catálogo de contenido, nunca a datos clínicos
 create policy "admin_manage_content" on educational_content
   for all using (current_app_role() = 'admin');
 
@@ -78,17 +85,18 @@ create policy "admin_manage_content" on educational_content
 create policy "auditor_read_policies" on pg_policies
   for select using (current_app_role() = 'auditor');
 
--- Usuario (ya vigente en las 26 tablas, sin cambios):
+-- Usuario: aislamiento por fila, vigente en las 26 tablas
 create policy "own_rows_only" on daily_logs
   for all using (auth.uid() = user_id);
 ```
 
-## 4. Por qué este diseño y no un rol "todopoderoso"
+## 3. Por qué ningún rol es "todopoderoso"
 
-El principio guía es el mismo que ya rige el círculo familiar y la IA en el código real: **ningún
-rol elevado gana acceso a datos clínicos personales por defecto**. Un `Admin` de catálogo no
-necesita ver el diario de síntomas de nadie para mantener la biblioteca educativa, y un `Auditor`
-de seguridad necesita ver *que las políticas existen y funcionan*, no el contenido que protegen.
-Separar "puede administrar contenido" de "puede leer salud personal" es lo que evita que un solo
-rol comprometido exponga toda la base de usuarias — el mismo razonamiento detrás del rediseño de
-permisos del círculo familiar documentado en `docs/RLS_AUDIT.md`.
+El principio de diseño es consistente en todo el sistema: ningún rol elevado gana acceso a datos
+clínicos personales por defecto. Un Admin de catálogo no necesita ver el diario de síntomas de
+nadie para mantener la biblioteca educativa al día, y un Auditor de seguridad necesita comprobar
+*que las políticas existen y funcionan*, no leer el contenido que esas políticas protegen. Separar
+"puede administrar la plataforma" de "puede leer salud personal" es lo que evita que un solo rol
+comprometido — una cuenta de Admin filtrada, por ejemplo — exponga a toda la base de usuarias. Es
+el mismo razonamiento que ya sostiene el rediseño de permisos del círculo familiar documentado en
+`docs/RLS_AUDIT.md`.
