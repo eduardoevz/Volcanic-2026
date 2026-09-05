@@ -52,6 +52,6 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 
-# APKs de distribución directa — se publican como assets de GitHub Release
-# (ver docs/PROGRESO.md), nunca como blobs de Git: superan el límite de 100 MB.
-releases/*.apk
+# APKs de distribución directa — trackeados vía Git LFS (ver .gitattributes),
+# no como blobs normales de Git: superan el límite de 100 MB. También se publican
+# como asset del GitHub Release correspondiente (ver docs/PROGRESO.md).
