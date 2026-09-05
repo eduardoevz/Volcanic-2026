@@ -27,6 +27,7 @@ erDiagram
     PROFILES ||--|| MASCOT_STATE : tiene
     PROFILES ||--o{ MASCOT_EVENTS : acumula
     PROFILES ||--o{ FAMILY_CIRCLE_MEMBERS : invita
+    PROFILES ||--o{ FAMILY_CIRCLE_MEMBERS : es_invitada
     AVATARS ||--o{ PROFILES : personaliza
 
     DAILY_LOGS ||--o{ DAILY_LOG_SYMPTOMS : detalla
@@ -67,7 +68,7 @@ erDiagram
     DEVICE_PUSH_TOKENS {
         uuid id PK
         uuid user_id FK
-        text token
+        text expo_push_token
     }
     MEDICAL_BACKGROUND {
         uuid user_id PK, FK
@@ -90,7 +91,7 @@ erDiagram
     DAILY_LOG_SYMPTOMS {
         uuid daily_log_id PK, FK
         uuid symptom_id PK, FK
-        text intensity
+        int intensity
     }
     MEDICAL_SUMMARIES {
         uuid id PK
@@ -110,7 +111,8 @@ erDiagram
     REMINDERS {
         uuid id PK
         uuid user_id FK
-        time remind_at
+        int hour
+        int minute
     }
     CONTENT_CATEGORIES {
         uuid id PK
@@ -119,7 +121,7 @@ erDiagram
     CONTENT_SOURCES {
         uuid id PK
         uuid content_id FK
-        text title
+        text label
     }
     EDUCATIONAL_CONTENT {
         uuid id PK
