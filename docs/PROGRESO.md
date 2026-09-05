@@ -1,6 +1,57 @@
 # Progreso — Cora
 
-> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-04.
+> Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
+
+## Fase 30 — Ícono real de la app (reemplaza el genérico de Expo)
+
+El usuario agregó `Icono_app.png` (2000×2000, el logo circular de Cora — la mujer de
+perfil con flor de plumeria, luna creciente y volcán) en la raíz del repo y pidió
+usarlo como ícono de la app en vez del ícono placeholder que trae el template de
+Expo por defecto.
+
+- Generados con Pillow (script ad hoc, no se agregó como dependencia del proyecto)
+  todos los assets derivados de `Icono_app.png` en `cora/assets/`:
+  - `icon.png` (1024×1024): el círculo completo tal cual, para iOS/fallback — las
+    tiendas/launcher aplican su propio recorte de esquinas.
+  - `android-icon-foreground.png` (512×512, RGBA): el logo con las esquinas hechas
+    transparentes (máscara circular calculada a partir del propio contorno del
+    logo) y reducido al ~66% del lienzo — el "safe zone" de los íconos adaptativos
+    de Android, para que ningún launcher lo recorte.
+  - `android-icon-background.png` (512×512): relleno sólido color crema (`#FAF3EA`,
+    el mismo `colors.cream` de `ui/theme/tokens.ts`) en vez del celeste genérico de
+    Expo, para que combine con el logo.
+  - `android-icon-monochrome.png` (432×432): silueta del mismo círculo en negro
+    sólido, para el ícono temático de Android 13+.
+  - `favicon.png` (48×48) y `splash-icon.png` (400×400): mismo logo, para
+    consistencia visual en web y en la pantalla de carga.
+- **Importante:** estos PNG en `cora/assets/` son solo la fuente — lo que realmente
+  usa el APK compilado son los `.webp` por densidad dentro de
+  `cora/android/app/src/main/res/mipmap-*/`, generados por `expo prebuild` a partir
+  de esos PNG y la config de `app.json` (`icon`, `android.adaptiveIcon`). Como
+  `cora/android/` está en `.gitignore` (se regenera, nunca se commitea), hubo que
+  correr `npx expo prebuild --platform android` después de reemplazar los PNG para
+  que el ícono nuevo quedara embebido en el próximo build — cambiar solo los PNG
+  sin volver a hacer prebuild no tiene efecto en el APK compilado.
+- `npx expo prebuild --platform android` en este proyecto borra y recrea `android/`
+  entero (no hace un parche incremental) — inofensivo acá porque no hay ninguna
+  edición manual nativa registrada en este documento; todo pasa por config plugins
+  de `app.json`.
+- **Falso positivo durante la verificación:** tras reinstalar el APK, el dock del
+  launcher del emulador mostraba el ícono con un fondo verde en vez del crema
+  esperado. Se confirmó leyendo directamente el `.webp` embebido
+  (`android-icon-background.webp`) que el color de fondo real es `#FAF3EA` (crema,
+  correcto) — el verde era caché del launcher (`com.google.android.apps.nexuslauncher`)
+  de una instalación anterior, no relacionado al ícono nuevo. Se confirmó limpiando
+  los datos del launcher y viendo el ícono, ya correcto (fondo crema), en el cajón
+  de apps.
+- APK de release recompilado (`./gradlew assembleRelease`, build en frío ~21 min por
+  la regeneración completa de `android/`) y verificado en emulador: instala limpio,
+  ícono correcto en el cajón de apps, sin errores fatales en logcat.
+- Publicado actualizando el mismo asset del release de GitHub de la Fase 29
+  (`android-2026-09-04`, `gh release upload --clobber`), con las notas del release
+  actualizadas para avisar del cambio de ícono y la posibilidad de que el launcher
+  del celular del usuario también tenga que refrescar su caché (quitar y volver a
+  agregar el ícono, o reiniciar el teléfono, si no se actualiza visualmente solo).
 
 ## Fase 29 — APK de instalación directa (release standalone, sin Metro)
 
