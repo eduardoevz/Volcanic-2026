@@ -46,8 +46,8 @@ superficie con contenido clínico muestra un descargo visible de "esto no es un 
 **IA y biblioteca educativa**
 - Asistente de IA (Gemini) con guardrails en capas: nunca diagnostica ni prescribe, cita fuentes
   reales de la biblioteca, y deriva ante señales de alerta en vez de responder
-- Biblioteca con ~28 artículos revisados y citados, filtrados por etapa de vida, con búsqueda
-  semántica y audio educativo
+- Biblioteca con 38 artículos publicados, revisados y citados, filtrados por etapa de vida, con
+  búsqueda semántica y audio educativo
 
 **Acompañamiento y personalización**
 - Círculo de acompañamiento familiar con permisos granulares por usuaria (RLS: sin invitación
@@ -62,7 +62,8 @@ superficie con contenido clínico muestra un descargo visible de "esto no es un 
 **Cuenta y seguridad**
 - Auth por correo/contraseña y Google OAuth, recuperación de contraseña, sesión y caché cifradas
   localmente
-- Row Level Security en las 25+ tablas de la base de datos — auditado en
+- Row Level Security en las 26 tablas de la base de datos, verificado directamente contra el
+  proyecto (`pg_tables`/`pg_policies`) — auditoría detallada tabla por tabla en
   [`docs/RLS_AUDIT.md`](../docs/RLS_AUDIT.md)
 
 ## 2. Tecnologías utilizadas
@@ -73,7 +74,7 @@ superficie con contenido clínico muestra un descargo visible de "esto no es un 
 | Estado y datos | Zustand, TanStack Query (con caché offline persistida en `AsyncStorage`) |
 | Formularios | react-hook-form + Zod |
 | i18n | i18next / react-i18next |
-| Backend | [Supabase](https://supabase.com/) (Postgres, Row Level Security, Auth, Storage) — 26+ migraciones versionadas |
+| Backend | [Supabase](https://supabase.com/) (Postgres, Row Level Security, Auth, Storage) — 26 migraciones versionadas, 26 tablas |
 | Edge Functions | `cora-ai` (asistente), `embed-content` / `search-articles-semantic` (búsqueda semántica con pgvector), `send-push` (notificaciones) |
 | IA | Gemini, vía Edge Function propia con guardrails determinísticos + de prompt |
 | Notificaciones | `expo-notifications` + Expo Push API / FCM |
