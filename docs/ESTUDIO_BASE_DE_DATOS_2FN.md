@@ -10,7 +10,7 @@
 - **Endpoint de Conexión:** `aws-0-us-east-1.pooler.supabase.com:6543/postgres`
 - **Total de Tablas en Esquema Público:** 26 tablas (incluye nueva tabla `medical_background` y actualización en `specialists`)
 - **Seguridad:** 100% de tablas con Row Level Security (RLS) habilitado y políticas activas
-- **Extensiones Especializadas:** `uuid-ossp`, `pgcrypto`, `pgvector` (búsqueda semántica), `pg_trgm`
+- **Extensiones Especializadas:** `uuid-ossp`, `pgcrypto`, `vector` (pgvector, búsqueda semántica), `pg_stat_statements`, `supabase_vault`
 
 ---
 
@@ -39,7 +39,7 @@ Las siguientes 25 tablas tienen claves primarias simples de un solo atributo (co
 Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 - **Tabla:** `daily_log_symptoms`
 - **Clave Primaria Compuesta ($PK$):** `(daily_log_id, symptom_id)`
-- **Atributos No Clave:** `intensity` (intensidad del síntoma: `'mild'`, `'moderate'`, `'severe'`)
+- **Atributos No Clave:** `intensity` (`smallint`, escala validada por `CHECK` entre 1 y 3)
 - **Análisis de Dependencia Funcional:**
   - $\text{daily\_log\_id} \not\to \text{intensity}$: Un registro diario contiene múltiples síntomas, cada uno con su propia intensidad.
   - $\text{symptom\_id} \not\to \text{intensity}$: Un síntoma en el catálogo abstracto no tiene una intensidad inherente fija; la intensidad varía en cada registro de la usuaria.
@@ -57,7 +57,7 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 ## 2. Organización Arquitectónica por Dominios Funcionales (26 Tablas)
 
 ### 1. Dominio de Identidad, Perfil y Configuración
-- **`profiles`**: Perfil principal de la usuaria, etapa de vida actual (adolescence, adulthood, pregnancy, perimenopause), año de nacimiento y configuración regional.
+- **`profiles`**: Perfil principal de la usuaria, etapa de vida actual (`adolescencia`, `adultez`, `embarazo`, `perimenopausia`, `mayor`), año de nacimiento y configuración regional.
 - **`avatars`**: Catálogo de avatares personalizables con rutas de recursos SVG/PNG.
 - **`life_stage_history`**: Trazabilidad histórica de cambios de etapa de vida con fechas de inicio/fin y razones de transición.
 - **`user_preferences`**: Preferencias de notificaciones, consentimiento de contexto clínico para IA y día de inicio de semana.
@@ -67,7 +67,7 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 ### 2. Dominio de Salud, Ciclo Menstrual y Antecedentes Clínicos
 - **`medical_background`**: Antecedentes médicos de la usuaria: alergias, tipo de sangre (CHECK validado), condiciones crónicas, medicación actual y antecedentes familiares.
 - **`cycles`**: Ciclos menstruales detectados/predichos, fechas de inicio y fin, longitud y anomalías.
-- **`daily_logs`**: Registro diario de bienestar: estado de ánimo, energía, flujo cervical, sangrado y notas personales.
+- **`daily_logs`**: Registro diario de bienestar: estado de ánimo, energía, nivel de flujo/sangrado menstrual, horas de sueño, notas personales, actividad sexual y marcadores booleanos de inicio/fin de período.
 - **`symptom_catalog`**: Catálogo maestro de síntomas categorizados con aplicabilidad por etapa de vida.
 - **`daily_log_symptoms`**: Tabla asociativa que vincula los registros diarios con síntomas y su intensidad calificada.
 - **`medical_summaries`**: Historial de resúmenes clínicos estructurados generados para exportación a PDF.
@@ -176,7 +176,6 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 - **`appointments_status_check`**: `(status = ANY (ARRAY['scheduled'::text, 'completed'::text, 'cancelled'::text]))`
 
 **Políticas de Seguridad Row Level Security (RLS):**
-- **`family_shared_select`** (`SELECT`): Roles: `['public']`
 - **`own_delete`** (`DELETE`): Roles: `['public']`
 - **`own_insert`** (`INSERT`): Roles: `['public']`
 - **`own_select`** (`SELECT`): Roles: `['public']`
@@ -303,7 +302,6 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 **Restricciones de Validación (CHECK Constraints):**
 
 **Políticas de Seguridad Row Level Security (RLS):**
-- **`family_shared_select`** (`SELECT`): Roles: `['public']`
 - **`own_delete`** (`DELETE`): Roles: `['public']`
 - **`own_insert`** (`INSERT`): Roles: `['public']`
 - **`own_select`** (`SELECT`): Roles: `['public']`
@@ -351,6 +349,9 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 | `notes` | `text` | YES | `*Ninguno*` |
 | `created_at` | `timestamptz` | NO | `now()` |
 | `updated_at` | `timestamptz` | NO | `now()` |
+| `sexual_activity` | `bool` | YES | `*Ninguno*` |
+| `period_start` | `bool` | NO | `false` |
+| `period_end` | `bool` | NO | `false` |
 
 **Claves Foráneas (Foreign Keys):**
 - `user_id` $\to$ `profiles(id)` *(ON DELETE CASCADE)*
@@ -730,7 +731,6 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 - **`reminders_minute_check`**: `((minute >= 0) AND (minute <= 59))`
 
 **Políticas de Seguridad Row Level Security (RLS):**
-- **`family_shared_select`** (`SELECT`): Roles: `['public']`
 - **`own_delete`** (`DELETE`): Roles: `['public']`
 - **`own_insert`** (`INSERT`): Roles: `['public']`
 - **`own_select`** (`SELECT`): Roles: `['public']`
@@ -820,7 +820,7 @@ Existe exactamente 1 tabla asociativa con clave primaria compuesta:
 El 100% de las 26 tablas en PostgreSQL cuentan con `ROW SECURITY` activado de forma obligatoria. Las políticas se dividen en 4 patrones de aislamiento:
 1. **Aislamiento Estricto por Usuaria (`own_data`):** Solo la usuaria autenticada con `auth.uid() = user_id` puede crear, leer, modificar y eliminar sus registros (`profiles`, `medical_background`, `daily_logs`, `cycles`, `pregnancies`, etc.).
 2. **Catálogos Públicos de Solo Lectura (`public_read`):** Cualquier cliente puede consultar catálogos (`avatars`, `symptom_catalog`, `content_categories`, `educational_content`), pero nadie puede alterarlos vía API cliente.
-3. **Compartición Familiar Granular Condicional (`family_shared`):** Un familiar solo puede ver datos específicos (ej. recordatorios, citas) si y solo si existe un registro activo en `family_share_grants` otorgado explícitamente por la usuaria.
+3. **Compartición Familiar Granular vía RPC (no RLS directa sobre datos clínicos):** Un familiar nunca lee filas crudas de `daily_logs`, `cycles`, `appointments` ni `reminders` — ni siquiera con permisos elevados. En su lugar, funciones `SECURITY DEFINER` (`get_family_mood_summary`, `get_family_care_alert`, `get_family_next_appointment`) verifican contra `family_share_grants` que exista un permiso activo y explícito, y devuelven únicamente un agregado acotado por el `scope` otorgado (un resumen de ánimo, una alerta booleana de "hoy podría necesitar apoyo", o la fecha pelada de la próxima cita) — nunca el registro, la nota ni el detalle original.
 4. **Protección de Datos Sensibles con Consentimiento:** Los especialistas solo son visibles si `consent_to_publish = true` y `is_verified = true`.
 
 ## 5. Conclusiones Técnicas para el Jurado del Hackathon
