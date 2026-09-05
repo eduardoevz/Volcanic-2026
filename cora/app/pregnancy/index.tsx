@@ -4,7 +4,6 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Circle, Svg } from 'react-native-svg';
 
 import { useArticles } from '@/features/content';
 import {
@@ -23,6 +22,7 @@ import { Banner } from '@/ui/components/Banner';
 import { Button } from '@/ui/components/Button';
 import { Card } from '@/ui/components/Card';
 import { Input } from '@/ui/components/Input';
+import { ProgressRing } from '@/ui/components/ProgressRing';
 import { useSession } from '@/shared/hooks/useSession';
 import { Screen } from '@/ui/components/Screen';
 import { Sheet } from '@/ui/components/Sheet';
@@ -36,8 +36,6 @@ const NEXT_STAGE_OPTIONS = LIFE_STAGES.filter((stage) => stage !== 'embarazo');
 const MOOD_ROW: Mood[] = ['great', 'good', 'neutral', 'low', 'difficult'];
 const RING_SIZE = 84;
 const RING_STROKE = 8;
-const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const GESTATION_WEEKS = 40;
 
 function toISODate(date: Date) {
@@ -138,31 +136,16 @@ export default function Pregnancy() {
         <Text variant="title">{t('title')}</Text>
 
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
-          <Svg width={RING_SIZE} height={RING_SIZE} style={{ transform: [{ rotate: '-90deg' }] }}>
-            <Circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RING_RADIUS}
-              stroke={colors.border}
-              strokeWidth={RING_STROKE}
-              fill="none"
-            />
-            <Circle
-              cx={RING_SIZE / 2}
-              cy={RING_SIZE / 2}
-              r={RING_RADIUS}
-              stroke={colors.pitahaya}
-              strokeWidth={RING_STROKE}
-              strokeLinecap="round"
-              strokeDasharray={RING_CIRCUMFERENCE}
-              strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
-              fill="none"
-            />
-          </Svg>
-          <View style={{ position: 'absolute', left: spacing.md, width: RING_SIZE, alignItems: 'center' }}>
+          <ProgressRing
+            size={RING_SIZE}
+            strokeWidth={RING_STROKE}
+            progress={progress}
+            color={colors.pitahaya}
+            trackColor={colors.border}
+          >
             <Text style={{ fontSize: 22, fontWeight: '700', color: colors.charcoal }}>{week}</Text>
             <Text variant="caption">{t('weeksUnit')}</Text>
-          </View>
+          </ProgressRing>
           <View style={{ flex: 1 }}>
             <Text variant="heading">{t('trimesterLabel', { trimester })}</Text>
             <Text variant="bodyMuted" style={{ marginTop: 2 }}>

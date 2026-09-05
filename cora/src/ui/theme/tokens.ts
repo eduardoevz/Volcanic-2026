@@ -54,6 +54,7 @@ export const lightColors = {
   warningLight: '#F4E285',
   success: '#57816D',
   successLight: '#DCEAE4',
+  sky: '#A7D8F5',
 } as const;
 
 export const darkColors = {
@@ -70,6 +71,7 @@ export const darkColors = {
   warningLight: '#3A2E15',
   success: '#4FAE78',
   successLight: '#1B3324',
+  sky: '#1E3A4A',
 } as const;
 
 // Ancho a `string` (no los literales exactos de `lightColors`) para que

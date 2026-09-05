@@ -2,6 +2,47 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 35 — Revisión de diseño (canvas) y ajustes menores derivados
+
+El usuario pidió generar un canvas de diseño (Claude Design, vía Claude Code) con las 7 pantallas
+principales de la app (Inicio, Calendario, Biblioteca, Cora IA, Perfil, Mi embarazo, Antecedentes
+médicos), adaptadas a como está la app hoy y usando la paleta de colores que definió (marfil
+cálido, rosa malva, terracota suave, amarillo mantequilla, azul cielo suave, verde salvia, marrón
+chocolate) — solo para revisión visual, sin tocar código todavía.
+
+- Investigado el contenido y estructura real de las 7 pantallas (lectura directa de
+  `app/(tabs)/*.tsx`, `app/pregnancy/index.tsx`, `app/(onboarding)/medical-background.tsx`, y los
+  componentes/copy que usan) para que los mockups fueran fieles a la app actual, no una
+  reinvención — la mayoría de los colores pedidos ya eran los tokens reales del proyecto
+  (`pitahaya`, `stem`, `cream`, `charcoal`, `warningLight`); solo el azul cielo suave era nuevo.
+- Publicado el canvas actualizando el mismo artifact de un rediseño anterior de las pestañas
+  (Fase 23), con las 7 pantallas recreadas pixel-cercanas usando los tokens reales de
+  `ui/theme/tokens.ts` (spacing, radii, sombra de `Card`) y componentes propios (anillo de
+  progreso, chips, tab bar con íconos SVG propios ya que no se pudo extraer el SVG original del
+  proyecto).
+- **Al revisar el canvas con el usuario, se confirmó lo esperado:** al ser recreaciones fieles de
+  la app actual, no había una lista grande de cambios visuales para "aplicar" de vuelta al código.
+  Se acordó una única acción concreta: formalizar el color nuevo (azul cielo suave) como token
+  real, y corregir la única inconsistencia real que salió a la luz durante la investigación.
+- `cora/src/ui/theme/tokens.ts`: agregado `sky: '#A7D8F5'` a `lightColors`, con un tono azul oscuro
+  desaturado equivalente en `darkColors` (`#1E3A4A`, ya que el usuario no había definido una
+  variante oscura y `ColorScheme` exige la misma clave en ambos temas). No se consume todavía en
+  ningún componente — queda disponible para cuando haga falta un acento informativo distinto de
+  `stemLight`.
+- `cora/app/pregnancy/index.tsx`: la pantalla de embarazo dibujaba su anillo de progreso (semana de
+  gestación) con SVG duplicado a mano, en vez de reusar el componente compartido `ProgressRing`
+  (`ui/components/ProgressRing.tsx`) que ya usan Calendario y el módulo de ciclo en Inicio. Además
+  tenía un bug menor de centrado: el número de semana se posicionaba con
+  `position:'absolute', left: spacing.md`, no relativo al propio anillo. Se reemplazó todo el
+  bloque por `<ProgressRing size={84} strokeWidth={8} progress={progress} color={colors.pitahaya}
+  trackColor={colors.border}>` con el número + "semanas" como children — mismo resultado visual
+  (tamaño, color, progreso), pero ahora perfectamente centrado y sin código de SVG duplicado.
+- **Verificado en emulador real:** cambiando la etapa de una cuenta de prueba a "Embarazo" y
+  registrando una fecha de última menstruación pasada (2026-03-15 → semana 25), se confirmó que el
+  anillo se ve idéntico a antes pero con el número ya centrado correctamente.
+- `npx tsc --noEmit` y `npx eslint` sin errores nuevos; `npx jest` sin regresiones (140 tests,
+  mismos 6 suites fallando por el problema de entorno preexistente de `test-renderer`).
+
 ## Fase 34 — Nuevo APK de instalación directa con los fixes de la Fase 33
 
 El usuario pidió compilar un APK actualizado con todos los cambios hasta la Fase 33 (rediseño de
