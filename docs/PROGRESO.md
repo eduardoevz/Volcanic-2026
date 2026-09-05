@@ -2,6 +2,26 @@
 
 > Se actualiza automáticamente al completar cada tarea. Última actualización: 2026-09-05.
 
+## Fase 36 — APK actualizado con los cambios de la Fase 35
+
+El usuario pidió recompilar el APK de instalación directa para incluir el token `sky` y el fix
+del anillo de progreso de Embarazo (Fase 35).
+
+- Build de release estándar (`cd cora/android && ./gradlew assembleRelease`), 1m 22s gracias al
+  caché de Gradle — solo se recompiló lo que cambió desde la Fase 34 (JS bundle nuevo con 3058
+  módulos).
+- **Verificado en el emulador real** instalando el APK standalone (`adb install -r`, sin Metro
+  corriendo): arranca limpio en la pantalla "Iniciemos", sin errores fatales en logcat. El fix del
+  anillo de Embarazo específicamente ya se había verificado a fondo en la Fase 35 con el mismo
+  código (vía Expo Go) — no se repitió esa prueba end-to-end acá, alcanza con confirmar que el
+  build de producción arranca y empaqueta el código actual.
+- Publicado reemplazando el mismo archivo del día en `releases/Cora-release-2026-09-05.apk` (vía
+  Git LFS) y actualizando el mismo asset del GitHub Release `android-2026-09-05`
+  (`gh release upload --clobber`) — mismo patrón ya usado en la Fase 30 cuando se actualizó un
+  release del mismo día con un cambio adicional, en vez de crear un tag nuevo.
+- Incluye todos los cambios hasta el commit de la Fase 35 (token `sky` + `ProgressRing` en
+  Embarazo).
+
 ## Fase 35 — Revisión de diseño (canvas) y ajustes menores derivados
 
 El usuario pidió generar un canvas de diseño (Claude Design, vía Claude Code) con las 7 pantallas
